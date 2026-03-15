@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Menu, X, ChevronDown, Briefcase, Search, User, LogIn } from 'lucide-react';
+import { ShoppingBag, Menu, X, ChevronDown, ChevronRight, Briefcase, Search, User, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,14 +9,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 const navItems = [
   {
     label: 'Plants',
-    type: 'dropdown', 
+    type: 'megamenu', // Changed to megamenu to trigger the new component on desktop
     href: '/shop',
+    // Added colored Leaf icon to highlight this as the main menu item
+    icon: <Leaf className="h-4 w-4 mr-1 text-[#667D00]" fill="currentColor" />,
+    // These items act as the mobile accordion fallback
     items: [
       { label: 'All Plants', href: '/shop' },
+      { label: 'Large & Extra Large', href: '/shop?size=large' },
       { label: 'Indoor Plants', href: '/shop?cat=indoor' },
-      { label: 'Air Purifying', href: '/shop?cat=air-purifying' },
-      { label: 'Flowering', href: '/shop?cat=flowering' },
-      { label: 'Pet Friendly', href: '/shop?cat=pet-friendly' },
+      { label: 'Air Purifying Plants', href: '/shop?cat=air-purifying' },
+      { label: 'Flowering Plants', href: '/shop?cat=flowering' },
+      { label: 'Pet Friendly Plants', href: '/shop?cat=pet-friendly' },
+      { label: 'Living Room Plants', href: '/shop?space=living-room' },
+      { label: 'Office Plants', href: '/shop?space=office' },
     ]
   },
   {
@@ -96,6 +102,153 @@ const TopBar = () => {
   );
 };
 
+// --- NEW: PLANTS MEGA MENU COMPONENT ---
+const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const slideImages = [
+    "https://images.unsplash.com/photo-1604762524889-3e2fcc145683?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1597055905063-cb60e334ba99?q=80&w=800&auto=format&fit=crop"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % slideImages.length);
+    }, 3000); // Change image every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <>
+      {/* Invisible backdrop to detect clicks outside */}
+      <div className="fixed inset-0 top-[120px] z-40 cursor-default" onClick={closeMenu} />
+      
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 15 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="absolute top-[80px] left-0 w-full z-50 cursor-default"
+        // REMOVED onMouseLeave={closeMenu}
+      >
+        <div className="container-custom">
+          <div className="bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-gray-100 rounded-b-2xl p-8 grid grid-cols-12 gap-8 w-full max-w-6xl mx-auto relative z-50">
+            
+            {/* LEFT: Banner & Top Picks (col-span-5) */}
+            <div className="col-span-5 flex flex-col gap-6">
+              <Link to="/shop?collection=self-watering" onClick={closeMenu} className="rounded-xl overflow-hidden h-28 relative group cursor-pointer block shadow-sm bg-gray-100">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={currentImageIndex}
+                    src={slideImages[currentImageIndex]}
+                    alt="Featured Collection"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                </AnimatePresence>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/20 flex items-center p-6 z-10">
+                  <div>
+                    <p className="text-white/90 text-xs uppercase tracking-widest font-bold mb-1">Introducing</p>
+                    <span className="text-white font-serif font-bold text-xl">Self Watering Pots</span>
+                  </div>
+                </div>
+              </Link>
+
+              <div>
+                <h3 className="font-serif font-bold text-2xl text-primary mb-4">Rastlina Top Picks</h3>
+                <div className="space-y-3">
+                  <Link to="/shop" onClick={closeMenu} className="flex items-center gap-4 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                      <img src="/logo.png" className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500" alt="All Plants"/>
+                    </div>
+                    <span className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">All Plants</span>
+                  </Link>
+                  <Link to="/shop?size=large" onClick={closeMenu} className="flex items-center gap-4 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                      <img src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=100&h=100&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Large Plants"/>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase font-bold text-accent-gold bg-accent-gold/10 px-2 py-0.5 rounded-md w-fit mb-1">New</span>
+                      <span className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">Large & Extra-Large</span>
+                    </div>
+                  </Link>
+                  <Link to="/shop?size=medium" onClick={closeMenu} className="flex items-center gap-4 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                      <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=100&h=100&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Medium Plants"/>
+                    </div>
+                    <span className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">Medium Plants</span>
+                  </Link>
+                  <Link to="/shop?size=small" onClick={closeMenu} className="flex items-center gap-4 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                      <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=100&h=100&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Small Plants"/>
+                    </div>
+                    <span className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">Small Plants</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* MIDDLE: Shop by Type (col-span-4) */}
+            <div className="col-span-4 border-l border-gray-100 pl-8">
+              <h3 className="font-serif font-bold text-2xl text-primary mb-6">Shop by Type</h3>
+              <ul className="space-y-2">
+                {[
+                  { label: 'All Plants', href: '/shop' },
+                  { label: 'Indoor Plants', href: '/shop?cat=indoor' },
+                  { label: 'Air Purifying Plants', href: '/shop?cat=air-purifying' },
+                  { label: 'Flowering Plants', href: '/shop?cat=flowering' },
+                  { label: 'Pet Friendly Plants', href: '/shop?cat=pet-friendly' },
+                ].map((link) => (
+                  <li key={link.label}>
+                    <Link 
+                      to={link.href} 
+                      onClick={closeMenu}
+                      className="flex items-center justify-between py-2.5 text-gray-600 hover:text-primary group border-b border-transparent hover:border-gray-50 transition-all"
+                    >
+                      <span className="font-semibold text-[15px]">{link.label}</span>
+                      <ChevronRight className="h-4 w-4 text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* RIGHT: Shop by Space (col-span-3) */}
+            <div className="col-span-3 pl-4">
+              <h3 className="font-serif font-bold text-2xl text-primary mb-6">Shop by Space</h3>
+              <ul className="space-y-2">
+                {[
+                  { label: 'Living Room', href: '/shop?space=living-room' },
+                  { label: 'Office Desk', href: '/shop?space=office' },
+                  { label: 'Bedroom', href: '/shop?space=bedroom' },
+                  { label: 'Balcony / Outdoor', href: '/shop?space=balcony' },
+                ].map((link) => (
+                  <li key={link.label}>
+                    <Link 
+                      to={link.href} 
+                      onClick={closeMenu}
+                      className="flex items-center justify-between py-2.5 text-gray-600 hover:text-primary group border-b border-transparent hover:border-gray-50 transition-all"
+                    >
+                      <span className="font-semibold text-[15px]">{link.label}</span>
+                      <ChevronRight className="h-4 w-4 text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </motion.div>
+    </>
+  );
+};
+
+
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -114,10 +267,19 @@ export const Header = () => {
     }
   };
 
+  const handleMenuClick = (label: string, type: string, href: string) => {
+    if (type === 'megamenu' || type === 'dropdown') {
+      setActiveDropdown(activeDropdown === label ? null : label);
+    } else {
+      setActiveDropdown(null);
+      navigate(href);
+    }
+  };
+
   return (
-    <>
+    <div className="fixed top-0 left-0 w-full z-50">
       <TopBar />
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300 w-full">
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300 w-full relative">
         <div className="container-custom">
           
           {/* =========================================
@@ -145,8 +307,8 @@ export const Header = () => {
                 />
             </Link>
 
-            {/* Right: Icons (REMOVED PROFILE, Tightened Spacing) */}
-            <div className="flex items-center justify-end gap-0.5 w-1/4">
+            {/* Right: Icons */}
+            <div className="flex items-center justify-end gap-1 w-1/4">
               {/* Search Icon */}
               <button 
                 className="p-2 text-foreground hover:text-primary transition-colors"
@@ -155,12 +317,12 @@ export const Header = () => {
                 <Search className="h-6 w-6" />
               </button>
               
-              {/* Cart Icon (Profile removed) */}
+              {/* Redesigned Large Cart Icon */}
               <Button variant="ghost" size="icon" onClick={openCart} className="hover:bg-transparent p-0 relative h-10 w-10">
-                <div className="relative text-primary">
-                  <ShoppingBag className="!h-6 !w-6" />
+                <div className="relative text-primary flex items-center justify-center">
+                  <ShoppingBag className="!h-7 !w-7 stroke-[1.5]" />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-accent-gold text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center border border-white">
+                    <span className="absolute -top-1 -right-1 bg-[#FACC15] text-black text-[10px] font-extrabold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                       {totalItems}
                     </span>
                   )}
@@ -187,12 +349,11 @@ export const Header = () => {
                 <div
                   key={item.label}
                   className="relative group h-full flex items-center"
-                  onMouseEnter={() => item.type === 'dropdown' && setActiveDropdown(item.label)}
-                  onMouseLeave={() => setActiveDropdown(null)}
+                  // REMOVED onMouseEnter and onMouseLeave
                 >
-                  <Link
-                    to={item.href}
-                    className={`flex items-center gap-1 text-sm xl:text-base transition-colors py-8 ${
+                  <button
+                    onClick={() => handleMenuClick(item.label, item.type, item.href)}
+                    className={`flex items-center gap-1 text-sm xl:text-base transition-colors py-8 outline-none ${
                       item.highlight 
                         ? item.highlight 
                         : 'text-foreground hover:text-primary font-medium'
@@ -200,31 +361,38 @@ export const Header = () => {
                   >
                     {item.icon}
                     {item.label}
-                    {item.type === 'dropdown' && (
-                      <ChevronDown className="h-3 w-3 opacity-50" />
+                    {(item.type === 'dropdown' || item.type === 'megamenu') && (
+                      <ChevronDown className={`h-3 w-3 opacity-50 transition-transform ${activeDropdown === item.label ? 'rotate-180' : ''}`} />
                     )}
-                  </Link>
+                  </button>
                   
+                  {/* Dropdown Render Logic */}
                   <AnimatePresence>
-                    {activeDropdown === item.label && item.items && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 pt-0 w-56 z-50"
-                      >
-                        <div className="bg-white shadow-xl border border-gray-100 p-2 rounded-b-lg">
-                          {item.items.map((subItem) => (
-                            <Link
-                              key={subItem.label}
-                              to={subItem.href}
-                              className="block px-4 py-3 text-sm text-foreground hover:text-primary hover:bg-gray-50 transition-colors rounded-md"
-                            >
-                              {subItem.label}
-                            </Link>
-                          ))}
-                        </div>
-                      </motion.div>
+                    {activeDropdown === item.label && item.type === 'dropdown' && item.items && (
+                      <>
+                         {/* Invisible backdrop for dropdowns */}
+                        <div className="fixed inset-0 top-[120px] z-40 cursor-default" onClick={() => setActiveDropdown(null)} />
+                        
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute top-full left-0 pt-0 w-56 z-50"
+                        >
+                          <div className="bg-white shadow-xl border border-gray-100 p-2 rounded-b-lg relative z-50">
+                            {item.items.map((subItem) => (
+                              <Link
+                                key={subItem.label}
+                                to={subItem.href}
+                                onClick={() => setActiveDropdown(null)}
+                                className="block px-4 py-3 text-sm font-medium text-foreground hover:text-primary hover:bg-gray-50 transition-colors rounded-md"
+                              >
+                                {subItem.label}
+                              </Link>
+                            ))}
+                          </div>
+                        </motion.div>
+                      </>
                     )}
                   </AnimatePresence>
                 </div>
@@ -249,11 +417,12 @@ export const Header = () => {
                 <User className="h-7 w-7" />
               </Link>
 
-              <Button variant="ghost" size="icon" onClick={openCart} className="hover:bg-transparent p-0 relative h-12 w-12">
-                <div className="relative text-primary">
-                  <ShoppingBag className="!h-6 !w-6" />
+              {/* Redesigned Large Cart Icon - Desktop */}
+              <Button variant="ghost" size="icon" onClick={openCart} className="hover:bg-transparent p-0 relative h-12 w-12 ml-1">
+                <div className="relative text-primary flex items-center justify-center">
+                  <ShoppingBag className="!h-8 !w-8 stroke-[1.5]" />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-accent-gold text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
+                    <span className="absolute -top-1.5 -right-1.5 bg-[#FACC15] text-black text-[11px] font-extrabold rounded-full h-[22px] w-[22px] flex items-center justify-center shadow-sm">
                       {totalItems}
                     </span>
                   )}
@@ -262,6 +431,13 @@ export const Header = () => {
             </div>
           </div>
         </div>
+
+        {/* --- RENDER MEGA MENU OUTSIDE THE NAV SO IT SPANS WIDE --- */}
+        <AnimatePresence>
+          {activeDropdown === 'Plants' && (
+            <PlantsMegaMenu closeMenu={() => setActiveDropdown(null)} />
+          )}
+        </AnimatePresence>
 
         {/* MOBILE SEARCH BAR */}
         <AnimatePresence>
@@ -291,7 +467,7 @@ export const Header = () => {
           )}
         </AnimatePresence>
 
-        {/* MOBILE MENU DRAWER (Updated with Profile Section) */}
+        {/* MOBILE MENU DRAWER (Updated with Profile Section & Mega Menu Fallback) */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -302,7 +478,7 @@ export const Header = () => {
             >
               <div className="container-custom py-4">
                 
-                {/* --- NEW: PROFILE SECTION IN MENU --- */}
+                {/* PROFILE SECTION IN MENU */}
                 <div 
                   onClick={() => {
                     navigate('/profile');
@@ -317,9 +493,8 @@ export const Header = () => {
                     <h3 className="font-bold text-primary text-base">My Account</h3>
                     <p className="text-xs text-gray-500">Login / Sign Up</p>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-gray-400 -rotate-90" />
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
                 </div>
-                {/* ------------------------------------ */}
 
                 <nav className="flex flex-col gap-2">
                   {navItems.map((item) => (
@@ -327,7 +502,7 @@ export const Header = () => {
                       <div 
                         className="flex items-center justify-between py-4"
                         onClick={() => {
-                          if (item.type === 'dropdown') {
+                          if (item.type === 'dropdown' || item.type === 'megamenu') {
                             setMobileExpanded(mobileExpanded === item.label ? null : item.label);
                           } else {
                             setMobileMenuOpen(false);
@@ -342,13 +517,13 @@ export const Header = () => {
                         >
                           {item.icon} {item.label}
                         </Link>
-                        {item.type === 'dropdown' && (
+                        {(item.type === 'dropdown' || item.type === 'megamenu') && (
                           <ChevronDown className={`h-5 w-5 transition-transform ${mobileExpanded === item.label ? 'rotate-180' : ''}`} />
                         )}
                       </div>
 
                       <AnimatePresence>
-                        {item.type === 'dropdown' && mobileExpanded === item.label && (
+                        {(item.type === 'dropdown' || item.type === 'megamenu') && mobileExpanded === item.label && (
                           <motion.div
                             initial={{ height: 0 }}
                             animate={{ height: 'auto' }}
@@ -360,7 +535,7 @@ export const Header = () => {
                                 <Link
                                   key={subItem.label}
                                   to={subItem.href}
-                                  className="text-base text-accent-earth hover:text-primary py-1"
+                                  className="text-base text-accent-earth hover:text-primary py-1.5 font-medium"
                                   onClick={() => setMobileMenuOpen(false)}
                                 >
                                   {subItem.label}
@@ -378,6 +553,6 @@ export const Header = () => {
           )}
         </AnimatePresence>
       </header>
-    </>
+    </div>
   );
 };

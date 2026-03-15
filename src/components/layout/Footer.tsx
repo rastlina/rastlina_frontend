@@ -7,7 +7,8 @@ import {
   Phone,
   Mail,
   Clock,
-  Briefcase
+  Briefcase,
+  Heart
 } from 'lucide-react';
 
 const footerLinks = [
@@ -20,20 +21,22 @@ const footerLinks = [
 
 export const Footer = () => {
   return (
-    <footer className="bg-accent-earth text-white border-t border-white/10 pt-12 pb-6">
+    <footer className="bg-primary text-white border-t border-white/10 pt-12 pb-6">
       <div className="container-custom">
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
 
           {/* Brand */}
           <div className="space-y-4">
-            <img
-              src="/logo.png"
-              alt="Rastlina Logo"
-              className="h-14 w-auto object-contain"
-            />
+            <div className="inline-block bg-white p-2.5 rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform hover:scale-105">
+              <img
+                src="/logo.png"
+                alt="Rastlina Logo"
+                className="h-14 w-auto object-contain"
+              />
+            </div>
 
-            <p className="text-sm text-white/80 leading-relaxed">
+            <p className="text-sm text-white/80 leading-relaxed mt-2">
               Rooted in Confidence, Growing with You. We provide premium plants and care essentials to elevate your living spaces.
             </p>
 
@@ -139,8 +142,26 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/40">
+        <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/60">
           <p>© 2025 Rastlina Plants. All rights reserved.</p>
+          
+          <div className="flex justify-center items-center gap-1">
+            Made with <Heart className="inline h-4 w-4 text-red-500 mx-1" /> by
+            <a
+              href="https://staffarc.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-orange-400 hover:underline"
+            >
+              <img
+                src="https://www.staffarc.in/images/Staffarc-logo.png"
+                alt="StaffArc logo"
+                className="h-5 w-5 object-contain"
+              />
+              StaffArc
+            </a>
+          </div>
+
           <p>Designed with 🌿 in Hyderabad</p>
         </div>
 

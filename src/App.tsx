@@ -8,7 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import ScrollToTop from "@/components/ScrollToTop"; 
-
+import WhatsAppButton from "./components/home/WhatsAppButton";
 import Index from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Shop from "./pages/Shop";
@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import UserProfile from './pages/UserProfile';
 import Contact from './pages/Contact'; // Imported Contact Page
 
+import CheckoutPage from '@/pages/CheckoutPage';
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -52,14 +53,15 @@ const App = () => (
                 <Route path="/quiz" element={<Index />} />
                 <Route path="/learn" element={<Index />} />
                 <Route path="/gift" element={<Shop />} />
-                <Route path="/checkout" element={<Index />} />
-
+                
+                <Route path="/checkout" element={<CheckoutPage />} />
                 {/* 404 Route - Always last */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
             <Footer />
             <CartDrawer />
+            <WhatsAppButton />
           </div>
         </BrowserRouter>
       </CartProvider>
