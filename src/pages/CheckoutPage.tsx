@@ -17,7 +17,7 @@ const WhatsAppButton = () => {
       href={`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 bg-[#556B2F] hover:bg-[#3d4d21] text-white p-3.5 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center"
+      className="fixed bottom-6 right-6 z-50 bg-primary hover:bg-primary/90 text-white p-3.5 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center"
       aria-label="Chat on WhatsApp"
     >
       <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
@@ -51,8 +51,8 @@ const formatPrice = (price: number) => {
 const FormInput = ({ className = '', error, ...props }: any) => (
   <input
     {...props}
-    className={`w-full h-12 px-4 rounded-xl border bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#667D00]/30 transition-all ${
-      error ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-[#667D00]'
+    className={`w-full h-12 px-4 rounded-xl border bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all ${
+      error ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-primary'
     } ${className}`}
   />
 );
@@ -252,8 +252,8 @@ const CheckoutPage = () => {
 
                 <div className="relative">
                   <select
-                    className={`w-full h-12 px-4 rounded-xl border bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#667D00]/30 transition-all appearance-none ${
-                      errors.state ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-[#667D00]'
+                    className={`w-full h-12 px-4 rounded-xl border bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all appearance-none ${
+                      errors.state ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-primary'
                     }`}
                     value={formData.state}
                     onChange={(e: any) => handleInputChange('state', e.target.value)}
@@ -333,7 +333,7 @@ const CheckoutPage = () => {
                   </Button>
                 </div>
                 {appliedCoupon && (
-                  <p className="mt-3 text-sm font-bold text-[#667D00] flex items-center gap-1.5">
+                  <p className="mt-3 text-sm font-bold text-primary flex items-center gap-1.5">
                     <ShieldCheck size={16}/> {appliedCoupon.message}
                   </p>
                 )}
@@ -348,20 +348,20 @@ const CheckoutPage = () => {
                 <div className="flex justify-between items-center">
                   <span className="flex items-center gap-2">Shipping</span>
                   {totals.shipping === 0 ? (
-                    <span className="text-[#667D00] font-bold">Free</span>
+                    <span className="text-primary font-bold">Free</span>
                   ) : (
                     <span className="text-gray-900 font-bold">{formatPrice(totals.shipping)}</span>
                   )}
                 </div>
                 {totals.discount > 0 && (
-                  <div className="flex justify-between text-[#667D00] font-bold">
+                  <div className="flex justify-between text-primary font-bold">
                     <span>Discount</span>
                     <span>-{formatPrice(totals.discount)}</span>
                   </div>
                 )}
                 <div className="border-t border-gray-100 pt-4 mt-2 flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-2xl font-extrabold text-[#1A3831]">{formatPrice(totals.finalTotal)}</span>
+                  <span className="text-2xl font-extrabold text-primary">{formatPrice(totals.finalTotal)}</span>
                 </div>
               </div>
 
@@ -370,7 +370,7 @@ const CheckoutPage = () => {
                 <Info className="text-[#73592F] h-5 w-5 flex-shrink-0 mt-0.5" />
                 <p className="text-xs leading-relaxed text-gray-700">
                   By completing your order, you agree to our <Link to="/terms" className="underline font-bold">Terms</Link> and <Link to="/privacy" className="underline font-bold">Privacy Policy</Link>. 
-                  <span className="block mt-1 font-bold text-[#1A3831]">🌿 30-Day Plant Survival Guarantee included.</span>
+                  <span className="block mt-1 font-bold text-primary">🌿 30-Day Plant Survival Guarantee included.</span>
                 </p>
               </div>
 
@@ -378,7 +378,7 @@ const CheckoutPage = () => {
               <Button 
                 onClick={handlePayment} 
                 disabled={isProcessing || cartItems.length === 0} 
-                className="w-full bg-[#1A3831] hover:bg-[#112520] text-white h-14 rounded-xl font-extrabold text-base shadow-[0_8px_20px_rgba(26,56,49,0.2)] active:scale-[0.98] transition-all"
+                className="w-full bg-primary hover:bg-primary/90 text-white h-14 rounded-xl font-extrabold text-base shadow-[0_8px_20px_rgba(29,29,0,0.2)] active:scale-[0.98] transition-all"
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2"><Loader2 className="animate-spin h-5 w-5" /> Processing...</span>

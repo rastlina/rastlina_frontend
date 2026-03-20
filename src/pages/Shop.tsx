@@ -34,7 +34,7 @@ const ModernProductCard = ({ product, index }: { product: Product; index: number
             </span>
           )}
           {product.discount > 0 && product.originalPrice > product.price && (
-            <span className="bg-[#1A3831] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-sm">
+            <span className="bg-primary text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-sm">
               -{product.discount}%
             </span>
           )}
@@ -80,7 +80,7 @@ const ModernProductCard = ({ product, index }: { product: Product; index: number
             e.preventDefault();
             addToCart(product, defaultSize.label, defaultColor, defaultSize.price);
           }}
-          className="w-full bg-[#667D00] hover:bg-[#556B2F] text-white font-bold text-sm py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 active:scale-[0.98]"
+          className="w-full bg-primary hover:bg-primary/90 text-white font-bold text-sm py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 active:scale-[0.98]"
         >
           Add to Cart
         </button>
@@ -99,7 +99,7 @@ const WhatsAppButton = () => {
       href={`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-[60] bg-[#556B2F] hover:bg-[#3d4d21] text-white p-3.5 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center"
+      className="fixed bottom-6 right-6 z-[60] bg-primary hover:bg-primary/90 text-white p-3.5 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center"
       aria-label="Chat on WhatsApp"
     >
       <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
@@ -268,14 +268,14 @@ export default function Shop() {
         return (
           <div className="p-4">
             <h4 className="font-bold mb-4 text-[color:var(--foreground)]">Max Price: ₹{priceRange[1]}</h4>
-            <input type="range" min="0" max="5000" step="100" value={priceRange[1]} onChange={(e) => setPriceRange([0, parseInt(e.target.value)])} className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-[color:var(--primary)]" style={sliderStyle} />
+            <input type="range" min="0" max="5000" step="100" value={priceRange[1]} onChange={(e) => setPriceRange([0, parseInt(e.target.value)])} className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary" style={sliderStyle} />
             <div className="flex justify-between text-xs text-gray-500 mt-3 font-medium"><span>₹0</span><span>₹5000+</span></div>
           </div>
         );
-      case "Color": return <div className="p-4 space-y-3">{allColors.map(color => (<label key={color} className="flex items-center space-x-3 cursor-pointer"><input type="checkbox" className="w-5 h-5 border-gray-300 rounded text-[color:var(--primary)] focus:ring-[color:var(--primary)]" checked={selectedColors.includes(color)} onChange={() => toggleFilter(color, selectedColors, setSelectedColors)} /><span className="text-gray-700 capitalize">{color}</span></label>))}</div>;
-      case "Size": return <div className="p-4 grid grid-cols-2 gap-3">{allSizes.map(size => (<button key={size} onClick={() => toggleFilter(size, selectedSizes, setSelectedSizes)} className={`py-2 px-3 text-sm border rounded transition-all ${selectedSizes.includes(size) ? "bg-[color:var(--primary)] text-white border-[color:var(--primary)]" : "border-gray-200 text-gray-600"}`}>{size}</button>))}</div>;
-      case "Tags": return <div className="p-4 space-y-3">{availableTags.map(tag => (<label key={tag.value} className="flex items-center space-x-3 cursor-pointer"><input type="checkbox" className="w-5 h-5 border-gray-300 rounded text-[color:var(--primary)] focus:ring-[color:var(--primary)]" checked={selectedTags.includes(tag.value)} onChange={() => toggleFilter(tag.value, selectedTags, setSelectedTags)} /><span className="text-gray-700">{tag.label}</span></label>))}</div>;
-      case "Availability": return <div className="p-4"><label className="flex items-center space-x-3 cursor-pointer"><input type="checkbox" className="w-5 h-5 border-gray-300 rounded text-[color:var(--primary)] focus:ring-[color:var(--primary)]" checked={onlyInStock} onChange={(e) => setOnlyInStock(e.target.checked)} /><span className="text-gray-700">In Stock Only</span></label></div>;
+      case "Color": return <div className="p-4 space-y-3">{allColors.map(color => (<label key={color} className="flex items-center space-x-3 cursor-pointer"><input type="checkbox" className="w-5 h-5 border-gray-300 rounded text-primary focus:ring-primary" checked={selectedColors.includes(color)} onChange={() => toggleFilter(color, selectedColors, setSelectedColors)} /><span className="text-gray-700 capitalize">{color}</span></label>))}</div>;
+      case "Size": return <div className="p-4 grid grid-cols-2 gap-3">{allSizes.map(size => (<button key={size} onClick={() => toggleFilter(size, selectedSizes, setSelectedSizes)} className={`py-2 px-3 text-sm border rounded transition-all ${selectedSizes.includes(size) ? "bg-primary text-white border-primary" : "border-gray-200 text-gray-600"}`}>{size}</button>))}</div>;
+      case "Tags": return <div className="p-4 space-y-3">{availableTags.map(tag => (<label key={tag.value} className="flex items-center space-x-3 cursor-pointer"><input type="checkbox" className="w-5 h-5 border-gray-300 rounded text-primary focus:ring-primary" checked={selectedTags.includes(tag.value)} onChange={() => toggleFilter(tag.value, selectedTags, setSelectedTags)} /><span className="text-gray-700">{tag.label}</span></label>))}</div>;
+      case "Availability": return <div className="p-4"><label className="flex items-center space-x-3 cursor-pointer"><input type="checkbox" className="w-5 h-5 border-gray-300 rounded text-primary focus:ring-primary" checked={onlyInStock} onChange={(e) => setOnlyInStock(e.target.checked)} /><span className="text-gray-700">In Stock Only</span></label></div>;
       default: return null;
     }
   };
@@ -286,7 +286,7 @@ export default function Shop() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4 border-b border-gray-100 pb-6">
           <div>
             {getBreadcrumbPath()}
-            <h1 className="text-3xl md:text-4xl font-serif text-[color:var(--primary)] capitalize">
+            <h1 className="text-3xl md:text-4xl font-serif text-primary capitalize">
               {getPageTitle()}
             </h1>
             <p className="text-gray-500 text-sm mt-2">{filteredProducts.length} Products Found</p>
@@ -325,18 +325,18 @@ export default function Shop() {
           {/* Desktop Sidebar */}
           <aside className="hidden md:block w-64 flex-shrink-0">
             <div className="space-y-8 sticky top-36">
-              <div><h3 className="font-bold text-sm text-[color:var(--foreground)] mb-4 uppercase tracking-wider">Price</h3><input type="range" min="0" max="5000" step="100" value={priceRange[1]} onChange={(e) => setPriceRange([0, parseInt(e.target.value)])} className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-[color:var(--primary)]" style={sliderStyle} /><div className="flex justify-between text-xs text-gray-500 mt-2 font-medium"><span>₹0</span><span>₹{priceRange[1]}</span></div></div>
-              <div><h3 className="font-bold text-sm text-[color:var(--foreground)] mb-4 uppercase tracking-wider">Category & Benefits</h3><div className="space-y-2">{availableTags.map(tag => (<label key={tag.value} className="flex items-center space-x-3 cursor-pointer group"><input type="checkbox" className="w-4 h-4 border-gray-300 rounded text-[color:var(--primary)] focus:ring-[color:var(--primary)]" checked={selectedTags.includes(tag.value)} onChange={() => toggleFilter(tag.value, selectedTags, setSelectedTags)} /><span className="text-sm text-gray-600 group-hover:text-[color:var(--primary)] transition-colors">{tag.label}</span></label>))}</div></div>
-              <div><h3 className="font-bold text-sm text-[color:var(--foreground)] mb-4 uppercase tracking-wider">Size</h3><div className="flex flex-wrap gap-2">{allSizes.map(size => (<button key={size} onClick={() => toggleFilter(size, selectedSizes, setSelectedSizes)} className={`px-3 py-1.5 text-xs border rounded transition-all ${selectedSizes.includes(size) ? "border-[color:var(--primary)] bg-[color:var(--primary)] text-white" : "border-gray-200 text-gray-600 hover:border-[color:var(--primary)]"}`}>{size}</button>))}</div></div>
-              <div><h3 className="font-bold text-sm text-[color:var(--foreground)] mb-4 uppercase tracking-wider">Pot Color</h3><div className="space-y-2">{allColors.map(color => (<label key={color} className="flex items-center space-x-3 cursor-pointer group"><div className={`w-5 h-5 rounded-full border border-gray-200 flex items-center justify-center transition-colors ${selectedColors.includes(color) ? 'ring-2 ring-[color:var(--primary)] ring-offset-1' : ''}`} style={{ backgroundColor: color.toLowerCase() === 'terracotta' ? '#E2725B' : color.toLowerCase() }}>{selectedColors.includes(color) && <Check className={`w-3 h-3 ${color.toLowerCase() === 'white' ? 'text-black' : 'text-white'}`} />}</div><span className="text-sm text-gray-600 group-hover:text-[color:var(--primary)] capitalize">{color}</span><input type="checkbox" className="hidden" checked={selectedColors.includes(color)} onChange={() => toggleFilter(color, selectedColors, setSelectedColors)} /></label>))}</div></div>
-              <div><label className="flex items-center space-x-3 cursor-pointer group"><input type="checkbox" className="w-4 h-4 border-gray-300 rounded text-[color:var(--primary)] focus:ring-[color:var(--primary)]" checked={onlyInStock} onChange={(e) => setOnlyInStock(e.target.checked)} /><span className="text-sm font-medium text-gray-700 group-hover:text-[color:var(--primary)]">In Stock Only</span></label></div>
-              <button onClick={() => {setSelectedSizes([]); setSelectedColors([]); setSelectedTags([]); setOnlyInStock(false); setPriceRange([0,5000])}} className="text-xs text-[color:var(--primary)] underline font-medium hover:text-[color:var(--accent-gold)]">Clear All Filters</button>
+              <div><h3 className="font-bold text-sm text-[color:var(--foreground)] mb-4 uppercase tracking-wider">Price</h3><input type="range" min="0" max="5000" step="100" value={priceRange[1]} onChange={(e) => setPriceRange([0, parseInt(e.target.value)])} className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-primary" style={sliderStyle} /><div className="flex justify-between text-xs text-gray-500 mt-2 font-medium"><span>₹0</span><span>₹{priceRange[1]}</span></div></div>
+              <div><h3 className="font-bold text-sm text-[color:var(--foreground)] mb-4 uppercase tracking-wider">Category & Benefits</h3><div className="space-y-2">{availableTags.map(tag => (<label key={tag.value} className="flex items-center space-x-3 cursor-pointer group"><input type="checkbox" className="w-4 h-4 border-gray-300 rounded text-primary focus:ring-primary" checked={selectedTags.includes(tag.value)} onChange={() => toggleFilter(tag.value, selectedTags, setSelectedTags)} /><span className="text-sm text-gray-600 group-hover:text-primary transition-colors">{tag.label}</span></label>))}</div></div>
+              <div><h3 className="font-bold text-sm text-[color:var(--foreground)] mb-4 uppercase tracking-wider">Size</h3><div className="flex flex-wrap gap-2">{allSizes.map(size => (<button key={size} onClick={() => toggleFilter(size, selectedSizes, setSelectedSizes)} className={`px-3 py-1.5 text-xs border rounded transition-all ${selectedSizes.includes(size) ? "border-primary bg-primary text-white" : "border-gray-200 text-gray-600 hover:border-primary"}`}>{size}</button>))}</div></div>
+              <div><h3 className="font-bold text-sm text-[color:var(--foreground)] mb-4 uppercase tracking-wider">Pot Color</h3><div className="space-y-2">{allColors.map(color => (<label key={color} className="flex items-center space-x-3 cursor-pointer group"><div className={`w-5 h-5 rounded-full border border-gray-200 flex items-center justify-center transition-colors ${selectedColors.includes(color) ? 'ring-2 ring-primary ring-offset-1' : ''}`} style={{ backgroundColor: color.toLowerCase() === 'terracotta' ? '#E2725B' : color.toLowerCase() }}>{selectedColors.includes(color) && <Check className={`w-3 h-3 ${color.toLowerCase() === 'white' ? 'text-black' : 'text-white'}`} />}</div><span className="text-sm text-gray-600 group-hover:text-primary capitalize">{color}</span><input type="checkbox" className="hidden" checked={selectedColors.includes(color)} onChange={() => toggleFilter(color, selectedColors, setSelectedColors)} /></label>))}</div></div>
+              <div><label className="flex items-center space-x-3 cursor-pointer group"><input type="checkbox" className="w-4 h-4 border-gray-300 rounded text-primary focus:ring-primary" checked={onlyInStock} onChange={(e) => setOnlyInStock(e.target.checked)} /><span className="text-sm font-medium text-gray-700 group-hover:text-primary">In Stock Only</span></label></div>
+              <button onClick={() => {setSelectedSizes([]); setSelectedColors([]); setSelectedTags([]); setOnlyInStock(false); setPriceRange([0,5000])}} className="text-xs text-primary underline font-medium hover:text-accent-gold">Clear All Filters</button>
             </div>
           </aside>
 
           {/* Product Grid */}
           <div className="flex-1">
-            {loading ? <div className="flex flex-col justify-center items-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[color:var(--primary)] mb-4" /><p className="text-sm text-gray-500">Loading plants...</p></div> : filteredProducts.length === 0 ? <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-200"><Leaf className="w-12 h-12 text-gray-300 mx-auto mb-4" /><h3 className="text-lg font-serif mb-2 text-gray-900">No products found</h3><p className="text-gray-500 mb-6">We couldn't find what you were looking for.</p><button onClick={() => {navigate('/shop')}} className="text-[color:var(--primary)] font-semibold hover:underline">Clear Search</button></div> : (
+            {loading ? <div className="flex flex-col justify-center items-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary mb-4" /><p className="text-sm text-gray-500">Loading plants...</p></div> : filteredProducts.length === 0 ? <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-200"><Leaf className="w-12 h-12 text-gray-300 mx-auto mb-4" /><h3 className="text-lg font-serif mb-2 text-gray-900">No products found</h3><p className="text-gray-500 mb-6">We couldn't find what you were looking for.</p><button onClick={() => {navigate('/shop')}} className="text-primary font-semibold hover:underline">Clear Search</button></div> : (
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 md:gap-x-6 gap-y-8 md:gap-y-10">
                 {filteredProducts.map((product, i) => (
                   // Using the new modern component here
@@ -353,12 +353,12 @@ export default function Shop() {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowFilters(false)}></div>
           <div className="relative bg-white w-[85%] h-full shadow-2xl flex flex-col overflow-hidden animate-slide-in-right">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-lg font-bold text-[color:var(--primary)] font-serif">Filter Plants</h2>
+              <h2 className="text-lg font-bold text-primary font-serif">Filter Plants</h2>
               <button onClick={() => setShowFilters(false)} className="p-2 bg-white rounded-full shadow-sm text-gray-500"><X className="w-5 h-5" /></button>
             </div>
             <div className="flex flex-1 overflow-hidden">
               <div className="w-1/3 bg-gray-50 border-r border-gray-100 overflow-y-auto">
-                {mobileFilterTabs.map(tab => (<button key={tab} onClick={() => setActiveFilterTab(tab)} className={`w-full text-left px-3 py-4 text-xs font-semibold border-l-4 transition-colors ${activeFilterTab === tab ? "bg-white border-[color:var(--primary)] text-[color:var(--primary)] shadow-sm" : "border-transparent text-gray-500 hover:bg-gray-100"}`}>{tab}</button>))}
+                {mobileFilterTabs.map(tab => (<button key={tab} onClick={() => setActiveFilterTab(tab)} className={`w-full text-left px-3 py-4 text-xs font-semibold border-l-4 transition-colors ${activeFilterTab === tab ? "bg-white border-primary text-primary shadow-sm" : "border-transparent text-gray-500 hover:bg-gray-100"}`}>{tab}</button>))}
               </div>
               <div className="w-2/3 bg-white overflow-y-auto">{renderMobileFilterContent()}</div>
             </div>
