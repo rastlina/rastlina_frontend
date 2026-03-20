@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Product } from '@/data/products';
 
 export interface CartItem {
@@ -25,9 +25,32 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Helper function to safely load from localStorage
+const loadCartFromStorage = (): CartItem[] => {
+  try {
+    const savedCart = localStorage.getItem('rastlina_cart');
+    if (savedCart) {
+      return JSON.parse(savedCart);
+    }
+  } catch (error) {
+    console.error('Failed to load cart from localStorage', error);
+  }
+  return [];
+};
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  // Initialize state directly from localStorage
+  const [items, setItems] = useState<CartItem[]>(loadCartFromStorage);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Automatically save to localStorage whenever 'items' change
+  useEffect(() => {
+    try {
+      localStorage.setItem('rastlina_cart', JSON.stringify(items));
+    } catch (error) {
+      console.error('Failed to save cart to localStorage', error);
+    }
+  }, [items]);
 
   const addToCart = useCallback((product: Product, size: string, color: string, price: number) => {
     setItems(prev => {
@@ -43,7 +66,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       return [...prev, { product, quantity: 1, selectedSize: size, selectedColor: color, price }];
     });
-    // REMOVED: setIsOpen(true); -> Now it won't auto-open
   }, []);
 
   const removeFromCart = useCallback((productId: string, size: string, color: string) => {

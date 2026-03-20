@@ -9,10 +9,10 @@
     /* RASILINA Design System */
     
     /* Variables hold just the HSL values */
-    --primary: 71 100% 25%;           /* #677d00 (Sage Green) */
+    --primary: 60 100% 6%;        /* #677d00 (Sage Green) */
     --primary-foreground: 0 0% 100%;
     
-    --accent-earth: 33 43% 31%;       /* #73592f (Warm Earth) */
+    --accent-earth: 33 43% 31%;      /* #73592f (Warm Earth) */
     --accent-earth-foreground: 0 0% 100%;
     
     --accent-gold: 41 38% 60%;        /* #bFA275 (Soft Gold) */
@@ -26,7 +26,7 @@
     
     --border: 41 38% 85%;
     --input: 41 38% 85%;
-    --ring: 71 100% 25%;
+    --ring: 60 100% 6%;
     --radius: 0.5rem;
     
   }

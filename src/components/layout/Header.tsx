@@ -9,11 +9,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 const navItems = [
   {
     label: 'Plants',
-    type: 'megamenu', // Changed to megamenu to trigger the new component on desktop
+    type: 'megamenu',
     href: '/shop',
-    // Added colored Leaf icon to highlight this as the main menu item
+    // Colored Leaf icon to highlight this as the main menu item
     icon: <Leaf className="h-4 w-4 mr-1 text-[#667D00]" fill="currentColor" />,
-    // These items act as the mobile accordion fallback
     items: [
       { label: 'All Plants', href: '/shop' },
       { label: 'Large & Extra Large', href: '/shop?size=large' },
@@ -59,13 +58,13 @@ const navItems = [
     label: 'Combos',
     type: 'link',
     href: '/shop?type=combo',
-    highlight: 'text-accent-earth font-bold'
+    highlight: 'text-[#BFA275] font-bold'
   },
   {
     label: 'Offers',
     type: 'link',
     href: '/shop?onOffer=true',
-    highlight: 'text-accent-earth font-bold tracking-wide',
+    highlight: 'text-[#BFA275] font-bold tracking-wide',
   },
   {
     label: 'Bulk',
@@ -92,8 +91,8 @@ const TopBar = () => {
   }, []);
 
   return (
-    <div className="bg-dark-olive text-white py-2.5 overflow-hidden relative z-50">
-      <div className="container-custom flex justify-center items-center">
+ <div className="bg-primary text-white py-2.5 overflow-hidden relative z-50 h-[40px] flex items-center justify-center">
+      <div className="container-custom flex justify-center items-center w-full">
         <p className="text-xs md:text-sm font-medium tracking-wide text-white text-center truncate px-4">
             {offers[index]}
         </p>
@@ -114,14 +113,13 @@ const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % slideImages.length);
-    }, 3000); // Change image every 3 seconds
+    }, 3000); 
 
     return () => clearInterval(interval);
   }, []);
 
   return (
     <>
-      {/* Invisible backdrop to detect clicks outside */}
       <div className="fixed inset-0 top-[120px] z-40 cursor-default" onClick={closeMenu} />
       
       <motion.div
@@ -130,15 +128,14 @@ const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
         exit={{ opacity: 0, y: 15 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
         className="absolute top-[80px] left-0 w-full z-50 cursor-default"
-        // REMOVED onMouseLeave={closeMenu}
       >
         <div className="container-custom">
           <div className="bg-white/95 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-gray-100 rounded-b-2xl p-8 grid grid-cols-12 gap-8 w-full max-w-6xl mx-auto relative z-50">
             
             {/* LEFT: Banner & Top Picks (col-span-5) */}
             <div className="col-span-5 flex flex-col gap-6">
-              <Link to="/shop?collection=self-watering" onClick={closeMenu} className="rounded-xl overflow-hidden h-28 relative group cursor-pointer block shadow-sm bg-gray-100">
-                <AnimatePresence mode="wait">
+              <Link to="/shop?collection=self-watering" onClick={closeMenu} className="rounded-xl overflow-hidden h-28 relative group cursor-pointer block shadow-sm bg-[#1A3831]">
+                <AnimatePresence mode="sync">
                   <motion.img
                     key={currentImageIndex}
                     src={slideImages[currentImageIndex]}
@@ -146,7 +143,7 @@ const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8 }}
+                    transition={{ duration: 1, ease: "easeInOut" }} 
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                 </AnimatePresence>
@@ -159,34 +156,34 @@ const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
               </Link>
 
               <div>
-                <h3 className="font-serif font-bold text-2xl text-primary mb-4">Rastlina Top Picks</h3>
+                <h3 className="font-serif font-bold text-2xl text-[#1A3831] mb-4">Rastlina Top Picks</h3>
                 <div className="space-y-3">
                   <Link to="/shop" onClick={closeMenu} className="flex items-center gap-4 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
                     <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                      <img src="/logo.png" className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500" alt="All Plants"/>
+                      <img src="https://images.unsplash.com/photo-1597055905063-cb60e334ba99?q=80&w=800&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="All Plants"/>
                     </div>
-                    <span className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">All Plants</span>
+                    <span className="font-bold text-gray-800 group-hover:text-[#667D00] transition-colors text-base">All Plants</span>
                   </Link>
                   <Link to="/shop?size=large" onClick={closeMenu} className="flex items-center gap-4 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
                     <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                       <img src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=100&h=100&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Large Plants"/>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-bold text-accent-gold bg-accent-gold/10 px-2 py-0.5 rounded-md w-fit mb-1">New</span>
-                      <span className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">Large & Extra-Large</span>
+                      <span className="text-[10px] uppercase font-bold text-white bg-[#BFA275] px-2 py-0.5 rounded-md w-fit mb-1">New</span>
+                      <span className="font-bold text-gray-800 group-hover:text-[#667D00] transition-colors text-base">Large & Extra-Large</span>
                     </div>
                   </Link>
                   <Link to="/shop?size=medium" onClick={closeMenu} className="flex items-center gap-4 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
                     <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                       <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=100&h=100&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Medium Plants"/>
                     </div>
-                    <span className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">Medium Plants</span>
+                    <span className="font-bold text-gray-800 group-hover:text-[#667D00] transition-colors text-base">Medium Plants</span>
                   </Link>
                   <Link to="/shop?size=small" onClick={closeMenu} className="flex items-center gap-4 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
                     <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                       <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=100&h=100&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Small Plants"/>
                     </div>
-                    <span className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">Small Plants</span>
+                    <span className="font-bold text-gray-800 group-hover:text-[#667D00] transition-colors text-base">Small Plants</span>
                   </Link>
                 </div>
               </div>
@@ -194,7 +191,7 @@ const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
 
             {/* MIDDLE: Shop by Type (col-span-4) */}
             <div className="col-span-4 border-l border-gray-100 pl-8">
-              <h3 className="font-serif font-bold text-2xl text-primary mb-6">Shop by Type</h3>
+              <h3 className="font-serif font-bold text-2xl text-[#1A3831] mb-6">Shop by Type</h3>
               <ul className="space-y-2">
                 {[
                   { label: 'All Plants', href: '/shop' },
@@ -207,10 +204,10 @@ const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
                     <Link 
                       to={link.href} 
                       onClick={closeMenu}
-                      className="flex items-center justify-between py-2.5 text-gray-600 hover:text-primary group border-b border-transparent hover:border-gray-50 transition-all"
+                      className="flex items-center justify-between py-2.5 text-gray-600 hover:text-[#667D00] group border-b border-transparent hover:border-gray-50 transition-all"
                     >
                       <span className="font-semibold text-[15px]">{link.label}</span>
-                      <ChevronRight className="h-4 w-4 text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
+                      <ChevronRight className="h-4 w-4 text-[#667D00] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
                     </Link>
                   </li>
                 ))}
@@ -219,7 +216,7 @@ const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
 
             {/* RIGHT: Shop by Space (col-span-3) */}
             <div className="col-span-3 pl-4">
-              <h3 className="font-serif font-bold text-2xl text-primary mb-6">Shop by Space</h3>
+              <h3 className="font-serif font-bold text-2xl text-[#1A3831] mb-6">Shop by Space</h3>
               <ul className="space-y-2">
                 {[
                   { label: 'Living Room', href: '/shop?space=living-room' },
@@ -231,10 +228,10 @@ const PlantsMegaMenu = ({ closeMenu }: { closeMenu: () => void }) => {
                     <Link 
                       to={link.href} 
                       onClick={closeMenu}
-                      className="flex items-center justify-between py-2.5 text-gray-600 hover:text-primary group border-b border-transparent hover:border-gray-50 transition-all"
+                      className="flex items-center justify-between py-2.5 text-gray-600 hover:text-[#667D00] group border-b border-transparent hover:border-gray-50 transition-all"
                     >
                       <span className="font-semibold text-[15px]">{link.label}</span>
-                      <ChevronRight className="h-4 w-4 text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
+                      <ChevronRight className="h-4 w-4 text-[#667D00] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
                     </Link>
                   </li>
                 ))}
@@ -259,6 +256,19 @@ export const Header = () => {
   const navigate = useNavigate();
   const { openCart, totalItems } = useCart();
 
+  // === FIX: SCROLL TRACKING STATE ===
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Hide TopBar if scrolled more than 30px down
+      setIsScrolled(window.scrollY > 30);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  // ===================================
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -277,8 +287,18 @@ export const Header = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full z-50">
-      <TopBar />
+    <div className="fixed top-0 left-0 w-full z-50 shadow-sm">
+      
+      {/* === FIX: WRAPPER TO HIDE TOPBAR ON SCROLL === */}
+      <div 
+        className={`transition-all duration-300 overflow-hidden ${
+          isScrolled ? 'h-0 opacity-0' : 'h-[40px] opacity-100'
+        }`}
+      >
+        <TopBar />
+      </div>
+      {/* ============================================= */}
+
       <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300 w-full relative">
         <div className="container-custom">
           
@@ -290,7 +310,7 @@ export const Header = () => {
             {/* Left: Menu Button */}
             <div className="flex items-center w-1/4">
               <button 
-                className="p-2 -ml-2 text-primary"
+                className="p-2 -ml-2 text-[#1A3831]"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
@@ -309,17 +329,15 @@ export const Header = () => {
 
             {/* Right: Icons */}
             <div className="flex items-center justify-end gap-1 w-1/4">
-              {/* Search Icon */}
               <button 
-                className="p-2 text-foreground hover:text-primary transition-colors"
+                className="p-2 text-gray-900 hover:text-[#667D00] transition-colors"
                 onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
               >
                 <Search className="h-6 w-6" />
               </button>
               
-              {/* Redesigned Large Cart Icon */}
               <Button variant="ghost" size="icon" onClick={openCart} className="hover:bg-transparent p-0 relative h-10 w-10">
-                <div className="relative text-primary flex items-center justify-center">
+                <div className="relative text-[#1A3831] flex items-center justify-center">
                   <ShoppingBag className="!h-7 !w-7 stroke-[1.5]" />
                   {totalItems > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#FACC15] text-black text-[10px] font-extrabold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
@@ -349,14 +367,13 @@ export const Header = () => {
                 <div
                   key={item.label}
                   className="relative group h-full flex items-center"
-                  // REMOVED onMouseEnter and onMouseLeave
                 >
                   <button
                     onClick={() => handleMenuClick(item.label, item.type, item.href)}
                     className={`flex items-center gap-1 text-sm xl:text-base transition-colors py-8 outline-none ${
                       item.highlight 
                         ? item.highlight 
-                        : 'text-foreground hover:text-primary font-medium'
+                        : 'text-gray-900 hover:text-[#667D00] font-medium'
                     }`}
                   >
                     {item.icon}
@@ -370,7 +387,6 @@ export const Header = () => {
                   <AnimatePresence>
                     {activeDropdown === item.label && item.type === 'dropdown' && item.items && (
                       <>
-                         {/* Invisible backdrop for dropdowns */}
                         <div className="fixed inset-0 top-[120px] z-40 cursor-default" onClick={() => setActiveDropdown(null)} />
                         
                         <motion.div
@@ -385,7 +401,7 @@ export const Header = () => {
                                 key={subItem.label}
                                 to={subItem.href}
                                 onClick={() => setActiveDropdown(null)}
-                                className="block px-4 py-3 text-sm font-medium text-foreground hover:text-primary hover:bg-gray-50 transition-colors rounded-md"
+                                className="block px-4 py-3 text-sm font-medium text-gray-900 hover:text-[#667D00] hover:bg-gray-50 transition-colors rounded-md"
                               >
                                 {subItem.label}
                               </Link>
@@ -406,20 +422,20 @@ export const Header = () => {
                   placeholder="Search plants..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-300 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-gray-50/50"
+                  className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-300 text-sm focus:outline-none focus:border-[#667D00] focus:ring-1 focus:ring-[#667D00] bg-gray-50/50"
                 />
-                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
+                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#667D00] transition-colors">
                   <Search className="h-4 w-4" />
                 </button>
               </form>
 
-              <Link to="/profile" className="text-foreground hover:text-primary transition-colors p-1">
+              <Link to="/profile" className="text-gray-900 hover:text-[#667D00] transition-colors p-1">
                 <User className="h-7 w-7" />
               </Link>
 
               {/* Redesigned Large Cart Icon - Desktop */}
               <Button variant="ghost" size="icon" onClick={openCart} className="hover:bg-transparent p-0 relative h-12 w-12 ml-1">
-                <div className="relative text-primary flex items-center justify-center">
+                <div className="relative text-[#1A3831] flex items-center justify-center">
                   <ShoppingBag className="!h-8 !w-8 stroke-[1.5]" />
                   {totalItems > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 bg-[#FACC15] text-black text-[11px] font-extrabold rounded-full h-[22px] w-[22px] flex items-center justify-center shadow-sm">
@@ -455,10 +471,10 @@ export const Header = () => {
                     placeholder="Search plants, seeds, pots..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-200 text-base focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-gray-50"
+                    className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-200 text-base focus:outline-none focus:border-[#667D00] focus:ring-1 focus:ring-[#667D00] bg-gray-50"
                     autoFocus
                   />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary">
+                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#667D00]">
                     <Search className="h-5 w-5" />
                   </button>
                 </form>
@@ -467,7 +483,7 @@ export const Header = () => {
           )}
         </AnimatePresence>
 
-        {/* MOBILE MENU DRAWER (Updated with Profile Section & Mega Menu Fallback) */}
+        {/* MOBILE MENU DRAWER */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -478,19 +494,18 @@ export const Header = () => {
             >
               <div className="container-custom py-4">
                 
-                {/* PROFILE SECTION IN MENU */}
                 <div 
                   onClick={() => {
                     navigate('/profile');
                     setMobileMenuOpen(false);
                   }}
-                  className="bg-primary/5 rounded-xl p-4 mb-6 flex items-center gap-4 cursor-pointer active:bg-primary/10 transition-colors"
+                  className="bg-[#1A3831]/5 rounded-xl p-4 mb-6 flex items-center gap-4 cursor-pointer active:bg-[#1A3831]/10 transition-colors"
                 >
-                  <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center shadow-sm">
+                  <div className="w-12 h-12 bg-[#1A3831] text-[#BFA275] rounded-full flex items-center justify-center shadow-sm">
                     <User className="h-6 w-6" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-primary text-base">My Account</h3>
+                    <h3 className="font-bold text-[#1A3831] text-base">My Account</h3>
                     <p className="text-xs text-gray-500">Login / Sign Up</p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-gray-400" />
@@ -512,7 +527,7 @@ export const Header = () => {
                         <Link 
                           to={item.href}
                           className={`text-lg font-serif font-medium flex items-center gap-2 ${
-                              item.highlight ? 'text-accent-earth font-bold' : 'text-foreground'
+                              item.highlight ? item.highlight : 'text-gray-900'
                           }`}
                         >
                           {item.icon} {item.label}
@@ -535,7 +550,7 @@ export const Header = () => {
                                 <Link
                                   key={subItem.label}
                                   to={subItem.href}
-                                  className="text-base text-accent-earth hover:text-primary py-1.5 font-medium"
+                                  className="text-base text-[#1A3831] hover:text-[#667D00] py-1.5 font-medium"
                                   onClick={() => setMobileMenuOpen(false)}
                                 >
                                   {subItem.label}
