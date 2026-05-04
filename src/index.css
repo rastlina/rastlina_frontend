@@ -116,3 +116,24 @@
     overflow-x: hidden; /* Prevents horizontal scrolling */
   }
 }
+@layer base {
+  html, body {
+    overflow-x: hidden; /* Fixes horizontal scroll/alignment issues */
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Ensure header container is never squashed */
+  .container-custom {
+    @apply w-full max-w-7xl mx-auto px-4;
+  }
+}
+
+@layer utilities {
+  /* Fix for Lucide icons rendering in buttons */
+  .lucide {
+    display: inline-block;
+    vertical-align: middle;
+  }
+}

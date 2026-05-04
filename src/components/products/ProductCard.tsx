@@ -112,32 +112,7 @@ export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           </div>
 
           {/* ADD TO CART / QUANTITY TOGGLE */}
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            {cartItem ? (
-                <div className="flex items-center justify-between bg-gray-100 rounded-lg h-10 w-full px-2">
-                    <button 
-                        onClick={handleDecrement}
-                        className="h-8 w-8 flex items-center justify-center bg-white rounded-md shadow-sm text-primary hover:bg-gray-50 transition-colors"
-                    >
-                        <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="font-bold text-primary text-sm">{cartItem.quantity}</span>
-                    <button 
-                        onClick={handleIncrement}
-                        className="h-8 w-8 flex items-center justify-center bg-white rounded-md shadow-sm text-primary hover:bg-gray-50 transition-colors"
-                    >
-                        <Plus className="h-4 w-4" />
-                    </button>
-                </div>
-            ) : (
-                <Button 
-                  onClick={handleAdd}
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-medium shadow-none h-10 rounded-lg"
-                >
-                  Add to Cart
-                </Button>
-            )}
-          </div>
+          
         </div>
       </Link>
     </motion.div>
