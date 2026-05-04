@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Menu, X, ChevronDown, ChevronRight, Briefcase, Search, User, Leaf } from 'lucide-react';
@@ -75,6 +76,7 @@ const navItems = [
 ];
 
 // --- ANNOUNCEMENT BAR ---
+
 const TopBar = () => {
   const offers = [
     "🌿 Free Shipping on orders above ₹1999",
@@ -258,7 +260,7 @@ export const Header = () => {
 
   // === FIX: SCROLL TRACKING STATE ===
   const [isScrolled, setIsScrolled] = useState(false);
-
+  const { isLoggedIn, user, logout } = useAuth(); // ✅ INSIDE component
   useEffect(() => {
     const handleScroll = () => {
       // Hide TopBar if scrolled more than 30px down
@@ -429,9 +431,12 @@ export const Header = () => {
                 </button>
               </form>
 
-              <Link to="/profile" className="text-gray-900 hover:text-[#667D00] transition-colors p-1">
-                <User className="h-7 w-7" />
-              </Link>
+              <Link
+  to={isLoggedIn ? "/profile" : "/login"}
+  className="text-gray-900 hover:text-[#667D00] transition-colors p-1"
+>
+  <User className="h-7 w-7" />
+</Link>
 
               {/* Redesigned Large Cart Icon - Desktop */}
               <Button variant="ghost" size="icon" onClick={openCart} className="hover:bg-transparent p-0 relative h-12 w-12 ml-1">

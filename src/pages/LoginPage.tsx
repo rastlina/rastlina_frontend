@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { authService, orderService } from '@/services/api';
 import { toast } from 'sonner';
 
-// VERBATIM REFERENCES TO YOUR COMPONENTS[cite: 28, 29, 30]
+// Import the dedicated components we created[cite: 28, 29, 30]
 import AddressManager from '@/components/profile/AdressManager';
 import OrderHistory from '@/components/profile/OrderHistory';
 import ProfileDetails from '@/components/profile/ProfileDetails';
@@ -21,6 +21,7 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
+  // Load orders only once for the OrderHistory component[cite: 29]
   useEffect(() => {
     if (!authUser) {
       navigate('/login');
@@ -51,12 +52,11 @@ export default function UserProfile() {
     }
   };
 
-  // This function connects to the 'onSave' prop in ProfileDetails_3.tsx
   const handleUpdateProfile = async (formData: any) => {
     setUpdating(true);
     try {
       await authService.updateProfile(formData);
-      await refreshUser(); 
+      await refreshUser(); // Update global auth state
       toast.success("Profile updated successfully");
     } catch (error) {
       toast.error("Failed to update profile");
@@ -70,13 +70,13 @@ export default function UserProfile() {
       case 'orders':
         return (
           <div className="space-y-8">
-            <div className="border-b border-gray-100 pb-6 text-left">
+            <div className="border-b border-gray-100 pb-6">
               <h2 className="text-2xl font-serif font-bold uppercase tracking-tight text-gray-900">Order History</h2>
             </div>
             {loading ? (
               <div className="flex justify-center py-20 font-bold uppercase tracking-[0.2em] text-gray-400 text-xs">Loading Orders...</div>
             ) : (
-              <OrderHistory orders={orders} /> 
+              <OrderHistory orders={orders} /> // Use the dedicated OrderHistory[cite: 29]
             )}
           </div>
         );
@@ -87,7 +87,7 @@ export default function UserProfile() {
             <div className="border-b border-gray-100 pb-6">
               <h2 className="text-2xl font-serif font-bold uppercase tracking-tight text-gray-900">Saved Addresses</h2>
             </div>
-            {/* AdressManager_2.tsx now handles all fields like City, State, and ZIP */}
+            {/* AddressManager handles its own data fetching and state */}
             <AddressManager />
           </div>
         );
@@ -98,12 +98,11 @@ export default function UserProfile() {
             <div className="border-b border-gray-100 pb-6">
               <h2 className="text-2xl font-serif font-bold uppercase tracking-tight text-gray-900">Account Details</h2>
             </div>
-            {/* ProfileDetails_3.tsx provides the editable fields[cite: 30] */}
             <ProfileDetails 
               user={authUser} 
               onSave={handleUpdateProfile} 
               loading={updating} 
-            />
+            /> // Use the dedicated ProfileDetails
           </div>
         );
 
@@ -126,49 +125,35 @@ export default function UserProfile() {
                     <p className="font-black text-xs text-gray-900 uppercase tracking-widest truncate max-w-full">
                       {authUser?.first_name || 'Member'}
                     </p>
-                    <p className="text-[10px] text-gray-400 font-bold  mt-1 truncate max-w-full">{authUser?.email}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase mt-1 truncate max-w-full">{authUser?.email}</p>
                 </div>
 
                 <nav className="space-y-1.5">
-  {[
-    { id: 'orders', label: 'My Orders', icon: Package },
-    { id: 'addresses', label: 'Addresses', icon: MapPin },
-    { id: 'details', label: 'Account', icon: UserIcon },
-  ].map((item) => (
-    <button 
-      key={item.id}
-      onClick={() => setActiveTab(item.id as any)} 
-      className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
-        activeTab === item.id 
-          ? 'bg-black text-white shadow-xl shadow-black/10' // Active: Black background, White text
-          : 'bg-transparent text-black hover:bg-gray-100'   // Inactive: Black text, gray hover
-      }`}
-    >
-      <span className="flex items-center gap-3">
-        <item.icon 
-          size={16} 
-          className={activeTab === item.id ? 'text-white' : 'text-black'} 
-        /> 
-        {item.label}
-      </span>
-      <ChevronRight 
-        size={14} 
-        className={activeTab === item.id ? 'opacity-100' : 'opacity-0'} 
-      />
-    </button>
-  ))}
-  
-  <button 
-    onClick={handleLogout} 
-    className="w-full flex items-center gap-3 px-6 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-red-600 hover:bg-red-50 rounded-2xl mt-6 transition-colors"
-  >
-    <LogOut size={16} /> Logout
-  </button>
-</nav>
+                    {[
+                      { id: 'orders', label: 'My Orders', icon: Package },
+                      { id: 'addresses', label: 'Addresses', icon: MapPin },
+                      { id: 'details', label: 'Account', icon: UserIcon },
+                    ].map((item) => (
+                      <button 
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id as any)} 
+                        className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
+                          activeTab === item.id ? 'bg-primary text-white shadow-xl shadow-primary/10' : 'hover:bg-gray-50 text-gray-400 hover:text-gray-900'
+                        }`}
+                      >
+                        <span className="flex items-center gap-3"><item.icon size={16} /> {item.label}</span>
+                        <ChevronRight size={14} className={activeTab === item.id ? 'opacity-100' : 'opacity-0'} />
+                      </button>
+                    ))}
+                    
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-6 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-red-400 hover:bg-red-50 rounded-2xl mt-6 transition-colors">
+                      <LogOut size={16} /> Logout
+                    </button>
+                </nav>
             </div>
           </aside>
 
-          {/* Main Content Area */}
+          {/* Main Display */}
           <main className="flex-1 bg-white rounded-[3rem] p-8 md:p-12 border border-gray-100 shadow-sm min-h-[650px] w-full">
             {renderContent()}
           </main>
