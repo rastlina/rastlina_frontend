@@ -432,12 +432,11 @@ export const Header = () => {
               </form>
 
               <Link
-  to={isLoggedIn ? "/profile" : "/login"}
+  to={user ? "/profile" : "/login"} // ✅ Use 'user' directly to be safe
   className="text-gray-900 hover:text-[#667D00] transition-colors p-1"
 >
   <User className="h-7 w-7" />
 </Link>
-
               {/* Redesigned Large Cart Icon - Desktop */}
               <Button variant="ghost" size="icon" onClick={openCart} className="hover:bg-transparent p-0 relative h-12 w-12 ml-1">
                 <div className="relative text-[#1A3831] flex items-center justify-center">
@@ -499,22 +498,24 @@ export const Header = () => {
             >
               <div className="container-custom py-4">
                 
-                <div 
-                  onClick={() => {
-                    navigate('/profile');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="bg-[#1A3831]/5 rounded-xl p-4 mb-6 flex items-center gap-4 cursor-pointer active:bg-[#1A3831]/10 transition-colors"
-                >
-                  <div className="w-12 h-12 bg-[#1A3831] text-[#BFA275] rounded-full flex items-center justify-center shadow-sm">
-                    <User className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-[#1A3831] text-base">My Account</h3>
-                    <p className="text-xs text-gray-500">Login / Sign Up</p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-gray-400" />
-                </div>
+               
+<div 
+  onClick={() => {
+    // ✅ Redirect based on login status
+    navigate(user ? '/profile' : '/login');
+    setMobileMenuOpen(false);
+  }}
+  className="bg-[#1A3831]/5 rounded-xl p-4 mb-6 flex items-center gap-4 cursor-pointer"
+>
+  <div className="w-12 h-12 bg-[#1A3831] text-[#BFA275] rounded-full flex items-center justify-center">
+    <User className="h-6 w-6" />
+  </div>
+  <div className="flex-1">
+    <h3 className="font-bold text-[#1A3831] text-base">My Account</h3>
+    <p className="text-xs text-gray-500">{user ? 'View Profile' : 'Login / Sign Up'}</p>
+  </div>
+  <ChevronRight className="h-5 w-5 text-gray-400" />
+</div>
 
                 <nav className="flex flex-col gap-2">
                   {navItems.map((item) => (

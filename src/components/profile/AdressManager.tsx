@@ -258,13 +258,22 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
             ))}
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={handleSave} disabled={saving} className="gradient-primary text-white px-6 py-2 rounded-lg text-sm font-bold disabled:opacity-60 transition">
-              {saving ? 'Saving...' : editing ? 'Update Address' : 'Save Address'}
-            </button>
-            <button onClick={() => setShowForm(false)} className="px-5 py-2 rounded-lg text-sm text-muted-foreground border border-border/30 hover:bg-muted transition">
-              Cancel
-            </button>
-          </div>
+  <button 
+    onClick={handleSave} 
+    disabled={saving} 
+    /* Changed from gradient-primary to solid black for high contrast */
+    className="bg-black text-white px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest disabled:opacity-60 hover:bg-gray-800 transition-all shadow-lg"
+  >
+    {saving ? 'Saving...' : editing ? 'Update Address' : 'Save Address'}
+  </button>
+  
+  <button 
+    onClick={() => setShowForm(false)} 
+    className="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-gray-500 border border-gray-200 hover:bg-gray-50 transition-all"
+  >
+    Cancel
+  </button>
+</div>
         </div>
       )}
     </div>
