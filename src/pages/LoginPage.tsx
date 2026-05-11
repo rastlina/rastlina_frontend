@@ -11,8 +11,12 @@ export default function LoginPage() {
   const location = useLocation();
   const { login, googleLogin, signup, isLoggedIn } = useAuth();
 
-  const from = (location.state as any)?.from || '/profile';
+  const params = new URLSearchParams(location.search);
 
+const from =
+  params.get('redirect') ||
+  (location.state as any)?.from ||
+  '/profile';
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

@@ -1,22 +1,5 @@
 // src/services/api.ts
 // Rastlina — complete API service
-// ADD THESE TWO METHODS to the existing storeService object.
-// The rest of the file is unchanged — only the storeService block is shown here
-// with the two new methods highlighted. Paste them into your existing storeService.
-
-// ─── ADD TO storeService ──────────────────────────────────────────────────────
-//
-//   // Watch & Shop — content layer (video items linked to real Products)
-//   getWatchAndShop: async () =>
-//     (await api.get('/store/watch-and-shop/')).data,
-//
-//   getWatchAndShopBySlug: async (slug: string) =>
-//     (await api.get(`/store/watch-and-shop/${slug}/`)).data,
-//
-// ─────────────────────────────────────────────────────────────────────────────
-
-// COMPLETE api.ts FILE BELOW
-// (Includes the two new methods — everything else is identical to your current file)
 
 import axios from 'axios';
 
@@ -181,25 +164,16 @@ export const storeService = {
   },
 
   getSiteConfig: async () => (await api.get('/store/config/')).data,
-  getActiveCoupons: async () =>
-  (await api.get('/store/active-coupons/')).data,
+
+  getActiveCoupons: async () => (await api.get('/store/active-coupons/')).data,
 
   validateCoupon: async (code: string, orderTotal: number) =>
     (await api.post('/store/validate-coupon/', { code, order_total: orderTotal })).data,
 
-  // ── Watch & Shop ─────────────────────────────────────────────────────────
-  // Content-only layer. Ecommerce data always comes from the linked product.
+  getWatchAndShop: async () => (await api.get('/store/watch-and-shop/')).data,
 
- getWatchAndShop: async () => {
-  const response = await api.get('/store/watch-and-shop/');
-  return response.data;
-},
-
-getWatchAndShopBySlug: async (slug: string) => {
-  const response = await api.get(`/store/watch-and-shop/${slug}/`);
-  return response.data;
-},
-
+  getWatchAndShopBySlug: async (slug: string) =>
+    (await api.get(`/store/watch-and-shop/${slug}/`)).data,
 };
 
 export const orderService = {
@@ -220,6 +194,67 @@ export const orderService = {
 
   cancelOrder: async (orderId: number) =>
     (await api.post(`/orders/${orderId}/cancel/`)).data,
+
+  validateExchangeCode: async (code: string) =>
+    (await api.post('/orders/validate-exchange-code/', { code })).data,
+
+  /**
+   * Exchange request — customer reports defect.
+   * Endpoint: POST /api/orders/<id>/exchange/
+   * On admin approval, an exchange code is auto-generated.
+   */
+  submitExchangeRequest: async (
+    orderId: number,
+    payload: {
+      defect_description: string;
+      defect_video_url?: string;
+    }
+  ) =>
+    (await api.post(`/orders/${orderId}/exchange/`, {
+      request_type: 'Exchange',        // always Exchange, Upgrade removed
+      defect_description: payload.defect_description,
+      defect_video_url: payload.defect_video_url ?? '',
+    })).data,
+
+  /**
+   * Legacy alias — used by old OrderHistory component.
+   * Maps to the same exchange endpoint above.
+   */
+  submitReturnRequest: async (
+    orderId: number,
+    payload: {
+      request_type?: string;
+      defect_description: string;
+      defect_video_url?: string;
+    }
+  ) =>
+    (await api.post(`/orders/${orderId}/exchange/`, {
+      request_type: 'Exchange',
+      defect_description: payload.defect_description,
+      defect_video_url: payload.defect_video_url ?? '',
+    })).data,
+
+  /**
+   * Return request — customer wants to return the product.
+   * Endpoint: POST /api/orders/<id>/return-product/
+   */
+  submitOrderReturnRequest: async (
+    orderId: number,
+    payload: {
+      reason: string;
+      video_url?: string;
+    }
+  ) =>
+    (await api.post(`/orders/${orderId}/return-product/`, {
+      reason: payload.reason,
+      video_url: payload.video_url ?? '',
+    })).data,
+
+  trackGuestOrder: async (data: {
+    order_id: number;
+    phone?: string;
+    email?: string;
+  }) => (await api.post('/orders/track/', data)).data,
 };
 
 export const submitBulkOrder = (data: BulkOrderPayload) =>

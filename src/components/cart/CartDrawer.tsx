@@ -96,8 +96,8 @@ export const CartDrawer = () => {
                     {' '}more to get{' '}
                     <span className="font-bold text-[#667D00]">
                       {nextCoupon.discount_type === 'percentage'
-                        ? `${nextCoupon.value}% OFF`
-                        : `${formatPrice(nextCoupon.value)} OFF`}
+  ? `${Number(nextCoupon.value)}% OFF`
+  : `${formatPrice(nextCoupon.value)} OFF`}
                     </span>
                   </p>
                 )}

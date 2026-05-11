@@ -1,63 +1,118 @@
-import { useState } from "react";
+// src/components/profile/ProfileDetails.tsx
+// Account details form — matches Rastlina premium design language.
+
+import { useState, useEffect } from 'react';
+import { User, Mail, Phone, Save } from 'lucide-react';
 
 interface ProfileDetailsProps {
   user: any;
-  onSave: (data: any) => Promise<void>;
-  loading: boolean;
+  onSave: (data: { first_name: string; last_name: string; phone: string }) => Promise<void>;
+  loading?: boolean;
 }
 
-export default function ProfileDetails({ user, onSave, loading }: ProfileDetailsProps) {
+export default function ProfileDetails({ user, onSave, loading = false }: ProfileDetailsProps) {
   const [form, setForm] = useState({
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
     phone: user?.phone || '',
   });
+  const [isDirty, setIsDirty] = useState(false);
+
+  // Sync when user prop changes
+  useEffect(() => {
+    if (user) {
+      setForm({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        phone: user.phone || '',
+      });
+      setIsDirty(false);
+    }
+  }, [user]);
+
+  const handleChange = (key: string, value: string) => {
+    setForm(f => ({ ...f, [key]: value }));
+    setIsDirty(true);
+  };
+
+  const handleSubmit = async () => {
+    await onSave(form);
+    setIsDirty(false);
+  };
+
+  const fields = [
+    {
+      key: 'first_name', label: 'First Name', icon: User,
+      placeholder: 'Your first name', type: 'text', required: true,
+    },
+    {
+      key: 'last_name', label: 'Last Name', icon: User,
+      placeholder: 'Your last name', type: 'text', required: false,
+    },
+    {
+      key: 'phone', label: 'Phone Number', icon: Phone,
+      placeholder: '10-digit mobile number', type: 'tel', required: false,
+    },
+  ];
 
   return (
-    <div className="bg-card rounded-2xl border border-border/30 p-6 space-y-6">
-      <h2 className="font-display font-bold text-lg text-foreground text-left">Personal Information</h2>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-        {[
-          { key: 'first_name', label: 'First Name' },
-          { key: 'last_name', label: 'Last Name' },
-          { key: 'phone', label: 'Phone Number' },
-        ].map(({ key, label }) => (
-          <div key={key}>
-            <label className="block text-[10px] font-bold text-muted-foreground mb-1.5 uppercase tracking-wider">
-              {label}
-            </label>
-            <input
-              value={(form as any)[key]}
-              onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-              /* Set border-black for consistency with Address Manager */
-              className="w-full border border-black rounded-xl px-4 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        ))}
-        
-        <div>
-          <label className="block text-[10px] font-bold text-muted-foreground mb-1.5 uppercase tracking-wider">
-            Email Address
-          </label>
-          <input 
-            value={user?.email} 
-            disabled 
-            className="w-full border border-border/20 rounded-xl px-4 py-2.5 text-sm bg-muted/30 text-muted-foreground cursor-not-allowed" 
-          />
+    <div className="space-y-6 max-w-md">
+      {/* Read-only email */}
+      <div>
+        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
+          Email Address
+        </label>
+        <div className="flex items-center gap-3 border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
+          <Mail className="h-4 w-4 text-gray-300 flex-shrink-0" />
+          <span className="text-sm text-gray-400 font-medium">{user?.email || '—'}</span>
+          <span className="ml-auto text-[10px] text-gray-300 font-bold uppercase tracking-wider">
+            Cannot change
+          </span>
         </div>
       </div>
 
-      <div className="flex justify-start">
-        <button 
-          onClick={() => onSave(form)} 
-          disabled={loading}
-          /* Changed from gradient-primary to solid black bg-black for visibility */
-          className="bg-black text-white px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest disabled:opacity-60 hover:bg-gray-800 transition-all shadow-lg"
-        >
-          {loading ? 'Saving...' : 'Save Changes'}
-        </button>
-      </div>
+      {/* Editable fields */}
+      {fields.map(({ key, label, icon: Icon, placeholder, type, required }) => (
+        <div key={key}>
+          <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
+            {label}{required && ' *'}
+          </label>
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <Icon className="h-4 w-4 text-gray-300" />
+            </div>
+            <input
+              type={type}
+              value={(form as any)[key]}
+              onChange={e => handleChange(key, e.target.value)}
+              placeholder={placeholder}
+              className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm text-gray-900 placeholder-gray-300 focus:ring-2 focus:ring-[#1A3831] focus:border-transparent outline-none transition-all"
+            />
+          </div>
+        </div>
+      ))}
+
+      {/* Save button */}
+      <button
+        onClick={handleSubmit}
+        disabled={loading || !isDirty}
+        className={[
+          'flex items-center gap-2 px-8 py-3 rounded-xl font-extrabold text-sm transition-all',
+          loading || !isDirty
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-[#1A3831] hover:bg-[#112520] text-white shadow-md hover:shadow-lg active:scale-95',
+        ].join(' ')}
+      >
+        {loading ? (
+          <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Saving...</>
+        ) : (
+          <><Save className="h-4 w-4" /> Save Changes</>
+        )}
+      </button>
+
+      {!isDirty && !loading && (
+        <p className="text-xs text-gray-400 font-medium">All changes saved.</p>
+      )}
     </div>
   );
 }
