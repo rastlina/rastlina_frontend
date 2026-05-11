@@ -1,35 +1,121 @@
+// src/components/home/ShopByFeeling.tsx
+// "Curate Your Atmosphere" section — fetches featured SpaceTags from API.
+// Single horizontal row with CSS scroll snap, left/right arrows on desktop,
+// native touch swipe on mobile. Scrollbar hidden.
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useHomeData } from '@/hooks/useHomeData';
 
-import bedroomImg from '@/assets/category-bedroom.jpg';
-import officeImg from '@/assets/category-office.jpg';
-import livingImg from '@/assets/category-living.jpg';
-import balconyImg from '@/assets/category-balcony.jpg';
+const SkeletonCard = () => (
+  <div className="flex-shrink-0 w-[260px] md:w-[300px] snap-start">
+    <div className="aspect-[3/4] rounded-2xl bg-gray-100 animate-pulse" />
+  </div>
+);
 
 const ShopByFeeling = () => {
-  const collections = [
-    { label: 'Sleep Better', desc: 'Elevate your rest', image: bedroomImg, href: '/shop?collection=sleep' },
-    { label: 'Focus More', desc: 'Boost productivity', image: officeImg, href: '/shop?collection=work' },
-    { label: 'Breathe Easy', desc: 'Pure air plants', image: livingImg, href: '/shop?collection=air' },
-    { label: 'Attract Luck', desc: 'Vastu vibes', image: balconyImg, href: '/shop?collection=vastu' },
-  ];
+  const { data, loading } = useHomeData();
+  const spaces = data.featured_spaces;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const updateState = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 8);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateState();
+    el.addEventListener('scroll', updateState, { passive: true });
+    return () => el.removeEventListener('scroll', updateState);
+  }, [spaces, updateState]);
+
+  const scroll = useCallback((dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const card = el.querySelector('[data-space-card]') as HTMLElement | null;
+    const cardWidth = card ? card.offsetWidth + 16 : 276;
+    el.scrollBy({ left: dir === 'left' ? -cardWidth : cardWidth, behavior: 'smooth' });
+  }, []);
+
+  if (!loading && spaces.length === 0) return null;
 
   return (
-    <section className="py-12 bg-secondary-custom">
+    <section className="py-12 bg-[#F8F7F4]">
       <div className="container-custom">
-        <h2 className="text-3xl font-serif text-center text-accent-earth mb-3">Curate Your Atmosphere</h2>
-        <p className="text-center text-gray-500 mb-8">Plants selected for specific moods</p>
-        <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-4 md:gap-6 md:pb-0 no-scrollbar snap-x px-4 md:px-0 -mx-4 md:mx-0">
-          {collections.map((col, i) => (
-            <Link key={i} to={col.href} className="min-w-[260px] md:min-w-0 snap-center group relative aspect-[3/4] overflow-hidden rounded-xl bg-gray-200 shadow-md">
-              <img src={col.image} alt={col.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-              <div className="absolute bottom-0 w-full p-5 text-white">
-                <h3 className="text-xl font-serif mb-1">{col.label}</h3>
-                <p className="text-xs text-white/80 mb-3">{col.desc}</p>
-                <span className="text-xs uppercase tracking-widest font-bold border-b border-white pb-1">Shop Now</span>
-              </div>
-            </Link>
-          ))}
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6 px-1">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#1A3831]">
+              Curate Your Atmosphere
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">Plants selected for your space</p>
+          </div>
+
+          {/* Arrows — desktop */}
+          <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={() => scroll('left')}
+              disabled={!canLeft}
+              className="w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:border-[#1A3831] hover:text-[#1A3831] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              disabled={!canRight}
+              className="w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:border-[#1A3831] hover:text-[#1A3831] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Slider */}
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {loading
+            ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
+            : spaces.map((space) => (
+                <Link
+                  key={space.id}
+                  to={`/shop?space=${space.slug}`}
+                  data-space-card
+                  className="flex-shrink-0 w-[260px] md:w-[300px] snap-start group relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-200 shadow-sm block"
+                >
+                  {space.image ? (
+                    <img
+                      src={space.image}
+                      alt={space.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#1A3831] to-[#667D00] flex items-center justify-center">
+                      <span className="text-6xl">{space.icon || '🌿'}</span>
+                    </div>
+                  )}
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 w-full p-5 text-white">
+                    <h3 className="text-xl font-serif font-bold mb-0.5">{space.name}</h3>
+                    <span className="text-xs uppercase tracking-widest font-bold border-b border-white/60 pb-0.5 opacity-80">
+                      Shop Now
+                    </span>
+                  </div>
+                </Link>
+              ))
+          }
+          <div className="flex-shrink-0 w-4 md:w-6" aria-hidden="true" />
         </div>
       </div>
     </section>

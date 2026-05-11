@@ -1,32 +1,47 @@
+// src/components/home/OffersSection.tsx
+// "Golden Deals" — products with is_best_deal=true from API.
+// Horizontal snap slider + "Shop All Deals" CTA below.
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ProductCard } from '@/components/products/ProductCard';
-import { getOfferProducts } from '@/data/products';
+import { useHomeData } from '@/hooks/useHomeData';
+import { ProductSlider } from './ProductSlider';
 
 const OffersSection = () => {
-  const offerProducts = getOfferProducts().slice(0, 4);
-  if (offerProducts.length === 0) return null;
+  const { data, loading } = useHomeData();
+
+  if (!loading && data.best_deals.length === 0) return null;
 
   return (
-    <section className="py-16 bg-[#F8F7F4]">
-      <div className="container-custom">
-        <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-serif text-gray-900 mb-2">Golden Deals</h2>
-            <p className="text-gray-500 font-medium">Exclusive offers just for you</p>
+    <section className="bg-[#F8F7F4]">
+      <div className="pt-12">
+        <div className="container-custom">
+          <div className="text-center mb-2">
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
+              Golden Deals
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">Exclusive offers just for you</p>
+          </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {offerProducts.map((product, i) => (
-                <ProductCard key={product.id} product={product} index={i} />
-            ))}
-        </div>
-        <div className="text-center mt-12">
-             <Link to="/shop?onOffer=true">
-                <Button className="bg-primary hover:opacity-90 text-white font-bold px-10 h-14 text-[11px] uppercase tracking-[0.2em] rounded-full shadow-md transition-opacity">
-                  SHOP ALL DEALS
-                </Button>
-             </Link>
-        </div>
+
+        <ProductSlider
+          title=""
+          products={data.best_deals}
+          viewAllHref="/shop?is_best_deal=true"
+          bgColor="bg-[#F8F7F4]"
+          loading={loading}
+        />
       </div>
+
+      {/* CTA */}
+      {!loading && data.best_deals.length > 0 && (
+        <div className="text-center pb-12 -mt-4">
+          <Link to="/shop?is_best_deal=true">
+            <Button className="bg-[#1A3831] hover:bg-[#112520] text-white font-bold px-10 h-12 text-[11px] uppercase tracking-[0.2em] rounded-full shadow-md transition-colors">
+              Shop All Deals
+            </Button>
+          </Link>
+        </div>
+      )}
     </section>
   );
 };

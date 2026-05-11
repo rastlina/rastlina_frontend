@@ -1,120 +1,203 @@
+// src/components/products/ProductCard.tsx
 import { Link } from 'react-router-dom';
-import { Star, Heart, Minus, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Product, formatPrice } from '@/data/products';
-import { useCart } from '@/contexts/CartContext';
+import { Star } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { formatPrice } from '@/utils/variantHelpers';
+
+export interface ApiProduct {
+  id: number;
+  name: string;
+  slug: string;
+  sku: string;
+  price: string | number;
+  original_price?: string | number | null;
+  discount_percentage: number;
+  images: Array<{
+    id: number;
+    image: string;
+    is_primary: boolean;
+    color_id?: number | null;
+    color_hex?: string | null;
+  }>;
+  available_sizes: Array<{ id: number; name: string }>;
+  available_colors: Array<{ id: number; name: string; hex_code: string }>;
+  review_count: number;
+  average_rating: number;
+  in_stock: boolean;
+  is_new_arrival: boolean;
+  is_best_seller: boolean;
+  is_best_deal: boolean;
+  care_level?: string;
+  category_name?: string;
+  main_category_name?: string;
+}
 
 interface ProductCardProps {
-  product: Product;
+  product: ApiProduct;
   index?: number;
 }
 
 export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
-  const { addToCart, items, removeFromCart, updateQuantity } = useCart();
+  const images = product.images ?? [];
+  const availableColors = product.available_colors ?? [];
 
-  // Find if this product is already in the cart (checking default size/color for grid view)
-  const defaultSize = product.sizes?.[0] || { label: 'Standard', price: product.price };
-  const defaultColor = product.colors?.[0] || 'Standard';
-  
-  const cartItem = items.find(
-    item => item.product.id === product.id && 
-    item.selectedSize === defaultSize.label && 
-    item.selectedColor === defaultColor
-  );
+  // Primary image (no hover swap — clean card)
+  const primaryImages = product.images.filter((img) => img.is_primary);
 
-  const handleAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(product, defaultSize.label, defaultColor, defaultSize.price);
-  };
+const displayImage =
+  primaryImages[0] || product.images[0];
 
-  const handleIncrement = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (cartItem) {
-      updateQuantity(product.id, defaultSize.label, defaultColor, cartItem.quantity + 1);
-    }
-  };
-
-  const handleDecrement = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (cartItem) {
-        if(cartItem.quantity === 1) {
-            removeFromCart(product.id, defaultSize.label, defaultColor);
-        } else {
-            updateQuantity(product.id, defaultSize.label, defaultColor, cartItem.quantity - 1);
-        }
-    }
-  };
+  const price = Number(product.price);
+  const originalPrice = product.original_price ? Number(product.original_price) : null;
+  const hasDiscount = originalPrice !== null && originalPrice > price;
+  const hasReviews = product.review_count > 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-      className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full"
+      transition={{ duration: 0.35, delay: Math.min(index * 0.06, 0.4) }}
+      className="group h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300"
     >
-      <Link to={`/product/${product.slug}`} className="block flex-1 flex flex-col">
-        {/* Image Container */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
-          <img
-            src={product.image}
+      <Link to={`/product/${product.slug}`} className="flex-1 flex flex-col">
+        {/* ── Image ── */}
+        <div className="relative aspect-[4/5] overflow-hidden bg-[#F8F7F4]">
+          <img src={displayImage?.image}
             alt={product.name}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          
-          <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-            {product.onOffer && (
-              <span className="bg-accent-gold text-white text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wide shadow-sm">
-                Sale
+
+          {/* Out of stock overlay */}
+          {!product.in_stock && (
+            <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10">
+              <span className="text-xs font-bold text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">
+                Out of Stock
+              </span>
+            </div>
+          )}
+
+          {/* Badges — top-left */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+            {hasDiscount && (
+              <span
+                className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
+                style={{ background: '#1A3831' }}
+              >
+                -{product.discount_percentage}%
               </span>
             )}
-            {product.discount > 0 && !product.onOffer && (
-              <span className="bg-accent-earth text-white text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wide shadow-sm">
-                -{product.discount}%
+            {product.is_best_deal && !hasDiscount && (
+              <span
+                className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
+                style={{ background: '#BFA275' }}
+              >
+                Deal
+              </span>
+            )}
+            {product.is_new_arrival && (
+              <span
+                className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
+                style={{ background: '#667D00' }}
+              >
+                New
+              </span>
+            )}
+            {product.is_best_seller && (
+              <span
+                className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
+                style={{ background: '#1A3831' }}
+              >
+                Bestseller
               </span>
             )}
           </div>
-          
-          <button 
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white text-[#2e3b0b] shadow-sm"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          >
-            <Heart className="h-4 w-4" />
-          </button>
         </div>
 
-        {/* Content */}
-        <div className="p-4 flex flex-col flex-1">
-          <div className="flex-1">
-            <h3 className="font-serif text-lg font-bold text-[#2e3b0b] truncate mb-1 group-hover:text-primary transition-colors">
-              {product.name}
-            </h3>
-            
-            <div className="flex items-center gap-1.5 mb-2">
-              <Star className="h-3.5 w-3.5 fill-accent-gold text-accent-gold" />
-              <span className="text-xs font-bold text-gray-700">{Number(product.rating).toFixed(1)}</span>
-              <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
-            </div>
+        {/* ── Content ── */}
+        <div className="p-4 flex flex-col gap-1.5 flex-1">
+          {/* Category */}
+          {(product.category_name || product.main_category_name) && (
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              {product.category_name ?? product.main_category_name}
+            </p>
+          )}
 
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-extrabold text-[#2e3b0b]">
-                {formatPrice(product.price)}
-              </span>
-              {product.originalPrice > product.price && (
-                <span className="text-sm text-gray-400 line-through font-medium">
-                  {formatPrice(product.originalPrice)}
+          {/* Name */}
+          <h3 className="min-h-[42px] font-serif font-bold text-[15px] text-gray-900 line-clamp-2 leading-snug group-hover:text-[#667D00] transition-colors">
+            {product.name}
+          </h3>
+
+          {/* Rating — only when reviews exist */}
+          
+            {/* Rating */}
+<div className="h-5 flex items-center">
+  {hasReviews ? (
+    <div className="flex items-center gap-1">
+      <div className="flex">
+        {[1, 2, 3, 4, 5].map(star => (
+          <Star
+            key={star}
+            className="h-3 w-3"
+            style={{
+              fill: star <= Math.round(product.average_rating) ? '#BFA275' : 'none',
+              color: '#BFA275',
+            }}
+          />
+        ))}
+      </div>
+
+      <span className="text-xs font-bold text-gray-700">
+        {Number(product.average_rating).toFixed(1)}
+      </span>
+
+      <span className="text-xs text-gray-400">
+        ({product.review_count})
+      </span>
+    </div>
+  ) : null}
+</div>
+      
+
+          {/* Color swatches — using exact hex_code from backend */}
+          {availableColors.length > 0 && (
+            <div className="flex gap-1.5 mt-0.5 flex-wrap">
+              {availableColors.slice(0, 6).map(c => (
+                <div
+                  key={c.id}
+                  title={c.name}
+                  className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0"
+                  style={{ backgroundColor: c.hex_code }} // use exact hex — no fallback white
+                />
+              ))}
+              {availableColors.length > 6 && (
+                <span className="text-[10px] text-gray-400 self-center">
+                  +{availableColors.length - 6}
                 </span>
               )}
             </div>
-          </div>
+          )}
 
-          {/* ADD TO CART / QUANTITY TOGGLE */}
-          
+          {/* Price */}
+          <div className="flex items-baseline gap-2 mt-auto pt-2">
+            <span className="text-lg font-extrabold text-gray-900">
+              {formatPrice(price)}
+            </span>
+            {hasDiscount && originalPrice && (
+              <>
+                <span className="text-sm text-gray-400 line-through font-medium">
+                  {formatPrice(originalPrice)}
+                </span>
+                <span className="text-xs font-bold text-green-600">
+                  {product.discount_percentage}% off
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </Link>
     </motion.div>
   );
 };
+
+export default ProductCard;

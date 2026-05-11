@@ -1,453 +1,478 @@
+// src/pages/ProductDetail.tsx
+// Fully API-integrated product detail page
 import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Star, Droplets, Sun, Thermometer, Ruler, PawPrint, Check, 
-  Truck, ShieldCheck, BookOpen, Plus, Minus, HelpCircle,
-  Leaf, Palette, Share2
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { getProductBySlug, formatPrice, products } from '@/data/products';
+import { useState, useEffect, useCallback } from 'react';
+import { storeService } from '@/services/api';
 import { useCart } from '@/contexts/CartContext';
-import { ProductCard } from '@/components/products/ProductCard';
+import { FAQ } from '@/components/product-detail/ProductFAQ';
+import { ImageGallery } from '@/components/product-detail/ImageGallery';
+import { ProductInfo } from '@/components/product-detail/ProductInfo';
+import { SizeSelector, ColorSelector } from '@/components/product-detail/ProductSelector';
+import { ProductTabs } from '@/components/product-detail/ProductTabs';
+import { ProductReviews } from '@/components/product-detail/ProductReviews';
+import { WhyChooseUs } from '@/components/product-detail/WhyChooseUs';
+import { ProductSuggestions } from '@/components/product-detail/ProductSuggestions';
+import { ProductFAQ } from '@/components/product-detail/ProductFAQ';
+import { FixedBottomBar } from '@/components/product-detail/FixedBottomBar';
 
-// Static FAQs for all products
-const FAQS = [
-  {
-    question: "How do you ensure the plant arrives safely?",
-    answer: "We use specially designed, eco-friendly packaging that keeps the plant secure, retains moisture, and provides airflow during transit."
-  },
-  {
-    question: "What if my plant arrives damaged?",
-    answer: "We have a 30-day survival guarantee. If your plant arrives damaged or struggles within the first 30 days, we will guide you back to health or replace it for free."
-  },
-  {
-    question: "Do you provide care instructions?",
-    answer: "Yes! Every plant comes with a detailed physical care card, and you can always refer to the 'Care Guide' tab on this page."
-  },
-  {
-    question: "Are the self-watering pots easy to use?",
-    answer: "Extremely easy. You just fill the bottom reservoir once a week, and the capillary wick draws up exactly the amount of water the plant needs."
-  }
-];
+// ─── Types matching the backend serializer exactly ────────────────────────────
+
+export interface ProductVariant {
+  id: number;
+  size_id: number;
+  size_name: string;
+  color_id: number | null;
+  color_name: string | null;
+  color_hex: string | null;
+  stock: number;
+  price_override: number;
+  final_price: number;
+  final_original_price: number | null;
+  in_stock: boolean;
+}
+
+export interface ProductImage {
+  id: number;
+  image: string;
+  alt_text: string;
+  is_primary: boolean;
+  order: number;
+  color_id: number | null;
+  color_name: string | null;
+  color_hex: string | null;
+}
+
+export interface DeliveryEstimate {
+  id: number;
+  region: string;
+  estimate: string;
+  order: number;
+}
+
+export interface Review {
+  id: number;
+  user_name: string;
+  rating: number;
+  title: string;
+  comment: string;
+  variant_info: string;
+  is_verified_purchase: boolean;
+  is_featured: boolean;
+  date: string;
+}
+
+export interface ApiProductDetail {
+  id: number;
+  name: string;
+  slug: string;
+  sku: string;
+  price: string;
+  original_price: string | null;
+  discount_percentage: number;
+  care_level: string;
+  pet_friendly: boolean | null;
+  air_purifying: boolean;
+  sunlight: string;
+  watering: string;
+  temperature: string;
+  growth_rate: string;
+  description: string;
+  care_instructions_list: string[];
+  what_you_get_list: string[];
+  images: ProductImage[];
+  variants: ProductVariant[];
+  delivery_estimates: DeliveryEstimate[];
+  reviews: Review[];
+  review_count: number;
+  average_rating: number;
+  available_sizes: { id: number; name: string }[];
+  available_colors: { id: number; name: string; hex_code: string }[];
+  in_stock: boolean;
+  is_new_arrival: boolean;
+  is_best_seller: boolean;
+  is_best_deal: boolean;
+  category_name: string;
+  category_slug: string;
+  main_category_slug: string;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Given current size & color selections, find the matching variant */
+export function findVariant(
+  variants: ProductVariant[],
+  sizeId: number | null,
+  colorId: number | null
+): ProductVariant | null {
+  if (!sizeId) return null;
+  const exact = variants.find(v => v.size_id === sizeId && v.color_id === colorId);
+  if (exact) return exact;
+  return variants.find(v => v.size_id === sizeId && v.color_id === null) || null;
+}
+
+/** Images to show for a given color: color-specific + generic (color_id null) */
+export function imagesForColor(images: ProductImage[], colorId: number | null): ProductImage[] {
+  if (!colorId) return images;
+  const colorSpecific = images.filter(img => img.color_id === colorId);
+  const generic = images.filter(img => img.color_id === null);
+  return colorSpecific.length > 0 ? [...colorSpecific, ...generic] : images;
+}
+
+/**
+ * Get the best cart image for a variant:
+ * - Primary image for selected color first
+ * - Falls back to any primary image
+ * - Falls back to first image
+ */
+function getCartImage(images: ProductImage[], colorId: number | null): string {
+  const colorFiltered = colorId
+    ? images.filter(img => img.color_id === colorId)
+    : images;
+
+  // Primary image for this color
+  const colorPrimary = colorFiltered.find(img => img.is_primary);
+  if (colorPrimary) return colorPrimary.image;
+
+  // Any color image
+  if (colorFiltered.length > 0) return colorFiltered[0].image;
+
+  // Global primary fallback
+  const globalPrimary = images.find(img => img.is_primary);
+  if (globalPrimary) return globalPrimary.image;
+
+  // Last resort
+  return images[0]?.image ?? '';
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+const Skeleton = () => (
+  <main className="bg-white pt-[120px] pb-32">
+    <div className="container mx-auto px-4 max-w-7xl py-4">
+      <div className="h-4 w-48 bg-gray-100 rounded animate-pulse mb-8" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="aspect-square rounded-2xl bg-gray-100 animate-pulse" />
+        <div className="space-y-5">
+          <div className="h-10 bg-gray-100 rounded animate-pulse w-3/4" />
+          <div className="h-6 bg-gray-100 rounded animate-pulse w-1/3" />
+          <div className="h-20 bg-gray-100 rounded animate-pulse" />
+          <div className="h-12 bg-gray-100 rounded animate-pulse w-1/2" />
+        </div>
+      </div>
+    </div>
+  </main>
+);
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const product = getProductBySlug(slug || '');
   const { addToCart } = useCart();
-  
-  const [selectedSize, setSelectedSize] = useState(product?.sizes[1] || product?.sizes[0]);
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0] || '');
-  const [activeTab, setActiveTab] = useState<'care' | 'included' | 'reviews'>('care');
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  
-  // Recently Viewed State
-  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
 
-  // Local Storage Logic for Recently Viewed
+  const [product, setProduct] = useState<ApiProductDetail | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  // FIX: quantity lives here and is passed down to FixedBottomBar
+  const [quantity, setQuantity] = useState(1);
+  const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
+  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
+
+  // Reset quantity whenever the variant changes
   useEffect(() => {
-    if (product && product.slug) {
-      const stored = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-      const updatedSlugs = [product.slug, ...stored.filter((s: string) => s !== product.slug)].slice(0, 4);
-      localStorage.setItem('recentlyViewed', JSON.stringify(updatedSlugs));
-      
-      const recentProducts = updatedSlugs
-        .filter((s) => s !== product.slug)
-        .map((s) => getProductBySlug(s))
-        .filter(Boolean);
-        
-      setRecentlyViewed(recentProducts);
-    }
+    setQuantity(1);
+  }, [selectedSizeId, selectedColorId]);
+
+  // Fetch product + related + FAQs in parallel
+  useEffect(() => {
+    if (!slug) return;
+    setLoading(true);
+    setError(false);
+    Promise.all([
+      storeService.getProductBySlug(slug),
+      storeService.getRelatedProducts(slug),
+      storeService.getFAQs(),
+    ])
+      .then(([prod, related, faqData]) => {
+        setProduct(prod);
+        setRelatedProducts(related?.results || []);
+
+        const validatedFaqs: FAQ[] = (faqData || []).map((item: any, index: number) => ({
+          id: item.id,
+          question: item.question,
+          answer: item.answer,
+          order: item.order ?? index,
+        }));
+        setFaqs(validatedFaqs);
+
+        // Default: first variant with stock, else just first variant
+        const firstStocked = prod.variants.find((v: ProductVariant) => v.in_stock);
+        const firstVariant = firstStocked || prod.variants[0];
+        if (firstVariant) {
+          setSelectedSizeId(firstVariant.size_id);
+          setSelectedColorId(firstVariant.color_id);
+        } else if (prod.available_sizes[0]) {
+          setSelectedSizeId(prod.available_sizes[0].id);
+        }
+      })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  // Recently viewed — read/write localStorage, fetch mini product data
+  useEffect(() => {
+    if (!product?.slug) return;
+    const stored: string[] = JSON.parse(
+      localStorage.getItem('rastlinaRecentlyViewed') || '[]'
+    );
+    const updated = [product.slug, ...stored.filter(s => s !== product.slug)].slice(0, 6);
+    localStorage.setItem('rastlinaRecentlyViewed', JSON.stringify(updated));
+
+    const slugsToFetch = updated.filter(s => s !== product.slug).slice(0, 4);
+    if (!slugsToFetch.length) return;
+    Promise.all(slugsToFetch.map(s => storeService.getProductBySlug(s).catch(() => null)))
+      .then(results => setRecentlyViewed(results.filter(Boolean)));
   }, [product?.slug]);
 
-  if (!product) {
+  // ── Derived state ─────────────────────────────────────────────────────────
+
+  const activeVariant = product
+    ? findVariant(product.variants, selectedSizeId, selectedColorId)
+    : null;
+
+  const displayImages = product
+    ? imagesForColor(product.images, selectedColorId)
+    : [];
+
+  const canAddToCart = !!activeVariant?.in_stock;
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  const handleColorSelect = useCallback((colorId: number | null) => {
+    setSelectedColorId(colorId);
+    if (!product) return;
+    const variant = product.variants.find(
+      v => v.color_id === colorId && v.size_id === selectedSizeId
+    );
+    if (!variant) {
+      const fallback = product.variants.find(v => v.color_id === colorId);
+      if (fallback) setSelectedSizeId(fallback.size_id);
+    }
+  }, [product, selectedSizeId]);
+
+  const handleSizeSelect = useCallback((sizeId: number) => {
+    setSelectedSizeId(sizeId);
+    if (!product) return;
+    const variant = product.variants.find(
+      v => v.size_id === sizeId && v.color_id === selectedColorId
+    );
+    if (!variant) {
+      const fallback = product.variants.find(v => v.size_id === sizeId);
+      if (fallback) setSelectedColorId(fallback.color_id);
+    }
+  }, [product, selectedColorId]);
+
+  // FIX: quantity guard — can't exceed stock, can't go below 1
+  const handleQuantityChange = useCallback((newQty: number) => {
+    if (!activeVariant) return;
+    const clamped = Math.max(1, Math.min(newQty, activeVariant.stock));
+    setQuantity(clamped);
+  }, [activeVariant]);
+
+  const handleAddToCart = useCallback(() => {
+    if (!product || !activeVariant || !activeVariant.in_stock) return;
+
+    // FIX: Use color-filtered primary image for cart display
+    const cartImageUrl = getCartImage(product.images, selectedColorId);
+
+    addToCart(
+      {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        // CartItem.product.images array — CartDrawer uses images[0].image
+        images: [{ image: cartImageUrl, is_primary: true, color_id: selectedColorId }],
+        original_price: product.original_price,
+      },
+      activeVariant.size_name,                              // sizeName
+      activeVariant.color_name || 'Standard',              // colorName
+      activeVariant.color_hex || '',                       // colorHex
+      activeVariant.final_price,                           // price
+      activeVariant.final_original_price ?? activeVariant.final_price, // originalPrice
+      activeVariant.stock,                                 // stock (for cart validation)
+      activeVariant.id,                                    // variantId
+      quantity,                                            // FIX: pass actual quantity
+    );
+  }, [product, activeVariant, selectedColorId, quantity, addToCart]);
+
+  const handleShare = useCallback(() => {
+    if (navigator.share) {
+      navigator.share({
+        title: product?.name,
+        text: `Check out ${product?.name} on Rastlina!`,
+        url: window.location.href,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        // Could toast here if needed
+      });
+    }
+  }, [product]);
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  if (loading) return <Skeleton />;
+
+  if (error || !product) {
     return (
-      <div className="container-custom py-32 text-center">
-        <h1 className="text-2xl font-serif font-extrabold text-gray-900">Product not found</h1>
+      <div className="pt-[120px] pb-32 flex flex-col items-center justify-center min-h-[60vh]">
+        <p className="text-2xl font-serif font-bold text-gray-900 mb-4">Product not found</p>
+        <Link to="/shop" className="text-[#667D00] font-bold hover:underline">
+          ← Back to Shop
+        </Link>
       </div>
     );
   }
-
-  const handleAddToCart = () => {
-    if (selectedSize) {
-      addToCart(product, selectedSize.label, selectedColor, selectedSize.price);
-    }
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: product.name,
-        text: `Check out ${product.name} on Rastlina!`,
-        url: window.location.href,
-      }).catch((error) => console.log('Error sharing', error));
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
-  };
-
-  // Get recommended products (same category, excluding current product)
-  const recommendedProducts = products
-    .filter((p) => p.id !== product.id && p.category === product.category)
-    .slice(0, 4);
-  const displayRecommendations = recommendedProducts.length > 0 
-    ? recommendedProducts 
-    : products.filter((p) => p.id !== product.id).slice(0, 4);
+  // console.log('PRODUCT DATA', product);
 
   return (
-    <main className="bg-background pt-[120px] pb-32 relative">
+    <main className="bg-white pt-[120px] pb-32 relative">
       {/* Breadcrumb */}
-      <div className="container-custom py-4">
-        <p className="text-sm text-muted-foreground font-medium">
-          Home / Shop / <span className="text-gray-900 font-bold">{product.name}</span>
-        </p>
+      <div className="container mx-auto px-4 max-w-7xl py-3">
+        <nav className="text-sm text-gray-500 font-medium flex items-center gap-1.5 flex-wrap">
+          <Link to="/" className="hover:text-[#667D00] transition-colors">Home</Link>
+          <span>/</span>
+          <Link to="/shop" className="hover:text-[#667D00] transition-colors">Shop</Link>
+          {product.category_name && (
+            <>
+              <span>/</span>
+              <Link
+                to={`/shop?category=${product.category_slug}`}
+                className="hover:text-[#667D00] transition-colors"
+              >
+                {product.category_name}
+              </Link>
+            </>
+          )}
+          <span>/</span>
+          <span className="text-gray-900 font-semibold truncate max-w-[180px] sm:max-w-xs">
+            {product.name}
+          </span>
+        </nav>
       </div>
 
-      {/* Product Section */}
-      <section className="container-custom pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 relative">
-          
-          {/* Image Gallery */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="aspect-square rounded-2xl overflow-hidden bg-muted mb-4 sticky top-36">
-              <img 
-                src={product.image} 
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </motion.div>
+      {/* ── Primary Product Section ── */}
+      <section className="container mx-auto px-4 max-w-7xl pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14">
 
-          {/* Product Info - Sticky Desktop right column */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="space-y-6 lg:sticky lg:top-36 lg:self-start w-full"
-          >
-            <div>
-              {/* Bold & Dark Name + Share Button */}
-              <div className="flex justify-between items-start gap-4 mb-2">
-                <h1 className="text-3xl md:text-5xl font-serif font-extrabold text-gray-900 tracking-tight">
-                  {product.name}
-                </h1>
-                <button 
-                  onClick={handleShare}
-                  className="p-2.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors flex-shrink-0 mt-1"
-                  aria-label="Share product"
-                >
-                  <Share2 className="h-5 w-5" />
-                </button>
+          {/* Left: Image Gallery */}
+          <ImageGallery
+            images={displayImages}
+            productName={product.name}
+            onShare={handleShare}
+          />
+
+          {/* Right: Info + Selectors (sticky on desktop) */}
+          <div className="space-y-7 lg:sticky lg:top-36 lg:self-start">
+            <ProductInfo
+              name={product.name}
+              reviewCount={product.review_count}
+              averageRating={product.average_rating}
+              price={Number(product.price)}
+              originalPrice={product.original_price ? Number(product.original_price) : null}
+              discountPercentage={product.discount_percentage}
+              activeVariant={activeVariant}
+              deliveryEstimates={product.delivery_estimates}
+              onShare={handleShare}
+              badges={{
+                isNewArrival: product.is_new_arrival,
+                isBestSeller: product.is_best_seller,
+                isBestDeal: product.is_best_deal,
+              }}
+            />
+
+            <div className="space-y-5 pt-1">
+              {product.variants.length > 0 && (
+                <SizeSelector
+                  variants={product.variants}
+                  selectedSizeId={selectedSizeId}
+                  selectedColorId={selectedColorId}
+                  onSelect={handleSizeSelect}
+                />
+              )}
+
+              {product.available_colors.length > 0 && (
+                <ColorSelector
+                  colors={product.available_colors}
+                  variants={product.variants}
+                  selectedColorId={selectedColorId}
+                  selectedSizeId={selectedSizeId}
+                  onSelect={handleColorSelect}
+                />
+              )}
+            </div>
+
+            {/* Out of stock notice */}
+            {!canAddToCart && product.variants.length > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-semibold">
+                {activeVariant
+                  ? 'This variant is currently out of stock. Try a different size or color.'
+                  : 'Select a size and color to check availability.'}
               </div>
-              <div className="flex items-center gap-3 mt-3">
-                <div className="flex items-center gap-1 text-gray-900">
-                  <Star className="h-5 w-5 fill-accent-gold text-accent-gold" />
-                  <span className="font-extrabold">{product.rating}</span>
-                </div>
-                <span className="text-gray-600 font-medium">
-                  ({product.reviewCount} reviews)
-                </span>
-              </div>
-            </div>
-
-            {/* Bold Price & Estimated Delivery */}
-            <div className="space-y-4">
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-extrabold text-gray-900">
-                  {formatPrice(selectedSize?.price || product.price)}
-                </span>
-                {product.originalPrice > product.price && (
-                  <>
-                    <span className="text-xl text-gray-400 line-through font-bold">
-                      {formatPrice(product.originalPrice)}
-                    </span>
-                    <span className="bg-primary/10 text-primary font-extrabold px-3 py-1 rounded-full text-sm">
-                      Save {product.discount}%
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {/* Estimated Delivery Block */}
-              <div className="bg-gray-50/80 border border-gray-200 rounded-xl p-4 flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-gray-900 font-bold mb-1">
-                  <Truck className="h-5 w-5 text-primary" />
-                  <h4>Estimated Delivery</h4>
-                </div>
-                <div className="grid grid-cols-2 text-sm">
-                  <span className="text-gray-600">Within Telangana:</span>
-                  <span className="text-gray-900 font-extrabold">3 - 5 days</span>
-                  <span className="text-gray-600">Other States:</span>
-                  <span className="text-gray-900 font-extrabold">5 - 7 days</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Size Selection */}
-            <div>
-              <h3 className="font-extrabold text-gray-900 mb-3 text-lg">Select Size</h3>
-              <div className="flex flex-wrap gap-3">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size.label}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-5 py-3 rounded-xl border-2 transition-all ${
-                      selectedSize?.label === size.label
-                        ? 'border-gray-900 bg-gray-900 text-white shadow-lg'
-                        : 'border-gray-200 bg-white text-gray-900 hover:border-gray-900'
-                    }`}
-                  >
-                    <span className={`block text-sm font-extrabold ${selectedSize?.label === size.label ? 'text-white' : 'text-gray-900'}`}>
-                      {size.label}
-                    </span>
-                    <span className={`block text-xs font-bold mt-1 ${selectedSize?.label === size.label ? 'text-gray-300' : 'text-gray-500'}`}>
-                      {formatPrice(size.price)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Color Selection */}
-            <div>
-              <h3 className="font-extrabold text-gray-900 mb-3 text-lg">Select Pot Color</h3>
-              <div className="flex flex-wrap gap-3">
-                {product.colors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={`px-5 py-2.5 rounded-xl border-2 font-bold transition-all ${
-                      selectedColor === color
-                        ? 'border-gray-900 bg-gray-900 text-white shadow-lg'
-                        : 'border-gray-200 bg-white text-gray-900 hover:border-gray-900'
-                    }`}
-                  >
-                    {color}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Tabs Section */}
-      <section className="bg-muted border-y border-gray-200">
-        <div className="container-custom py-12">
-          {/* Tab Headers */}
-          <div className="flex gap-6 mb-8 border-b border-gray-300 overflow-x-auto no-scrollbar">
-            {[
-              { id: 'care', label: 'Care Guide' },
-              { id: 'included', label: "What's Included" },
-              { id: 'reviews', label: `Reviews (${product.reviewCount})` },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`pb-4 px-2 font-extrabold whitespace-nowrap transition-colors border-b-4 -mb-[2px] ${
-                  activeTab === tab.id
-                    ? 'border-gray-900 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:text-gray-900'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content */}
-          {activeTab === 'care' && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-              {[
-                { icon: Droplets, label: 'Watering', value: product.waterFrequency },
-                { icon: Sun, label: 'Light', value: product.light },
-                { icon: Thermometer, label: 'Temperature', value: '18-25°C' },
-                { icon: Ruler, label: 'Growth', value: 'Moderate' },
-                { icon: PawPrint, label: 'Pet Safe', value: product.petSafe ? 'Yes' : 'No' },
-              ].map((item) => (
-                <div key={item.label} className="bg-white rounded-xl p-6 text-center shadow-sm border border-gray-100">
-                  <div className="bg-primary/5 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <item.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">{item.label}</p>
-                  <p className="font-extrabold text-gray-900">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === 'included' && (
-            <div className="max-w-md bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <ul className="space-y-4">
-                {[
-                  `${product.name} plant`,
-                  'Self-watering ceramic pot',
-                  'Premium potting mix',
-                  'Care instruction card',
-                  '30-day survival guarantee',
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <div className="bg-primary/10 p-1 rounded-full"><Check className="h-4 w-4 text-primary" /></div>
-                    <span className="font-bold text-gray-800">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <div className="space-y-4 max-w-3xl">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-extrabold text-gray-500">
-                        PS
-                      </div>
-                      <div>
-                        <span className="font-extrabold text-gray-900 block">Priya S.</span>
-                        <div className="flex text-accent-gold mt-1">
-                          {[...Array(5)].map((_, j) => (
-                            <Star key={j} className="h-3 w-3 fill-current" />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold text-gray-400">2 weeks ago</span>
-                  </div>
-                  <p className="text-gray-700 font-medium leading-relaxed">
-                    Absolutely love my new {product.name}! It arrived in perfect condition and the self-watering pot is a game changer. Already seeing new growth! Highly recommended.
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Why Choose Us Section */}
-      <section className="py-16 bg-white">
-        <div className="container-custom">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-serif font-extrabold text-gray-900">Why Choose Rastlina?</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
-              <Droplets className="h-10 w-10 text-primary mb-4" />
-              <h3 className="font-extrabold text-gray-900 mb-2">Self Watering</h3>
-              <p className="text-sm text-gray-600 font-medium">Designed for ease and elegance.</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
-              <Palette className="h-10 w-10 text-primary mb-4" />
-              <h3 className="font-extrabold text-gray-900 mb-2">Aesthetic Designs</h3>
-              <p className="text-sm text-gray-600 font-medium">Stylish planters to match interiors.</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
-              <ShieldCheck className="h-10 w-10 text-primary mb-4" />
-              <h3 className="font-extrabold text-gray-900 mb-2">Innovative Care</h3>
-              <p className="text-sm text-gray-600 font-medium">Expert tips and growing support.</p>
-            </div>
-            <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
-              <Leaf className="h-10 w-10 text-primary mb-4" />
-              <h3 className="font-extrabold text-gray-900 mb-2">Healthy Plants</h3>
-              <p className="text-sm text-gray-600 font-medium">Handpicked and nurtured.</p>
-            </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Recommended Products Section */}
-      <section className="py-16 bg-muted border-t border-gray-200">
-        <div className="container-custom">
-          <h2 className="text-3xl font-serif font-extrabold text-gray-900 mb-8 text-center md:text-left">You Might Also Like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {displayRecommendations.map((item, i) => (
-              <ProductCard key={item.id} product={item} index={i} />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── Tabs: Description / Care Guide / What's Included ── */}
+      <ProductTabs product={product} />
 
-      {/* Recently Viewed Section */}
-      {recentlyViewed.length > 0 && (
-        <section className="py-16 bg-white border-t border-gray-200">
-          <div className="container-custom">
-            <h2 className="text-3xl font-serif font-extrabold text-gray-900 mb-8 text-center md:text-left">Recently Viewed</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-              {recentlyViewed.map((item, i) => (
-                <ProductCard key={item.id} product={item} index={i} />
-              ))}
-            </div>
-          </div>
-        </section>
+      {/* ── Reviews ── */}
+      <ProductReviews
+        reviews={product.reviews}
+        reviewCount={product.review_count}
+        averageRating={product.average_rating}
+        productSlug={product.slug}
+        activeVariant={activeVariant}
+      />
+
+      {/* ── Why Choose Rastlina (static) ── */}
+      <WhyChooseUs />
+
+      {/* ── You Might Also Like ── */}
+      {relatedProducts.length > 0 && (
+        <ProductSuggestions
+          title="You Might Also Like"
+          products={relatedProducts}
+          bgColor="bg-[#F8F7F4]"
+        />
       )}
 
-      {/* FAQs Section */}
-      <section className="py-16 bg-muted border-t border-gray-200">
-        <div className="container-custom max-w-4xl">
-          <div className="text-center mb-10 flex flex-col items-center">
-            <HelpCircle className="h-10 w-10 text-primary mb-3" />
-            <h2 className="text-3xl font-serif font-extrabold text-gray-900">Frequently Asked Questions</h2>
-          </div>
-          <div className="space-y-4">
-            {FAQS.map((faq, index) => (
-              <div key={index} className="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all shadow-sm hover:shadow-md">
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-5 flex justify-between items-center text-left"
-                >
-                  <span className="font-extrabold text-gray-900 text-lg">{faq.question}</span>
-                  {openFaq === index ? (
-                    <Minus className="h-5 w-5 text-primary flex-shrink-0" />
-                  ) : (
-                    <Plus className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                  )}
-                </button>
-                <AnimatePresence>
-                  {openFaq === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-6 pb-5 pt-0 text-gray-600 font-medium leading-relaxed">
-                        {faq.answer}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── Recently Viewed ── */}
+      {recentlyViewed.length > 0 && (
+        <ProductSuggestions
+          title="Recently Viewed"
+          products={recentlyViewed}
+          bgColor="bg-white"
+        />
+      )}
 
-      {/* FIXED BOTTOM BAR - Aligned content as requested */}
-      <div className="fixed bottom-0 left-0 w-full bg-[#f4f2ec] border-t border-gray-300 py-4 px-4 md:px-8 z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.08)]">
-        <div className="container-custom flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <span className="font-serif font-extrabold text-gray-900 text-xl lg:text-3xl truncate max-w-[200px] md:max-w-xl lg:max-w-3xl">
-              {product.name}
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-4 md:gap-6 pr-2 md:pr-8">
-            <Button 
-              onClick={handleAddToCart} 
-              className="font-extrabold bg-[#1A3831] hover:bg-[#112520] text-white rounded-full shadow-lg px-8 lg:px-16 py-6 text-sm lg:text-lg uppercase tracking-wider transition-transform active:scale-95"
-            >
-              ADD TO BASKET
-            </Button>
-          </div>
-        </div>
-      </div>
+      {/* ── FAQ ── */}
+      <ProductFAQ faqs={faqs} />
 
+      {/* ── Fixed Bottom Bar ── */}
+      <FixedBottomBar
+        productName={product.name}
+        canAddToCart={canAddToCart}
+        activeVariant={activeVariant}
+        quantity={quantity}
+        onQuantityChange={handleQuantityChange}
+        onAddToCart={handleAddToCart}
+        basePrice={Number(product.price)}
+      />
     </main>
   );
 };

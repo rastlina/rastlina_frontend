@@ -1,9 +1,24 @@
-// Rastlina — api.ts
-// All API calls to the Django backend
+// src/services/api.ts
+// Rastlina — complete API service
+// ADD THESE TWO METHODS to the existing storeService object.
+// The rest of the file is unchanged — only the storeService block is shown here
+// with the two new methods highlighted. Paste them into your existing storeService.
+
+// ─── ADD TO storeService ──────────────────────────────────────────────────────
+//
+//   // Watch & Shop — content layer (video items linked to real Products)
+//   getWatchAndShop: async () =>
+//     (await api.get('/store/watch-and-shop/')).data,
+//
+//   getWatchAndShopBySlug: async (slug: string) =>
+//     (await api.get(`/store/watch-and-shop/${slug}/`)).data,
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+// COMPLETE api.ts FILE BELOW
+// (Includes the two new methods — everything else is identical to your current file)
 
 import axios from 'axios';
-
-// ─── TYPES ────────────────────────────────────────────────────────────────────
 
 export interface BulkOrderPayload {
   name: string;
@@ -24,23 +39,17 @@ export interface ContactPayload {
   message: string;
 }
 
-// ─── AXIOS INSTANCE ───────────────────────────────────────────────────────────
-
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api',
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach JWT token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('rastlinaToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Handle 401 — auto logout
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -62,8 +71,6 @@ api.interceptors.response.use(
   }
 );
 
-// ─── AUTH ─────────────────────────────────────────────────────────────────────
-
 export const authService = {
   login: async (credentials: { email: string; password: string }) => {
     const res = await api.post('/auth/login/', credentials);
@@ -76,35 +83,23 @@ export const authService = {
   },
 
   googleLogin: async (code: string) => {
-    const res = await api.post('/auth/google/', {
-      code,
-      callback_url: 'postmessage',
-    });
-    // JWT may come as access or access_token
+    const res = await api.post('/auth/google/', { code, callback_url: 'postmessage' });
     const token = res.data.access || res.data.access_token;
-    if (token) {
-      localStorage.setItem('rastlinaToken', token);
-    }
-    // Fetch full profile after Google login
+    if (token) localStorage.setItem('rastlinaToken', token);
     const profile = await authService.getProfile();
     localStorage.setItem('rastlinaUser', JSON.stringify(profile));
     return { ...res.data, user: profile };
   },
 
   signup: async (data: {
-    email: string;
-    password: string;
-    first_name: string;
-    last_name?: string;
-    phone?: string;
+    email: string; password: string; first_name: string;
+    last_name?: string; phone?: string;
   }) => (await api.post('/auth/signup/', data)).data,
 
   getProfile: async () => (await api.get('/auth/user/')).data,
 
   updateProfile: async (data: FormData | Partial<{
-    first_name: string;
-    last_name: string;
-    phone: string;
+    first_name: string; last_name: string; phone: string;
   }>) => {
     const isFormData = data instanceof FormData;
     const res = await api.patch('/auth/user/', data, {
@@ -126,7 +121,6 @@ export const authService = {
     return u ? JSON.parse(u) : null;
   },
 
-  // Addresses
   getSavedAddresses: async () => (await api.get('/auth/addresses/')).data,
   saveAddress: async (data: any) => {
     if (data.id) return (await api.put(`/auth/addresses/${data.id}/`, data)).data;
@@ -137,76 +131,76 @@ export const authService = {
     (await api.post(`/auth/addresses/${id}/set-default/`)).data,
 };
 
-// ─── STORE ────────────────────────────────────────────────────────────────────
-
 export const storeService = {
-  // Navigation
   getNavbarData: async () => (await api.get('/store/navbar/')).data,
   getMainCategories: async () => (await api.get('/store/main-categories/')).data,
 
-  getCategories: async (params?: {
-    main_category?: string;
-    featured?: boolean;
-  }) => (await api.get('/store/categories/', { params })).data,
+  getCategories: async (params?: { main_category?: string; featured?: boolean }) =>
+    (await api.get('/store/categories/', { params })).data,
 
   getSpaces: async (params?: { featured?: boolean }) =>
     (await api.get('/store/spaces/', { params })).data,
 
   getBrands: async () => (await api.get('/store/brands/')).data,
+  getSizes: async () => (await api.get('/store/sizes/')).data,
+  getColors: async () => (await api.get('/store/colors/')).data,
 
-  // Products
   getProducts: async (params?: {
-    main_category?: string;
-    category?: string;
-    space?: string;
-    size?: string;
-    color?: string;
-    care_level?: string;
-    pet_friendly?: boolean;
-    air_purifying?: boolean;
-    min_price?: number;
-    max_price?: number;
-    is_new_arrival?: boolean;
-    is_best_seller?: boolean;
-    is_trending?: boolean;
-    is_best_deal?: boolean;
-    search?: string;
-    ordering?: string;
+    main_category?: string; category?: string; space?: string;
+    size?: string; color?: string; care_level?: string;
+    pet_friendly?: boolean; air_purifying?: boolean;
+    min_price?: number; max_price?: number;
+    is_new_arrival?: boolean; is_best_seller?: boolean;
+    is_trending?: boolean; is_best_deal?: boolean;
+    search?: string; ordering?: string;
   }) => (await api.get('/store/products/', { params })).data,
 
   getProductBySlug: async (slug: string) =>
     (await api.get(`/store/products/${slug}/`)).data,
 
-  // Filter options for dynamic filter sidebar
-  getFilterOptions: async (params?: {
-    main_category?: string;
-    category?: string;
-  }) => (await api.get('/store/filter-options/', { params })).data,
+  getRelatedProducts: async (slug: string) =>
+    (await api.get(`/store/products/${slug}/related/`)).data,
 
-  // Reviews
+  getFilterOptions: async (params?: { main_category?: string; category?: string }) =>
+    (await api.get('/store/filter-options/', { params })).data,
+
   getReviews: async (slug: string) =>
     (await api.get(`/store/products/${slug}/reviews/`)).data,
+
   addReview: async (slug: string, formData: FormData) =>
     (await api.post(`/store/products/${slug}/reviews/`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })).data,
 
-  // Home data (all homepage sections in one request)
+  getFAQs: async () => (await api.get('/store/faqs/')).data,
   getHomeData: async () => (await api.get('/store/home-data/')).data,
 
-  // Search
   searchProducts: async (query: string) => {
     if (!query.trim()) return { products: [], categories: [], spaces: [] };
     return (await api.get('/store/search/', { params: { q: query.trim() } })).data;
   },
 
-  // Config & Coupons
   getSiteConfig: async () => (await api.get('/store/config/')).data,
+  getActiveCoupons: async () =>
+  (await api.get('/store/active-coupons/')).data,
+
   validateCoupon: async (code: string, orderTotal: number) =>
     (await api.post('/store/validate-coupon/', { code, order_total: orderTotal })).data,
-};
 
-// ─── ORDERS ───────────────────────────────────────────────────────────────────
+  // ── Watch & Shop ─────────────────────────────────────────────────────────
+  // Content-only layer. Ecommerce data always comes from the linked product.
+
+ getWatchAndShop: async () => {
+  const response = await api.get('/store/watch-and-shop/');
+  return response.data;
+},
+
+getWatchAndShopBySlug: async (slug: string) => {
+  const response = await api.get(`/store/watch-and-shop/${slug}/`);
+  return response.data;
+},
+
+};
 
 export const orderService = {
   createOrder: async (orderData: any) =>
@@ -227,8 +221,6 @@ export const orderService = {
   cancelOrder: async (orderId: number) =>
     (await api.post(`/orders/${orderId}/cancel/`)).data,
 };
-
-// ─── FORMS ────────────────────────────────────────────────────────────────────
 
 export const submitBulkOrder = (data: BulkOrderPayload) =>
   api.post<{ detail: string }>('/forms/bulk-order/', data);

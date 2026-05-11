@@ -14,6 +14,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "./components/home/WhatsAppButton";
 import Index from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
+import WatchAndShopDetail from '@/pages/WatchAndShopDetail';
 import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 import UserProfile from './pages/UserProfile';
@@ -43,6 +44,7 @@ const App = () => (
                     <Route path="/shop" element={<Shop />} />
                     <Route path="/shop/:category" element={<Shop />} />
                     <Route path="/product/:slug" element={<ProductDetail />} />
+                     <Route path="/watch-shop/:slug" element={<WatchAndShopDetail />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/contact" element={<Contact />} />

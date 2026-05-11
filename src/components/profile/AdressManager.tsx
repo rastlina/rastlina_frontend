@@ -236,26 +236,39 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
         <div className="border border-border/30 rounded-xl p-5 space-y-4 bg-muted/20">
           <h4 className="font-semibold text-sm text-foreground">{editing ? 'Edit Address' : 'New Address'}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[
-              { key: 'first_name', label: 'First Name *' },
-              { key: 'last_name', label: 'Last Name' },
-              { key: 'phone', label: 'Phone *' },
-              { key: 'address', label: 'Street Address *', full: true },
-              { key: 'city', label: 'City *' },
-              { key: 'state', label: 'State *' },
-              { key: 'zip_code', label: 'ZIP Code *' },
-            ].map(({ key, label, full }) => (
-              // Inside AddressManager component loop for inputs...
-<div key={key} className={full ? 'sm:col-span-2' : ''}>
-  <label className="block text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">{label}</label>
-  <input
-    value={(form as any)[key]}
-    onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))}
-    /* Changed border-border/30 to border-black for better visibility */
-    className="w-full border border-black rounded-lg px-3 py-2 text-sm bg-card focus:ring-2 focus:ring-primary outline-none"
-  />
-</div>
-            ))}
+           {[
+  { key: 'first_name', label: 'First Name *', placeholder: 'e.g. John' },
+  { key: 'last_name', label: 'Last Name', placeholder: 'e.g. Doe' },
+  { key: 'phone', label: 'Phone *', placeholder: '10-digit mobile number' },
+  { 
+    key: 'address', 
+    label: 'Street Address *', 
+    full: true, 
+    placeholder: 'Flat No, Building, Street Name, Area/Sector',
+    hint: 'Please include Block, Street, and Area details here.' // Added hint
+  },
+  { key: 'city', label: 'City *', placeholder: 'e.g. Hyderabad' },
+  { key: 'state', label: 'State *', placeholder: 'e.g. Telangana' },
+  { key: 'zip_code', label: 'ZIP Code *', placeholder: '6-digit Pincode' },
+].map(({ key, label, full, placeholder, hint }) => (
+  <div key={key} className={full ? 'sm:col-span-2' : ''}>
+    <label className="block text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">
+      {label}
+    </label>
+    <input
+      value={(form as any)[key]}
+      onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))}
+      placeholder={placeholder}
+      className="w-full border border-black rounded-lg px-3 py-2 text-sm bg-card focus:ring-2 focus:ring-primary outline-none placeholder:text-gray-300"
+    />
+    {/* This adds the instruction text below the Street Address box */}
+    {hint && (
+      <span className="text-[10px] text-gray-400 mt-1 block italic">
+        {hint}
+      </span>
+    )}
+  </div>
+))}
           </div>
           <div className="flex gap-3 pt-1">
   <button 

@@ -10,6 +10,12 @@ export interface ProductSize {
   label: string;
   price: number;
 }
+export interface ProductImage {
+  id: number;
+  image: string;
+  is_primary: boolean;
+  color_id?: number | null;
+}
 
 export interface Product {
   id: string;
@@ -21,6 +27,7 @@ export interface Product {
   discount: number;
   rating: number;
   reviewCount: number;
+  images?: ProductImage[];
   careLevel: 'Very Easy' | 'Easy' | 'Moderate' | 'Expert';
   waterFrequency: string;
   light: string;
@@ -32,6 +39,7 @@ export interface Product {
   inStock: boolean;
   featured: boolean;
   selfWatering?: boolean;
+  
   onOffer?: boolean;
   type: 'plant' | 'pot' | 'seed' | 'care' | 'combo';
 }
