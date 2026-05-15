@@ -24,9 +24,8 @@ export interface AppliedCoupon {
   discount_type: 'percentage' | 'fixed';
   value: number;
   min_order_value: number;
-  discount: number; // calculated discount amount
+  discount: number;
 }
-
 // ─── Core Calculations ────────────────────────────────────────────────────────
 
 export function calculateSubtotal(items: CartPricingItem[]): number {
@@ -127,8 +126,8 @@ export function calculateCartTotals(
   const itemSavings = calculateItemSavings(items);
   const couponDiscount = calculateCouponDiscount(subtotal, coupon);
   const afterCoupon = Math.max(0, subtotal - couponDiscount);
-  const shipping = calculateShipping(
-  subtotal,
+const shipping = calculateShipping(
+  afterCoupon,
   freeShippingThreshold,
   baseShippingFee
 );

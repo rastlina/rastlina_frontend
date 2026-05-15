@@ -226,17 +226,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Only auto-apply if user hasn't manually applied something better
     const bestDiscount = best.discount_type === 'percentage'
-      ? Math.round((subtotal * best.value) / 100)
-      : best.value;
+  ? Math.round((subtotal * Number(best.value)) / 100)
+  : Number(best.value);
 
-    if (!appliedCoupon || appliedCoupon.discount < bestDiscount) {
-      setAppliedCoupon({
-        code: best.code,
-        discount_type: best.discount_type,
-        value: best.value,
-        min_order_value: best.min_order_value,
-        discount: bestDiscount,
-      });
+const currentDiscount = appliedCoupon
+  ? (
+      appliedCoupon.discount_type === 'percentage'
+        ? Math.round((subtotal * Number(appliedCoupon.value)) / 100)
+        : Number(appliedCoupon.value)
+    )
+  : 0;
+
+if (!appliedCoupon || currentDiscount < bestDiscount) {
+setAppliedCoupon({
+  code: best.code,
+  discount_type: best.discount_type,
+  value: Number(best.value),
+  min_order_value: Number(best.min_order_value),
+  discount: bestDiscount,
+});
       if (!appliedCoupon) {
         toast.success(`🎉 Coupon ${best.code} applied automatically!`, { duration: 3000 });
       }
@@ -312,7 +320,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // Open cart drawer after adding
-    setIsOpen(true);
+   
   }, []);
 
   const removeFromCart = useCallback((productId: number, sizeName: string, colorName: string) => {

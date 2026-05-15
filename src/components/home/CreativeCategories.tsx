@@ -23,12 +23,7 @@ const CreativeCategories = () => {
           <h2 className="text-xl md:text-2xl font-serif font-bold text-[#1A3831]">
             Explore by Category
           </h2>
-          <Link
-            to="/shop"
-            className="text-sm font-semibold text-[#667D00] hover:text-[#1A3831] flex items-center gap-0.5 transition-colors"
-          >
-            View All <ChevronRight className="h-4 w-4" />
-          </Link>
+          
         </div>
 
         <div

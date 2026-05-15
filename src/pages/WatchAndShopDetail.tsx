@@ -24,7 +24,7 @@ import { WhyChooseUs } from '@/components/product-detail/WhyChooseUs';
 import { ProductSuggestions } from '@/components/product-detail/ProductSuggestions';
 import { ProductFAQ } from '@/components/product-detail/ProductFAQ';
 import { FixedBottomBar } from '@/components/product-detail/FixedBottomBar';
-import { WatchAndShopVideo } from '@/watch-and-shop/WatchAndShopVideo';
+import { WatchAndShopVideo } from '@/components/watch-and-shop/WatchAndShopVideo';
 
 // Reuse helpers and types from ProductDetail
 import {

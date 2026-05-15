@@ -263,4 +263,11 @@ export const submitBulkOrder = (data: BulkOrderPayload) =>
 export const submitContactForm = (data: ContactPayload) =>
   api.post<{ detail: string }>('/forms/contact/', data);
 
+export const contentService = {
+  async getHomeContent() {
+    const response = await api.get('/content/home-content/');
+    return response.data;
+  },
+};
+
 export default api;

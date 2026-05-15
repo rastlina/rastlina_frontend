@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send, Gift, Briefcase, Users } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Gift, Briefcase, Users, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { submitContactForm } from '@/services/api'; 
+import { toast } from 'sonner';
 
-// Using a warmer image that fits both office and home vibes
 import heroImage from '@/assets/hero-living-room.jpg'; 
 
 export default function Contact() {
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -24,34 +26,39 @@ export default function Contact() {
     setFormData({ ...formData, type: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 1. Format the message for WhatsApp
-    const message = `*New Inquiry: ${formData.type || 'General'}* 🌿
-    
-*Name:* ${formData.name}
-*Phone:* ${formData.phone}
-*Email:* ${formData.email}
-*Est. Quantity:* ${formData.quantity || 'N/A'}
-*Details:* ${formData.message}`;
+    setLoading(true);
 
-    // 2. Your WhatsApp Number
-    const phoneNumber = "919915473575"; 
+    try {
+      // 1. Send data to the Django Backend
+      await submitContactForm({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        issue_type: formData.type || 'Bulk Inquiry',
+        message: `Est. Quantity: ${formData.quantity || 'N/A'}\n\nMessage: ${formData.message}`
+      });
 
-    // 3. Open WhatsApp
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+      // 2. Success Feedback
+      toast.success("Thank you! Your inquiry has been sent to our team.");
+
+      // 3. Reset form
+      setFormData({ name: '', phone: '', email: '', type: '', quantity: '', message: '' });
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast.error("We couldn't send your request. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Split Layout Container */}
+    <div className="min-h-screen bg-white pt-20">
       <div className="flex flex-col lg:flex-row min-h-[850px]">
         
         {/* Left Side: Visual & Context */}
         <div className="w-full lg:w-5/12 relative bg-primary overflow-hidden order-1 lg:order-1">
-          {/* Background Image with Overlay */}
           <img 
             src={heroImage} 
             alt="Gifting" 
@@ -59,7 +66,6 @@ export default function Contact() {
           />
           <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-accent-earth/90 mix-blend-multiply" />
           
-          {/* Content Overlay */}
           <div className="relative z-10 h-full flex flex-col justify-between p-8 lg:p-16 text-white">
             <div>
                 <h1 className="text-4xl lg:text-5xl font-serif font-bold mb-6 leading-tight">
@@ -70,7 +76,6 @@ export default function Contact() {
                   Whether it's for your innovative team or a heartfelt wedding celebration, give the gift of growth.
                 </p>
 
-                {/* Icons Grid */}
                 <div className="grid grid-cols-1 gap-6 mt-8">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/10">
@@ -102,7 +107,6 @@ export default function Contact() {
                 </div>
             </div>
 
-            {/* Footer Info */}
             <div className="space-y-4 pt-12 border-t border-white/20 mt-12">
               <div className="flex items-center gap-3 text-sm">
                 <Phone className="h-4 w-4 text-accent-gold" />
@@ -124,7 +128,7 @@ export default function Contact() {
         <div className="w-full lg:w-7/12 bg-white flex items-center justify-center p-8 lg:p-20 order-2 lg:order-2">
           <div className="w-full max-w-xl">
             <div className="mb-10">
-                <span className="text-primary font-bold tracking-wider uppercase text-xs mb-2 block">Get in Touch</span>
+                <span className="text-primary font-bold tracking-wider uppercase text-xs mb-2 block">Bulk & Corporate</span>
                 <h2 className="text-3xl md:text-4xl font-serif text-gray-900">Let's grow together</h2>
                 <p className="text-gray-500 mt-2 text-sm">Tell us about your requirements, and we'll curate the perfect green solution for you.</p>
             </div>
@@ -186,7 +190,6 @@ export default function Contact() {
                   </div>
               </div>
 
-              {/* Inquiry Type Dropdown - FIXED UI */}
               <div className="group relative">
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">What are you looking for? <span className="text-red-500">*</span></label>
                 <Select onValueChange={handleTypeChange} required>
@@ -194,7 +197,6 @@ export default function Contact() {
                     <SelectValue placeholder="Select Inquiry Type" />
                   </SelectTrigger>
                   
-                  {/* FIX: Added bg-white, z-index, and shadow to ensure visibility */}
                   <SelectContent className="bg-white border border-gray-200 shadow-xl z-50">
                     <SelectItem value="Corporate Gifting" className="cursor-pointer hover:bg-gray-50 py-2">
                         Corporate Gifting (Employees/Clients)
@@ -226,12 +228,22 @@ export default function Contact() {
 
               <Button 
                 type="submit" 
-                className="w-full md:w-auto bg-primary hover:bg-primary/90 text-white h-12 px-8 text-base font-bold tracking-wide rounded-lg shadow-lg mt-4"
+                disabled={loading}
+                className="w-full md:w-auto bg-primary hover:bg-primary/90 text-white h-12 px-8 text-base font-bold tracking-wide rounded-lg shadow-lg mt-4 flex items-center justify-center transition-all active:scale-[0.98]"
               >
-                Send Request via WhatsApp <Send className="ml-2 h-4 w-4" />
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending Inquiry...
+                  </>
+                ) : (
+                  <>
+                    Submit Inquiry <Send className="ml-2 h-4 w-4" />
+                  </>
+                )}
               </Button>
 
-              <p className="text-[10px] text-gray-400 mt-4">
+              <p className="text-[10px] text-gray-400 mt-4 text-center md:text-left">
                 We respect your privacy. Your details are safe with us.
               </p>
             </form>

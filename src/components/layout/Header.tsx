@@ -10,7 +10,7 @@ import {
 import { useCart } from '@/contexts/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { storeService } from '@/services/api';
-
+import { contentService } from '@/services/api';
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface NavCategory { id: number; name: string; slug: string; image?: string; }
 interface MainCat { id: number; name: string; slug: string; icon: string; order: number; categories: NavCategory[]; }
@@ -28,19 +28,68 @@ interface NavbarData {
 }
 
 // ─── Announcement Bar ─────────────────────────────────────────────────────────
+interface AnnouncementItem {
+  id: number;
+  text: string;
+  is_active: boolean;
+  order: number;
+}
+
+interface HomeContentResponse {
+  announcement_bars?: AnnouncementItem[];
+}
+
+const DEFAULT_OFFERS = [
+  '🌿 Free Shipping on orders above ₹1999',
+  '✨ Buy 2 Plants @ ₹699 — Use Code: GREEN2',
+  '🏺 Flat 20% OFF on Ceramic Planters',
+];
+
 const TopBar = () => {
-  const offers = [
-    "🌿 Free Shipping on orders above ₹1999",
-    "✨ Buy 2 Plants @ ₹699 — Use Code: GREEN2",
-    "🏺 Flat 20% OFF on Ceramic Planters",
-  ];
+  const [offers, setOffers] = useState<string[]>(DEFAULT_OFFERS);
   const [idx, setIdx] = useState(0);
+
+  // Fetch dynamic announcements
   useEffect(() => {
-    const t = setInterval(() => setIdx(i => (i + 1) % offers.length), 4000);
-    return () => clearInterval(t);
+    const fetchAnnouncements = async () => {
+      try {
+        const data: HomeContentResponse =
+          await contentService.getHomeContent();
+
+        const backendOffers =
+          data?.announcement_bars
+            ?.map((item) => item.text)
+            ?.filter(Boolean) || [];
+
+        // Replace defaults ONLY if backend has data
+        if (backendOffers.length > 0) {
+          setOffers(backendOffers);
+        }
+
+      } catch (error) {
+        console.error('Announcement fetch failed:', error);
+
+        // fallback remains automatically
+        setOffers(DEFAULT_OFFERS);
+      }
+    };
+
+    fetchAnnouncements();
   }, []);
+
+  // Auto rotate
+  useEffect(() => {
+    if (offers.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setIdx((prev) => (prev + 1) % offers.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [offers]);
+
   return (
-    <div className="bg-[#1A3831] text-white py-2.5 flex items-center justify-center h-[38px]">
+    <div className="bg-[#1A3831] text-white py-2.5 flex items-center justify-center h-[38px] overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.p
           key={idx}
@@ -48,7 +97,7 @@ const TopBar = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.3 }}
-          className="text-xs md:text-sm font-medium tracking-wide text-center"
+          className="text-xs md:text-sm font-medium tracking-wide text-center px-4"
         >
           {offers[idx]}
         </motion.p>
@@ -57,16 +106,24 @@ const TopBar = () => {
   );
 };
 
+export default TopBar;
+
 // ─── Plants Mega Menu ────────────────────────────────────────────────────────
 // ─── Plants Mega Menu ────────────────────────────────────────────────────────
 const PlantsMegaMenu = ({
-  heroSlides, categories, spaces, sizes, closeMenu,
+  heroSlides,
+  categories,
+  spaces,
+  sizes,
+  closeMenu,
+  isScrolled,
 }: {
   heroSlides: HeroSlide[];
   categories: NavCategory[];
   spaces: SpaceTag[];
   sizes: SizeOption[];
   closeMenu: () => void;
+  isScrolled: boolean;
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -81,14 +138,21 @@ const PlantsMegaMenu = ({
 
   return (
     <>
-      <div className="fixed inset-0 top-[72px] z-40 bg-transparent" onClick={closeMenu} />
+      <div
+  className={`fixed inset-0 z-40 bg-transparent transition-all duration-300 ${
+    isScrolled ? 'top-[72px]' : 'top-[110px]'
+  }`}
+  onClick={closeMenu}
+/>
       
-     <motion.div
-  initial={{ opacity: 0, y: -10 }} // Slide down from the header
+<motion.div
+  initial={{ opacity: 0, y: -10 }}
   animate={{ opacity: 1, y: 0 }}
   exit={{ opacity: 0, y: -10 }}
   transition={{ duration: 0.2 }}
-  className="fixed top-[110px] left-0 w-full z-50 pointer-events-none"
+  className={`fixed left-0 w-full z-50 pointer-events-none transition-all duration-300 ${
+    isScrolled ? 'top-[72px]' : 'top-[110px]'
+  }`}
 >
   <div className="container mx-auto px-4 pointer-events-auto">
           <div className="bg-white shadow-2xl border border-gray-100 rounded-b-2xl p-8 grid grid-cols-12 gap-8 w-full max-w-[1400px] mx-auto relative z-50">
@@ -254,6 +318,16 @@ export const Header = () => {
   const { user } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+  const handleScroll = () => {
+    setIsScrolled(window.scrollY > 10);
+  };
+
+  window.addEventListener("scroll", handleScroll);
+
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
   // Fetch navbar data
   useEffect(() => {
     storeService.getNavbarData().then(setNavData).catch(() => {});
@@ -301,17 +375,24 @@ const plantSizes = navData?.plants_sizes || [];
   // Static extra nav items (Offers, Bulk)
   const extraNavItems = [
     { label: 'Offers', href: '/shop?is_best_deal=true', highlight: true, icon: <Tag className="h-3.5 w-3.5" /> },
-    { label: 'Bulk', href: '/bulk-order', icon: <Briefcase className="h-3.5 w-3.5" /> },
+    { label: 'Bulk', href: '/bulk', icon: <Briefcase className="h-3.5 w-3.5" /> },
   ];
 
   return (
-    <div className="fixed top-0 left-0 w-full z-50">
+    <div className="fixed top-0 left-0 w-full z-50 bg-white">
       {/* Announcement bar */}
-      <div className={`transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 opacity-0' : 'h-[38px] opacity-100'}`}>
-        <TopBar />
-      </div>
+<div
+  className={[
+    "transition-all duration-300 overflow-hidden",
+    isScrolled
+      ? "max-h-0 opacity-0 -translate-y-full"
+      : "max-h-[38px] opacity-100 translate-y-0"
+  ].join(" ")}
+>
+  <TopBar />
+</div>
 
-<header className="bg-white w-full relative">
+<header className="bg-white w-full relative border-b border-transparent">
           <div className="container mx-auto px-4 max-w-7xl">
 
           {/* ── MOBILE ── */}
@@ -363,12 +444,13 @@ const plantSizes = navData?.plants_sizes || [];
       <AnimatePresence>
         {activeDropdown === 'plants' && (
           <PlantsMegaMenu
-            heroSlides={heroSlides}
-            categories={plantsCategories}
-            spaces={featuredSpaces}
-            sizes={plantSizes}
-            closeMenu={() => setActiveDropdown(null)}
-          />
+  heroSlides={heroSlides}
+  categories={plantsCategories}
+  spaces={featuredSpaces}
+  sizes={plantSizes}
+  closeMenu={() => setActiveDropdown(null)}
+  isScrolled={isScrolled}
+/>
         )}
       </AnimatePresence>
     </div>
@@ -507,6 +589,7 @@ const plantSizes = navData?.plants_sizes || [];
                       {mobileExpanded === 'plants' && (
                         <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
                           <div className="pb-4 space-y-1 pl-2">
+                            
                             {/* By Size */}
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 mb-1">By Size</p>
                             {(plantSizes.length ? plantSizes : [{ id: 0, name: 'Small' }, { id: 1, name: 'Medium' }, { id: 2, name: 'Large' }]).map(s => (
@@ -530,8 +613,18 @@ const plantSizes = navData?.plants_sizes || [];
                                     onClick={() => setMobileOpen(false)}
                                     className="block py-2 text-sm text-gray-700 hover:text-[#667D00] font-medium">{sp.name}</Link>
                                 ))}
+
                               </>
+                              
                             )}
+                            {/* All Plants */}
+<Link
+  to="/shop?main_category=plants"
+  onClick={() => setMobileOpen(false)}
+  className="block py-2 text-sm font-semibold text-[#1A3831] hover:text-[#667D00]"
+>
+  All Plants
+</Link>
                           </div>
                         </motion.div>
                       )}

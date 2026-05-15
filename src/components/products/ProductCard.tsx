@@ -38,31 +38,42 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
-  const images = product.images ?? [];
   const availableColors = product.available_colors ?? [];
 
-  // Primary image (no hover swap — clean card)
+  // Primary image
   const primaryImages = product.images.filter((img) => img.is_primary);
 
-const displayImage =
-  primaryImages[0] || product.images[0];
+  const displayImage =
+    primaryImages[0] || product.images[0];
 
   const price = Number(product.price);
-  const originalPrice = product.original_price ? Number(product.original_price) : null;
-  const hasDiscount = originalPrice !== null && originalPrice > price;
+  const originalPrice = product.original_price
+    ? Number(product.original_price)
+    : null;
+
+  const hasDiscount =
+    originalPrice !== null && originalPrice > price;
+
   const hasReviews = product.review_count > 0;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: Math.min(index * 0.06, 0.4) }}
+      transition={{
+        duration: 0.35,
+        delay: Math.min(index * 0.06, 0.4),
+      }}
       className="group h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300"
     >
-      <Link to={`/product/${product.slug}`} className="flex-1 flex flex-col">
+      <Link
+        to={`/product/${product.slug}`}
+        className="flex-1 flex flex-col"
+      >
         {/* ── Image ── */}
         <div className="relative aspect-[4/5] overflow-hidden bg-[#F8F7F4]">
-          <img src={displayImage?.image}
+          <img
+            src={displayImage?.image}
             alt={product.name}
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -77,7 +88,7 @@ const displayImage =
             </div>
           )}
 
-          {/* Badges — top-left */}
+          {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
             {hasDiscount && (
               <span
@@ -87,6 +98,7 @@ const displayImage =
                 -{product.discount_percentage}%
               </span>
             )}
+
             {product.is_best_deal && !hasDiscount && (
               <span
                 className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
@@ -95,6 +107,7 @@ const displayImage =
                 Deal
               </span>
             )}
+
             {product.is_new_arrival && (
               <span
                 className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
@@ -103,6 +116,7 @@ const displayImage =
                 New
               </span>
             )}
+
             {product.is_best_seller && (
               <span
                 className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
@@ -112,64 +126,55 @@ const displayImage =
               </span>
             )}
           </div>
+
+          {/* Floating Rating */}
+          {hasReviews && (
+            <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 shadow-sm z-10">
+              <Star className="h-3 w-3 fill-[#BFA275] text-[#BFA275]" />
+
+              <span className="text-[11px] font-bold text-gray-800">
+                {Number(product.average_rating).toFixed(1)}
+              </span>
+
+              <span className="text-[10px] text-gray-500">
+                ({product.review_count})
+              </span>
+            </div>
+          )}
         </div>
 
         {/* ── Content ── */}
-        <div className="p-4 flex flex-col gap-1.5 flex-1">
+        <div className="p-3.5 flex flex-col gap-1 flex-1">
           {/* Category */}
-          {(product.category_name || product.main_category_name) && (
+          {(product.category_name ||
+            product.main_category_name) && (
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-              {product.category_name ?? product.main_category_name}
+              {product.category_name ??
+                product.main_category_name}
             </p>
           )}
 
           {/* Name */}
-          <h3 className="min-h-[42px] font-serif font-bold text-[15px] text-gray-900 line-clamp-2 leading-snug group-hover:text-[#667D00] transition-colors">
+          <h3 className="font-serif font-bold text-[15px] text-gray-900 line-clamp-2 leading-tight mt-1 group-hover:text-[#667D00] transition-colors">
             {product.name}
           </h3>
 
-          {/* Rating — only when reviews exist */}
-          
-            {/* Rating */}
-<div className="h-5 flex items-center">
-  {hasReviews ? (
-    <div className="flex items-center gap-1">
-      <div className="flex">
-        {[1, 2, 3, 4, 5].map(star => (
-          <Star
-            key={star}
-            className="h-3 w-3"
-            style={{
-              fill: star <= Math.round(product.average_rating) ? '#BFA275' : 'none',
-              color: '#BFA275',
-            }}
-          />
-        ))}
-      </div>
-
-      <span className="text-xs font-bold text-gray-700">
-        {Number(product.average_rating).toFixed(1)}
-      </span>
-
-      <span className="text-xs text-gray-400">
-        ({product.review_count})
-      </span>
-    </div>
-  ) : null}
-</div>
-      
-
-          {/* Color swatches — using exact hex_code from backend */}
+          {/* Color swatches */}
           {availableColors.length > 0 && (
-            <div className="flex gap-1.5 mt-0.5 flex-wrap">
-              {availableColors.slice(0, 6).map(c => (
-                <div
-                  key={c.id}
-                  title={c.name}
-                  className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0"
-                  style={{ backgroundColor: c.hex_code }} // use exact hex — no fallback white
-                />
-              ))}
+            <div className="flex gap-1.5 mt-1 flex-wrap">
+              {availableColors
+                .slice(0, 6)
+                .map((c) => (
+                  <div
+                    key={c.id}
+                    title={c.name}
+                    className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0"
+                    style={{
+                      backgroundColor: c.hex_code,
+                    }}
+                  />
+                ))}
+
               {availableColors.length > 6 && (
                 <span className="text-[10px] text-gray-400 self-center">
                   +{availableColors.length - 6}
@@ -183,11 +188,13 @@ const displayImage =
             <span className="text-lg font-extrabold text-gray-900">
               {formatPrice(price)}
             </span>
+
             {hasDiscount && originalPrice && (
               <>
                 <span className="text-sm text-gray-400 line-through font-medium">
                   {formatPrice(originalPrice)}
                 </span>
+
                 <span className="text-xs font-bold text-green-600">
                   {product.discount_percentage}% off
                 </span>

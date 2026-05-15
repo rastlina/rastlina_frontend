@@ -6,7 +6,7 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useWatchAndShopList } from '@/hooks/useWatchAndShop';
-import { WatchAndShopCard } from '@/watch-and-shop/WatchAndShopCard';
+import { WatchAndShopCard } from '@/components/watch-and-shop/WatchAndShopCard';
 
 // ── Skeleton card ─────────────────────────────────────────────────────────────
 const SkeletonCard = () => (

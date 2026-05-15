@@ -39,7 +39,8 @@ function toYouTubeEmbed(url: string, autoplay: boolean): string {
   const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
   if (shortMatch) videoId = shortMatch[1];
 
-  // youtube.com/watch?v=VIDEO_ID
+  // youtube.com/
+  // ?v=VIDEO_ID
   const longMatch = url.match(/[?&]v=([^?&]+)/);
   if (longMatch) videoId = longMatch[1];
 
@@ -138,23 +139,29 @@ export const WatchAndShopVideo = memo(({
     video.muted = !video.muted;
     setIsMuted(video.muted);
   }, []);
+  const togglePlay = useCallback(() => {
+  const video = videoRef.current;
+  if (!video) return;
 
-  const togglePlay = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      pauseOthers(video);
-      video.play().then(() => setIsPlaying(true)).catch(() => {});
-    } else {
-      video.pause();
-      setIsPlaying(false);
-    }
-  }, []);
+  if (video.paused) {
+    pauseOthers(video);
+
+    video
+      .play()
+      .then(() => setIsPlaying(true))
+      .catch(() => {});
+  } else {
+    video.pause();
+    setIsPlaying(false);
+  }
+}, []);
+
 
   // ── YouTube iframe ────────────────────────────────────────────────────────
   if (isYT) {
-    const embedUrl = toYouTubeEmbed(videoUrl, mode === 'detail' || autoplay);
+    const shouldAutoplay = mode === 'card' || mode === 'detail' || autoplay;
+
+const embedUrl = toYouTubeEmbed(videoUrl, shouldAutoplay);
     return (
       <div
         ref={containerRef}
@@ -174,30 +181,32 @@ export const WatchAndShopVideo = memo(({
           />
         )}
         <iframe
-          src={embedUrl}
-          title={productName || 'Watch & Shop Video'}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          onLoad={() => setIsLoaded(true)}
-          className="absolute inset-0 w-full h-full border-0"
-          loading="lazy"
-        />
+  src={embedUrl}
+  title={productName || 'Watch & Shop Video'}
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+  onLoad={() => setIsLoaded(true)}
+  loading="lazy"
+  className={[
+    "absolute inset-0 w-full h-full border-0",
+    mode === "card" ? "pointer-events-none" : ""
+  ].join(" ")}
+/>
       </div>
     );
   }
 
   // ── Native <video> ─────────────────────────────────────────────────────────
   return (
-    <div
-      ref={containerRef}
-      className={[
-        'relative group overflow-hidden bg-black',
-        mode === 'detail'
-          ? 'rounded-2xl aspect-video lg:aspect-[4/5] w-full'
-          : 'rounded-2xl aspect-[9/16] w-full cursor-pointer',
-      ].join(' ')}
-      onClick={mode === 'card' ? togglePlay : undefined}
-    >
+<div
+  ref={containerRef}
+  className={[
+    'relative group overflow-hidden bg-black',
+    mode === 'detail'
+      ? 'rounded-2xl aspect-video lg:aspect-[4/5] w-full'
+      : 'rounded-2xl aspect-[9/16] w-full cursor-pointer',
+  ].join(' ')}
+>
       {/* Thumbnail fallback */}
       {thumbnail && (
         <img

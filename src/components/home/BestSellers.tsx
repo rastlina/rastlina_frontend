@@ -4,6 +4,7 @@ import { ProductSlider } from './ProductSlider';
 
 const BestSellers = () => {
   const { data, loading } = useHomeData();
+
   return (
     <ProductSlider
       title="Best Sellers"

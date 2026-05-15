@@ -180,16 +180,13 @@ export default function CheckoutPage() {
         couponInput.trim().toUpperCase(),
         totals.subtotal,
       );
-      applyCoupon({
-        code: couponInput.trim().toUpperCase(),
-        discount_type: res.discount_type,
-        value:
-          res.discount_type === 'percentage'
-            ? Number(res.code_value ?? res.value ?? 0)
-            : Number(res.discount),
-        min_order_value: Number(res.min_order_value ?? 0),
-        discount: Number(res.discount),
-      });
+applyCoupon({
+  code: couponInput.trim().toUpperCase(),
+  discount_type: res.discount_type,
+  value: Number(res.value ?? 0),
+  min_order_value: Number(res.min_order_value ?? 0),
+  discount: Number(res.discount ?? 0),
+});
       toast.success(res.message || 'Coupon applied!');
     } catch (err: any) {
       toast.error(err?.error || 'Invalid coupon code');

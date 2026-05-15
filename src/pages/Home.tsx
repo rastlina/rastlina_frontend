@@ -19,7 +19,7 @@ import WhatsAppButton from '@/components/home/WhatsAppButton';
 
 const Home = () => {
   return (
-    <main className="w-full overflow-x-hidden pt-[120px]">
+    <main className="w-full overflow-x-hidden pt-[110px]">
       <HeroSection />
       <SocialProof />
       <CreativeCategories />

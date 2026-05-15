@@ -20,7 +20,7 @@ import NotFound from "./pages/NotFound";
 import UserProfile from './pages/UserProfile';
 import Contact from './pages/Contact'; // Imported Contact Page
 import LoginPage from './pages/LoginPage';
-
+import BlogDetail from '@/pages/BlogDetail';
 import CheckoutPage from '@/pages/CheckoutPage';
 const queryClient = new QueryClient();
 
@@ -47,8 +47,8 @@ const App = () => (
                      <Route path="/watch-shop/:slug" element={<WatchAndShopDetail />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/profile" element={<UserProfile />} />
-                    <Route path="/contact" element={<Contact />} />
-
+                    <Route path="/bulk" element={<Contact />} />
+                    <Route path="/blog/:id" element={<BlogDetail />} />
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>

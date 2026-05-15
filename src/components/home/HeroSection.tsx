@@ -27,7 +27,7 @@ const HeroSection = () => {
   if (!slides.length) return null;
 
   return (
-    <section className="relative w-full h-[50vh] md:h-[80vh] overflow-hidden bg-[#F8F7F4]">
+     <section className="relative w-full h-[50vh] md:h-[80vh] overflow-hidden bg-[#F8F7F4] -mt-[1px]">
       {/* Slides */}
       <AnimatePresence mode="wait">
         <motion.div

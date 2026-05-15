@@ -128,15 +128,16 @@ export const CartDrawer = () => {
                     Your cart is empty
                   </p>
                   <p className="text-sm text-gray-500 mb-7 leading-relaxed">
-                    Add some beautiful plants to brighten your space!
-                  </p>
-                  <Button
-                    onClick={closeCart}
-                    asChild
-                    className="bg-[#1A3831] hover:bg-[#112520] text-white rounded-full px-8 h-11 font-bold tracking-wide uppercase text-xs w-full"
-                  >
-                    <Link to="/shop">Browse Plants</Link>
-                  </Button>
+  Add plants, planters, and seeds to create your perfect space.
+</p>
+
+<Button
+  onClick={closeCart}
+  asChild
+  className="bg-[#1A3831] hover:bg-[#112520] text-white rounded-full px-8 h-11 font-bold tracking-wide uppercase text-xs w-full"
+>
+  <Link to="/shop">Browse Products</Link>
+</Button>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-50">

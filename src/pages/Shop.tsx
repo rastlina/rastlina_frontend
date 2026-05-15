@@ -149,17 +149,38 @@ export default function Shop() {
   };
 
   // Page title
-  const getTitle = () => {
-    if (urlSearch) return `Results for "${urlSearch}"`;
-    if (urlBestDeal) return 'Exclusive Offers';
-    if (urlNewArrival) return 'New Arrivals';
-    if (urlBestSeller) return 'Best Sellers';
-    if (urlCat) return products[0]?.category_name || urlCat;
-    if (urlSpace) return filterOptions?.spaces.find(s => s.slug === urlSpace)?.name || urlSpace;
-    if (urlSize) return `${urlSize} Plants`;
-    if (urlMainCat) return urlMainCat.charAt(0).toUpperCase() + urlMainCat.slice(1);
-    return 'All Plants';
-  };
+// Page title
+const getTitle = () => {
+  if (urlSearch) return `Results for "${urlSearch}"`;
+
+  if (urlBestDeal) return 'Exclusive Offers';
+
+  if (urlNewArrival) return 'New Arrivals';
+
+  if (urlBestSeller) return 'Best Sellers';
+
+  if (urlCat) {
+    return products[0]?.category_name || urlCat;
+  }
+
+  if (urlSpace) {
+    return (
+      filterOptions?.spaces.find(s => s.slug === urlSpace)?.name ||
+      urlSpace
+    );
+  }
+
+  if (urlSize) {
+    return `${urlSize} Products`;
+  }
+
+  if (urlMainCat) {
+    return urlMainCat.charAt(0).toUpperCase() + urlMainCat.slice(1);
+  }
+
+  // UPDATED DEFAULT TITLE
+  return 'All Products';
+};
 
   const toggle = <T,>(arr: T[], val: T) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val];
@@ -285,8 +306,7 @@ export default function Shop() {
             ) : products.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
                 <Search className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-                <p className="font-semibold text-gray-700 text-lg">No plants found</p>
-                <p className="text-sm text-gray-400 mt-1 mb-5">Try adjusting your filters or search term.</p>
+<p className="font-semibold text-gray-700 text-lg">No plants found</p>
                 <button onClick={clearFilters} className="px-5 py-2.5 rounded-xl text-sm font-bold text-white" style={{ background: '#1A3831' }}>
                   Clear Filters
                 </button>
