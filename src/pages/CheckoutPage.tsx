@@ -383,20 +383,26 @@ applyCoupon({
           </div>
 
           {/* Track order CTA */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-              Track Your Order
-            </p>
-            <p className="text-sm text-gray-600">
-              Use your order ID and email or phone to track your delivery status anytime.
-            </p>
-            <Link
-              to={`/track-order?order_id=${orderSuccess.orderId}&email=${encodeURIComponent(orderSuccess.guestEmail)}`}
-              className="inline-flex items-center gap-2 text-sm font-bold text-[#1A3831] hover:underline"
-            >
-              Track Order #{orderSuccess.orderId} →
-            </Link>
-          </div>
+          {/* Order Details */}
+<div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-3">
+  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+    Order Details
+  </p>
+
+  <div className="bg-[#F8F7F4] rounded-xl p-4 border border-gray-100">
+    <p className="text-xs text-gray-500 mb-1">
+      Your Order ID
+    </p>
+
+    <p className="text-2xl font-black text-[#1A3831] tracking-wide">
+      #{orderSuccess.orderId}
+    </p>
+  </div>
+
+  <p className="text-xs text-gray-500 leading-relaxed">
+    Please save this order ID for future reference. We will contact you within 24 hours via mail/phone number.
+  </p>
+</div>
 
           {/* Create account nudge */}
           <div className="bg-[#F0F4E8] rounded-2xl border border-[#667D00]/20 p-6 space-y-3">
