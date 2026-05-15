@@ -306,27 +306,33 @@ applyCoupon({
         description: 'Plants & Planters',
         order_id: res.razorpay_order_id,
         handler: async (response: any) => {
-          try {
-            await orderService.verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-            clearCart();
-            toast.success('🎉 Payment successful! Your order is confirmed.');
+  try {
+    await orderService.verifyPayment({
+      razorpay_order_id: response.razorpay_order_id,
+      razorpay_payment_id: response.razorpay_payment_id,
+      razorpay_signature: response.razorpay_signature,
+    });
 
-            if (isLoggedIn) {
-              navigate('/profile?tab=orders');
-            } else {
-              // Guest post-order success screen
-              setOrderSuccess({
-                orderId: res.order_id,
-                guestEmail: guestForm.email,
-                isGuest: true,
-              });
-              setIsPlacingOrder(false);
-            }
-          } catch {
+    // Clear everything after successful payment
+    clearCart();
+    removeCoupon();
+    setAppliedExchange(null);
+    setCouponInput('');
+    setExchangeInput('');
+
+    toast.success('🎉 Payment successful! Your order is confirmed.');
+
+    if (isLoggedIn) {
+      navigate('/profile?tab=orders');
+    } else {
+      setOrderSuccess({
+        orderId: res.order_id,
+        guestEmail: guestForm.email,
+        isGuest: true,
+      });
+      setIsPlacingOrder(false);
+    }
+  } catch {
             toast.error(
               'Payment verification failed. Contact support with payment ID: ' +
               response.razorpay_payment_id,
