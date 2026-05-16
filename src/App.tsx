@@ -22,6 +22,13 @@ import Contact from './pages/Contact'; // Imported Contact Page
 import LoginPage from './pages/LoginPage';
 import BlogDetail from '@/pages/BlogDetail';
 import CheckoutPage from '@/pages/CheckoutPage';
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsPage from "./pages/TermsPage";
+import ShippingPolicyPage from "./pages/ShippingPolicyPage";
+import ReturnsRefundPolicyPage from './pages/ReturnsRefundPage';
+import ReplacementPolicyPage from "./pages/ReplacementPolicyPage";
+
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -44,6 +51,11 @@ const App = () => (
                     <Route path="/shop" element={<Shop />} />
                     <Route path="/shop/:category" element={<Shop />} />
                     <Route path="/product/:slug" element={<ProductDetail />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                    <Route path="/terms-and-conditions" element={<TermsPage />} />
+                    <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                    <Route path="/returns-refund-policy" element={<ReturnsRefundPolicyPage />} />
+                    <Route path="/replacement-policy" element={<ReplacementPolicyPage />} />
                      <Route path="/watch-shop/:slug" element={<WatchAndShopDetail />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/profile" element={<UserProfile />} />

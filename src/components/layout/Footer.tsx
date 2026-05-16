@@ -1,22 +1,22 @@
 import { Link } from 'react-router-dom';
 import {
   Instagram,
-  Facebook,
-  Linkedin,
   MapPin,
   Phone,
   Mail,
   Clock,
-  Briefcase,
-  Heart
+  Heart,
 } from 'lucide-react';
 
 const footerLinks = [
-  { label: 'About Us', href: '/about' },
-  { label: 'Privacy Policy', href: '/privacy' },
-  { label: 'Terms & Conditions', href: '/terms' },
-  { label: 'Shipping Policy', href: '/shipping' },
-  { label: 'Returns & Refunds', href: '/returns' },
+  { label: 'Home', href: '/' },
+  { label: 'Shop', href: '/shop' },
+  { label: 'Contact Us', href: '/bulk' },
+  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Terms & Conditions', href: '/terms-and-conditions' },
+  { label: 'Shipping Policy', href: '/shipping-policy' },
+  { label: 'Returns & Refunds', href: '/returns-refund-policy' },
+  { label: 'Replacement Policy', href: '/replacement-policy' },
 ];
 
 export const Footer = () => {
@@ -24,51 +24,48 @@ export const Footer = () => {
     <footer className="bg-primary text-white border-t border-white/10 pt-12 pb-6">
       <div className="container-custom">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-14 mb-12">
 
           {/* Brand */}
-          <div className="space-y-4">
-            <div className="inline-block bg-white p-2.5 rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform hover:scale-105">
-              <img
-                src="/logo.png"
-                alt="Rastlina Logo"
-                className="h-14 w-auto object-contain"
-              />
-            </div>
+          <div className="space-y-5">
+            <Link to="/" className="inline-block">
+              <div className="bg-white p-2.5 rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:scale-[1.02] transition-transform">
+                <img
+                  src="/logo.png"
+                  alt="Rastlina Logo"
+                  className="h-14 w-auto object-contain"
+                />
+              </div>
+            </Link>
 
-            <p className="text-sm text-white/80 leading-relaxed mt-2">
-              Rooted in Confidence, Growing with You. We provide premium plants and care essentials to elevate your living spaces.
+            <p className="text-sm text-white/75 leading-relaxed max-w-sm">
+              Rooted in confidence, growing with you. Premium plants and green
+              essentials crafted to elevate your living spaces.
             </p>
 
-            <div className="flex gap-3 pt-2">
+            {/* Social */}
+            <div className="flex items-center gap-3 pt-1">
               <a
                 href="https://www.instagram.com/rastlina2025"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-white/10 rounded-full hover:bg-accent-gold transition-colors"
+                className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors"
+                aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="p-2 bg-white/10 rounded-full hover:bg-accent-gold transition-colors"
-              >
-                <Facebook className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="p-2 bg-white/10 rounded-full hover:bg-accent-gold transition-colors"
-              >
-                <Linkedin className="h-4 w-4" />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="lg:pl-8">
-            <h4 className="text-lg font-serif font-medium mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              {footerLinks.map(link => (
+          <div>
+            <h4 className="text-lg font-serif font-medium mb-5">
+              Quick Links
+            </h4>
+
+            <ul className="space-y-3">
+              {footerLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     to={link.href}
@@ -81,88 +78,110 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact + Timings */}
-          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
+          {/* Contact */}
+          <div>
+            <h4 className="text-lg font-serif font-medium mb-5">
+              Get in Touch
+            </h4>
 
-            {/* Contact */}
-            <div>
-              <h4 className="text-lg font-serif font-medium mb-4">Get in touch</h4>
-              <ul className="space-y-3 text-sm text-white/80">
-                <li className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-accent-gold shrink-0" />
-                  <span>
-                    4th Floor, Lake View Towers,<br />
-                    Safari Nagar, Kondapur,<br />
-                    Hyderabad, 500084
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-accent-gold" />
-                  <span>+91 99154 73575</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-accent-gold" />
-                  <span>info.rastlina@gmail.com</span>
-                </li>
-              </ul>
+            <ul className="space-y-4 text-sm text-white/75">
+              <li className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-accent-gold shrink-0 mt-0.5" />
+                <span>
+                  4th Floor, Lake View Towers,
+                  <br />
+                  Safari Nagar, Kondapur,
+                  <br />
+                  Hyderabad, 500084
+                </span>
+              </li>
+
+              <li className="flex items-center gap-3">
+                <Phone className="h-4 w-4 text-accent-gold shrink-0" />
+                <a
+                  href="tel:+919915473575"
+                  className="hover:text-accent-gold transition-colors"
+                >
+                  +91 99154 73575
+                </a>
+              </li>
+
+              <li className="flex items-center gap-3">
+                <Mail className="h-4 w-4 text-accent-gold shrink-0" />
+                <a
+                  href="mailto:info.rastlina@gmail.com"
+                  className="hover:text-accent-gold transition-colors break-all"
+                >
+                  info.rastlina@gmail.com
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Timings */}
+          <div>
+            <h4 className="text-lg font-serif font-medium mb-5">
+              Store Timings
+            </h4>
+
+            <div className="flex items-start gap-3 text-sm text-white/75 mb-6">
+              <Clock className="h-4 w-4 text-accent-gold mt-1 shrink-0" />
+
+              <div>
+                <p className="font-medium text-white/90">
+                  Monday – Saturday
+                </p>
+
+                <p className="text-white/60 mt-1">
+                  10:00 AM – 7:00 PM
+                </p>
+              </div>
             </div>
 
-            {/* Timings + Bulk */}
-            <div>
-              <h4 className="text-lg font-serif font-medium mb-4">Timings</h4>
-              <ul className="space-y-2 text-sm text-white/80 mb-6">
-                <li className="flex items-start gap-2">
-                  <Clock className="h-4 w-4 text-accent-gold mt-0.5" />
-                  <div>
-                    <p>Monday – Saturday</p>
-                    <p className="text-xs text-white/60">10:00 AM – 7:00 PM</p>
-                  </div>
-                </li>
-              </ul>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+              <p className="text-sm text-white/70 leading-relaxed">
+                Need help with plants, décor styling, or bulk requirements?
+              </p>
 
-              <h4 className="text-lg font-serif font-medium mb-3">Bulk Orders</h4>
-              <ul className="space-y-2 text-sm text-white/80">
-                <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-accent-gold" />
-                  <span>info.rastlina@gmail.com</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4 text-accent-gold" />
-                  <Link
-                    to="/contact"
-                    className="hover:text-accent-gold underline decoration-accent-gold/50"
-                  >
-                    Enquire for Bulk Orders
-                  </Link>
-                </li>
-              </ul>
+              <Link
+                to="/bulk"
+                className="inline-flex items-center mt-3 text-sm font-semibold text-accent-gold hover:underline"
+              >
+                Contact Our Team →
+              </Link>
             </div>
-
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/60">
-          <p>© 2025 Rastlina Plants. All rights reserved.</p>
-          
-          <div className="flex justify-center items-center gap-1">
-            Made with <Heart className="inline h-4 w-4 text-red-500 mx-1" /> by
+        <div className="pt-6 border-t border-white/10 flex flex-col lg:flex-row items-center justify-between gap-4 text-xs text-white/55">
+
+          <p className="text-center lg:text-left">
+            © 2025 Rastlina Plants. All rights reserved.
+          </p>
+
+          <div className="flex items-center gap-1 text-center">
+            Made with
+            <Heart className="h-3.5 w-3.5 text-red-500 mx-1 fill-red-500" />
+            by
             <a
               href="https://staffarc.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-orange-400 hover:underline"
+              className="flex items-center gap-1 text-orange-400 hover:underline ml-1"
             >
               <img
                 src="https://www.staffarc.in/images/Staffarc-logo.png"
                 alt="StaffArc logo"
-                className="h-5 w-5 object-contain"
+                className="h-4 w-4 object-contain"
               />
               StaffArc
             </a>
           </div>
 
-          <p>Designed with 🌿 in Hyderabad</p>
+          <p className="text-center lg:text-right">
+            Designed with 🌿 in Hyderabad
+          </p>
         </div>
 
       </div>
