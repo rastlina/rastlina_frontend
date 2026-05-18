@@ -4,7 +4,7 @@
 // Fetches up to 4 active Watch & Shop items.
 
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 import { useWatchAndShopList } from '@/hooks/useWatchAndShop';
 import { WatchAndShopCard } from '@/components/watch-and-shop/WatchAndShopCard';
 
@@ -63,30 +63,16 @@ const WatchAndShopSection = () => {
           </div>
 
           {/* Arrow controls — desktop */}
-          <div className="hidden md:flex items-center gap-2">
-            <button
-              onClick={() => scroll('left')}
-              disabled={!canLeft}
-              className="w-9 h-9 rounded-full border border-white/20 bg-white/10 flex items-center justify-center hover:bg-white/20 text-white transition-all disabled:opacity-25 disabled:cursor-not-allowed"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              disabled={!canRight}
-              className="w-9 h-9 rounded-full border border-white/20 bg-white/10 flex items-center justify-center hover:bg-white/20 text-white transition-all disabled:opacity-25 disabled:cursor-not-allowed"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+          
         </div>
 
         {/* Slider */}
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3 scroll-smooth"
+          className="
+flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3 scroll-smooth
+md:justify-center
+"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {loading
@@ -96,7 +82,7 @@ const WatchAndShopSection = () => {
               ))
           }
           {/* Trailing spacer */}
-          <div className="flex-shrink-0 w-4 md:w-8" aria-hidden="true" />
+          
         </div>
 
         {/* Mobile hint dots */}
