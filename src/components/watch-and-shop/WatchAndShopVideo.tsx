@@ -1,22 +1,10 @@
 // src/components/watch-and-shop/WatchAndShopVideo.tsx
-// Smart video player used on both the homepage card and the detail page.
-//
-// Supports:
-//   • YouTube URLs  → renders an <iframe> embed
-//   • Direct video URLs (.mp4, .webm, etc.) → renders <video> with IntersectionObserver
-//
-// IntersectionObserver handles:
-//   • Autoplay when entering viewport
-//   • Pause when leaving viewport
-//   • Only ONE video playing at a time (via a module-level Set)
-//
-// Usage on detail page:  <WatchAndShopVideo videoUrl={...} thumbnail={...} mode="detail" />
-// Usage on card:         <WatchAndShopVideo videoUrl={...} thumbnail={...} mode="card" />
+// Smart video player optimized for a clean, luxury e-commerce experience.
+// Automatically crops out YouTube title headers, timeline scrubbers, and playback controls.
 
-import { useRef, useEffect, useState, useCallback, memo } from 'react';
-import { Play, Volume2, VolumeX } from 'lucide-react';
+import { useRef, useEffect, useState, memo } from 'react';
 
-// ── Module-level registry so only one <video> plays at a time ─────────────────
+// ── Module-level registry so only one native video asset plays at a time ──
 const activeVideos = new Set<HTMLVideoElement>();
 
 function pauseOthers(except: HTMLVideoElement) {
@@ -25,272 +13,185 @@ function pauseOthers(except: HTMLVideoElement) {
   });
 }
 
-// ── YouTube helpers ───────────────────────────────────────────────────────────
+// ── YouTube Embed Formatting Helpers ───────────────────────────────────────────
 
 function isYouTubeUrl(url: string): boolean {
-  return /youtube\.com|youtu\.be/.test(url);
+  return /youtube\.com|youtu\.be|youtube-nocookie\.com/.test(url);
 }
 
-/** Convert any YouTube URL to the nocookie embed with autoplay + mute */
-function toYouTubeEmbed(url: string, autoplay: boolean): string {
+/**
+ * Extracts the 11-character video ID and appends strict parameter flags
+ * to disable native interfaces before rendering the iframe framework.
+ */
+function toYouTubeEmbed(url: string): string {
   let videoId = '';
 
-  // youtu.be/VIDEO_ID
-  const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
-  if (shortMatch) videoId = shortMatch[1];
+  if (url.includes('embed/')) {
+    videoId = url.split('embed/')[1]?.split('?')[0];
+  } else if (url.includes('shorts/')) {
+    videoId = url.split('shorts/')[1]?.split('?')[0];
+  } else if (url.includes('v=')) {
+    videoId = url.split('v=')[1]?.split('&')[0];
+  } else {
+    const match = url.match(/youtu\.be\/([^?&]+)/);
+    if (match) videoId = match[1];
+  }
 
-  // youtube.com/
-  // ?v=VIDEO_ID
-  const longMatch = url.match(/[?&]v=([^?&]+)/);
-  if (longMatch) videoId = longMatch[1];
-
-  // youtube.com/embed/VIDEO_ID
-  const embedMatch = url.match(/embed\/([^?&]+)/);
-  if (embedMatch) videoId = embedMatch[1];
-
-  if (!videoId) return url; // fallback — return original
+  if (!videoId || videoId.length !== 11) return url;
 
   const params = new URLSearchParams({
-    autoplay: autoplay ? '1' : '0',
+    autoplay: '1',
     mute: '1',
     loop: '1',
-    playlist: videoId,       // required for loop to work
-    controls: '1',
-    modestbranding: '1',
-    rel: '0',
-    playsinline: '1',
+    playlist: videoId,     // Mandatory reference token to enable repeating loops
+    controls: '0',         // Hides playbars, timeline sliders, and volume handles
+    modestbranding: '1',   // Minimizes prominent corporate logo placement passes
+    rel: '0',              // Prevents end-of-clip recommendation window popups
+    playsinline: '1',      // Disables system video fullscreen takeovers on smartphones
+    showinfo: '0',         // Legacy parameter protection fallback against top title bars
+    iv_load_policy: '3',   // Blocks interactive subscription popups and annotation overlays
   });
 
-  return `https://www.youtube-nocookie.com/embed/${videoId}?${params}`;
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
 }
-
-// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface WatchAndShopVideoProps {
   videoUrl: string;
   thumbnail?: string;
   productName?: string;
-  /** "card" = compact homepage card | "detail" = full-width detail page player */
   mode?: 'card' | 'detail';
-  /** Whether to start playing immediately (for detail page, card uses IntersectionObserver) */
-  autoplay?: boolean;
 }
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 export const WatchAndShopVideo = memo(({
   videoUrl,
   thumbnail,
   productName,
   mode = 'card',
-  autoplay = false,
 }: WatchAndShopVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isIntersecting, setIsIntersecting] = useState(false);
+  
+  // Controls overlay visibility state toggle logic
+  const [showControls, setShowControls] = useState(false);
 
   const isYT = isYouTubeUrl(videoUrl);
+  const embedUrl = isYT ? toYouTubeEmbed(videoUrl) : videoUrl;
 
-  // ── Native video: IntersectionObserver ──────────────────────────────────────
+  // ── Intersection Observer to trigger viewport runtime playback transitions ──
   useEffect(() => {
-    if (isYT) return; // YouTube iframe handles its own autoplay
-    const video = videoRef.current;
-    if (!video) return;
-
-    activeVideos.add(video);
+    const container = containerRef.current;
+    if (!container) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            pauseOthers(video);
-            video.play().then(() => setIsPlaying(true)).catch(() => {});
-          } else {
-            video.pause();
-            setIsPlaying(false);
-          }
-        });
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
       },
-      { threshold: mode === 'detail' ? 0.3 : 0.6 }
+      { threshold: 0.1 }
     );
 
-    observer.observe(video);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
-    return () => {
-      observer.disconnect();
-      activeVideos.delete(video);
-    };
-  }, [isYT, mode]);
-
-  // ── Register + cleanup native video ─────────────────────────────────────────
+  // ── Native HTML5 standard streaming lifecycle (.mp4 local asset fallback) ──
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video || isYT) return;
-    return () => { activeVideos.delete(video); };
-  }, [isYT]);
-
-  const toggleMute = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
+    if (isYT) return;
     const video = videoRef.current;
     if (!video) return;
-    video.muted = !video.muted;
-    setIsMuted(video.muted);
-  }, []);
-  const togglePlay = useCallback(() => {
-  const video = videoRef.current;
-  if (!video) return;
 
-  if (video.paused) {
-    pauseOthers(video);
+    if (isIntersecting) {
+      activeVideos.add(video);
+      pauseOthers(video);
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+      activeVideos.delete(video);
+    }
 
-    video
-      .play()
-      .then(() => setIsPlaying(true))
-      .catch(() => {});
-  } else {
-    video.pause();
-    setIsPlaying(false);
-  }
-}, []);
+    return () => {
+      activeVideos.delete(video);
+    };
+  }, [isIntersecting, isYT]);
 
+  // Dynamic user gesture handlers
+  const handleInteraction = () => {
+    setShowControls(prev => !prev);
+  };
 
-  // ── YouTube iframe ────────────────────────────────────────────────────────
-  if (isYT) {
-    const shouldAutoplay = mode === 'card' || mode === 'detail' || autoplay;
-
-const embedUrl = toYouTubeEmbed(videoUrl, shouldAutoplay);
-    return (
-      <div
-        ref={containerRef}
-        className={[
-          'relative w-full overflow-hidden bg-black',
-          mode === 'detail'
-            ? 'rounded-2xl aspect-video lg:aspect-[4/5]'
-            : 'rounded-2xl aspect-[9/16]',
-        ].join(' ')}
-      >
-        {/* Thumbnail shown until iframe loads */}
-        {thumbnail && !isLoaded && (
-          <img
-            src={thumbnail}
-            alt={productName || 'Video thumbnail'}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-        <iframe
-  src={embedUrl}
-  title={productName || 'Watch & Shop Video'}
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowFullScreen
-  onLoad={() => setIsLoaded(true)}
-  loading="lazy"
-  className={[
-    "absolute inset-0 w-full h-full border-0",
-    mode === "card" ? "pointer-events-none" : ""
-  ].join(" ")}
-/>
-      </div>
-    );
-  }
-
-  // ── Native <video> ─────────────────────────────────────────────────────────
   return (
-<div
-  ref={containerRef}
-  className={[
-    'relative group overflow-hidden bg-black',
-    mode === 'detail'
-      ? 'rounded-2xl aspect-video lg:aspect-[4/5] w-full'
-      : 'rounded-2xl aspect-[9/16] w-full cursor-pointer',
-  ].join(' ')}
->
-      {/* Thumbnail fallback */}
-      {thumbnail && (
+    <div
+      ref={containerRef}
+      onClick={handleInteraction}
+      onMouseEnter={() => setShowControls(true)}
+      onMouseLeave={() => setShowControls(false)}
+      className={[
+        'relative w-full overflow-hidden bg-black select-none group cursor-pointer',
+        mode === 'detail'
+          ? 'rounded-2xl aspect-[9/16] md:aspect-[3/4] lg:aspect-[4/5] max-h-[75vh] w-full max-w-[450px] mx-auto shadow-2xl'
+          : 'rounded-2xl aspect-[9/16] w-full',
+      ].join(' ')}
+    >
+      {/* 1. SEAMLESS REEL COVER IMAGE PLACEHOLDER */}
+      {thumbnail && !isLoaded && (
         <img
           src={thumbnail}
-          alt={productName || 'Video thumbnail'}
-          className={[
-            'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
-            isLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100',
-          ].join(' ')}
+          alt={productName || 'Premium item visualization'}
+          className="absolute inset-0 w-full h-full object-cover z-30 transition-opacity duration-500 ease-out pointer-events-none"
         />
       )}
 
-      {/* Native video */}
-      <video
-        ref={videoRef}
-        src={videoUrl}
-        poster={thumbnail}
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        className="absolute inset-0 w-full h-full object-cover"
-        onCanPlay={() => setIsLoaded(true)}
-        onError={() => setHasError(true)}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      />
-
-      {/* Error state */}
-      {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
-          <p className="text-white/60 text-sm font-medium">Video unavailable</p>
+      {/* 2. THREE-STAGE LUXURY OVERSCAN BRANDING OVERLAY MASK */}
+      {isYT ? (
+        <div 
+          className={[
+            "absolute w-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-700",
+            // The magic crop formulas:
+            // 1. We stretch the height to 135% to convert horizontal view lines into clean vertical ratios.
+            // 2. We use scale-[1.35] to safely crop top-banner metadata and bottom media controls beyond the visible bounds.
+            "aspect-[9/16] h-[135%] scale-[1.35]",
+            isLoaded ? "opacity-100" : "opacity-0"
+          ].join(' ')}
+        >
+          <iframe
+            src={isIntersecting ? embedUrl : ''}
+            title={productName || 'Luxury Brand Feed'}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            frameBorder="0"
+            onLoad={() => setIsLoaded(true)}
+            className="w-full h-full object-cover pointer-events-none"
+            style={{ pointerEvents: 'none' }}
+          />
         </div>
+      ) : (
+        /* 3. HARDWARE-ACCELERATED STANDALONE MP4 PIPELINE */
+        <video
+          ref={videoRef}
+          src={embedUrl}
+          muted
+          loop
+          playsInline
+          webkit-playsinline="true"
+          preload="metadata"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10"
+          onCanPlay={() => setIsLoaded(true)}
+          onError={() => setHasError(true)}
+        />
       )}
 
-      {/* Card controls overlay */}
-      {mode === 'card' && (
-        <>
-          {/* Play button — shown when paused */}
-          {!isPlaying && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                <Play className="h-6 w-6 text-white fill-white ml-0.5" />
-              </div>
-            </div>
-          )}
-
-          {/* Mute toggle */}
-          <button
-            onClick={toggleMute}
-            className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-            aria-label={isMuted ? 'Unmute' : 'Mute'}
-          >
-            {isMuted
-              ? <VolumeX className="h-3.5 w-3.5 text-white" />
-              : <Volume2 className="h-3.5 w-3.5 text-white" />
-            }
-          </button>
-        </>
+      {/* 4. INVISIBLE GESTURE GLASS PROTECTION SHIELD
+          Sits directly on top of the iframe to intercept context switches when controls are hidden.
+      */}
+      {isYT && isLoaded && !showControls && (
+        <div className="absolute inset-0 w-full h-full z-20 bg-transparent" />
       )}
 
-      {/* Detail page controls */}
-      {mode === 'detail' && isLoaded && (
-        <div className="absolute bottom-4 right-4 flex gap-2 z-10">
-          <button
-            onClick={togglePlay}
-            className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/20 hover:bg-black/70 transition-colors"
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-          >
-            {isPlaying
-              ? <span className="flex gap-0.5"><span className="w-1 h-3.5 bg-white rounded-sm"/><span className="w-1 h-3.5 bg-white rounded-sm"/></span>
-              : <Play className="h-4 w-4 text-white fill-white ml-0.5" />
-            }
-          </button>
-          <button
-            onClick={toggleMute}
-            className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/20 hover:bg-black/70 transition-colors"
-            aria-label={isMuted ? 'Unmute' : 'Mute'}
-          >
-            {isMuted
-              ? <VolumeX className="h-4 w-4 text-white" />
-              : <Volume2 className="h-4 w-4 text-white" />
-            }
-          </button>
+      {/* 5. ERROR DIAGNOSTIC FRAME DISPLAY */}
+      {hasError && !isYT && (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-40">
+          <p className="text-zinc-500 text-[10px] tracking-widest uppercase font-mono">Asset Inaccessible</p>
         </div>
       )}
     </div>
