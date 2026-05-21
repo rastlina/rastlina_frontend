@@ -40,9 +40,15 @@ export default function UserProfile() {
   const [updating, setUpdating] = useState(false);
 
   // ── Auth guard ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!authUser) navigate('/login');
-  }, [authUser, navigate]);
+useEffect(() => {
+  if (!authUser) {
+    navigate('/login', {
+      state: {
+        redirectTo: '/profile?tab=orders',
+      },
+    });
+  }
+}, [authUser, navigate]);
 
   // ── Switch tab + sync URL ──────────────────────────────────────────────────
   const switchTab = (tab: Tab) => {
@@ -76,10 +82,15 @@ export default function UserProfile() {
   }, []);
 
   // Load orders on mount and when orders tab is active
-  useEffect(() => {
-    if (activeTab === 'orders') loadOrders(currentPage);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+useEffect(() => {
+  if (!authUser) return;
+
+  if (activeTab === 'orders') {
+    loadOrders(currentPage);
+  }
+
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [activeTab, authUser]);
 
   const handlePageChange = (page: number) => {
     loadOrders(page);

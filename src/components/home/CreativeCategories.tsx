@@ -7,7 +7,7 @@ import { useHomeData } from '@/hooks/useHomeData';
 
 const SkeletonCircle = () => (
   <div className="flex flex-col items-center gap-2 flex-shrink-0">
-    <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-gray-100 animate-pulse" />
+    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-100 animate-pulse" />
     <div className="h-3 w-14 bg-gray-100 rounded animate-pulse" />
   </div>
 );
@@ -61,7 +61,7 @@ const CreativeCategories = () => {
                     </div>
                   </div>
                   {/* Label */}
-                  <span className="text-[10px] md:text-xs font-semibold text-gray-600 group-hover:text-[#1A3831] transition-colors text-center w-16 md:w-24 leading-tight">
+                  <span className="text-sm md:text-base font-semibold text-gray-600 group-hover:text-[#1A3831] transition-colors text-center w-24 md:w-32 leading-tight">
                     {cat.name}
                   </span>
                 </Link>

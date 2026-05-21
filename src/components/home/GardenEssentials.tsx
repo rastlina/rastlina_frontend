@@ -5,9 +5,9 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
-import officeImg from '@/assets/category-office.jpg';
-import livingImg from '@/assets/category-living.jpg';
-import balconyImg from '@/assets/category-balcony.jpg';
+import officeImg from '@/assets/c1.jpeg';
+import livingImg from '@/assets/c2.jpeg';
+import balconyImg from '@/assets/c3.jpeg';
 
 const items = [
   {

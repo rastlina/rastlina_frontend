@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import {
   Instagram,
+  Facebook,
+  Twitter,
   MapPin,
   Phone,
   Mail,
@@ -45,17 +47,39 @@ export const Footer = () => {
             </p>
 
             {/* Social */}
-            <div className="flex items-center gap-3 pt-1">
-              <a
-                href="https://www.instagram.com/rastlina2025"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-4 w-4" />
-              </a>
-            </div>
+            {/* Social */}
+<div className="flex items-center gap-3 pt-1">
+
+  {/* Instagram */}
+  <a
+    href="https://www.instagram.com/rastlina2025"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors"
+    aria-label="Instagram"
+  >
+    <Instagram className="h-4 w-4" />
+  </a>
+
+  {/* Facebook Placeholder */}
+  <a
+    href="#"
+    className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors opacity-70"
+    aria-label="Facebook"
+  >
+    <Facebook className="h-4 w-4" />
+  </a>
+
+  {/* X / Twitter Placeholder */}
+  <a
+    href="#"
+    className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors opacity-70"
+    aria-label="X"
+  >
+    <Twitter className="h-4 w-4" />
+  </a>
+
+</div>
           </div>
 
           {/* Quick Links */}

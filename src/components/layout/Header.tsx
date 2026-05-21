@@ -373,10 +373,26 @@ const plantSizes = navData?.plants_sizes || [];
   const plantsCategories = plantsCat?.categories || [];
 
   // Static extra nav items (Offers, Bulk)
-  const extraNavItems = [
-    { label: 'Offers', href: '/shop?is_best_deal=true', highlight: true, icon: <Tag className="h-3.5 w-3.5" /> },
-    { label: 'Bulk', href: '/bulk', icon: <Briefcase className="h-3.5 w-3.5" /> },
-  ];
+const extraNavItems = [
+  {
+    label: 'Track Your Order',
+    href:'/profile?tab=orders',
+    icon: <ShoppingBag className="h-3.5 w-3.5" />,
+  },
+
+  {
+    label: 'Offers',
+    href: '/shop?is_best_deal=true',
+    highlight: true,
+    icon: <Tag className="h-3.5 w-3.5" />,
+  },
+
+  {
+    label: 'Bulk',
+    href: '/bulk',
+    icon: <Briefcase className="h-3.5 w-3.5" />,
+  },
+];
 
   return (
     <div className="fixed top-0 left-0 w-full z-50 bg-white">

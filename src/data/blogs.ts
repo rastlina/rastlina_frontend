@@ -1,8 +1,8 @@
 // src/data/blogs.ts
 
-import blog1 from '@/assets/category-living.jpg';
-import blog2 from '@/assets/category-office.jpg';
-import blog3 from '@/assets/category-balcony.jpg';
+import blog1 from '@/assets/b1.jpeg';
+import blog2 from '@/assets/b2.jpeg';
+import blog3 from '@/assets/b3.jpeg';
 
 export const blogs = [
   {
@@ -261,99 +261,164 @@ export const blogs = [
     image: blog3,
     date: 'Sep 15, 2025',
     tag: 'Decor',
-    content: `
-      <p>Vertical gardens are perfect for compact balconies and urban apartments where floor space is at a premium. They transform plain walls into lush, living artworks while providing numerous environmental and aesthetic benefits.</p>
-      
-      <p>Whether you have a tiny balcony, a tiny patio, or just a small wall, a vertical garden can turn that space into a green oasis.</p>
-      
-      <h2>Why Choose a Vertical Garden?</h2>
-      
-      <h3>Space-Saving Benefits</h3>
-      <ul>
-        <li><strong>Maximizes limited space</strong> — Go up instead of out</li>
-        <li><strong>No floor space needed</strong> — Perfect for small balconies</li>
-        <li><strong>Creates privacy</strong> — Natural screen from neighbors</li>
-        <li><strong>Adds insulation</strong> — Plants help regulate temperature</li>
-        <li><strong>Reduces noise</strong> — Living walls absorb sound</li>
-      </ul>
-      
-      <h3>Environmental Benefits</h3>
-      <ul>
-        <li><strong>Improves air quality</strong> — Plants filter pollutants</li>
-        <li><strong>Reduces urban heat</strong> — Green walls cool surrounding areas</li>
-        <li><strong>Supports biodiversity</strong> — Attracts beneficial insects and birds</li>
-        <li><strong>Reduces carbon footprint</strong> — Plants absorb CO2</li>
-        <li><strong>Manages stormwater</strong> — Absorbs rainwater runoff</li>
-      </ul>
-      
-      <h3>Aesthetic Benefits</h3>
-      <ul>
-        <li><strong>Creates visual interest</strong> — Adds texture and depth</li>
-        <li><strong>Personalizes space</strong> — Express your style</li>
-        <li><strong>Increases property value</strong> — Green spaces are desirable</li>
-        <li><strong>Improves mental health</strong> — Connection with nature</li>
-        <li><strong>Photogenic backdrop</strong> — Beautiful for photos and videos</li>
-      </ul>
-      
-      <h2>Best Plants for Vertical Gardens</h2>
-      
-      <h3>1. Pothos (Epipremnum Aureum)</h3>
-      <p><strong>Why it's perfect:</strong></p>
-      <ul>
-        <li>Thrives in various light conditions</li>
-        <li>Trailing habit looks stunning vertically</li>
-        <li>Very low maintenance</li>
-        <li>Fast-growing</li>
-        <li>Excellent air purifier</li>
-      </ul>
-      <p><strong>Care:</strong> Light: Low to bright indirect | Water: When top inch is dry | Humidity: Adaptable</p>
-      
-      <h3>2. Ferns (Boston Fern, Maidenhair Fern)</h3>
-      <p><strong>Why they're perfect:</strong></p>
-      <ul>
-        <li>Lush, feathery texture</li>
-        <li>Love humidity</li>
-        <li>Native to tropical environments</li>
-        <li>Create dense, full coverage</li>
-      </ul>
-      <p><strong>Care:</strong> Light: Indirect, no direct sun | Water: Keep consistently moist | Humidity: High (50-80%)</p>
-      
-      <h3>3. Succulents (Echeveria, Sedum, String of Pearls)</h3>
-      <p><strong>Why they're perfect:</strong></p>
-      <ul>
-        <li>Drought-tolerant</li>
-        <li>Unique shapes and colors</li>
-        <li>Low maintenance</li>
-        <li>Perfect for sunny walls</li>
-      </ul>
-      <p><strong>Care:</strong> Light: Bright, direct sun | Water: Allow to dry between waterings | Humidity: Low</p>
-      
-      <h3>4. Spider Plant (Chlorophytum Comosum)</h3>
-      <p><strong>Why it's perfect:</strong></p>
-      <ul>
-        <li>Fast-growing and easy to propagate</li>
-        <li>Arching habit looks beautiful</li>
-        <li>Very hardy</li>
-        <li>Excellent air purifier</li>
-      </ul>
-      <p><strong>Care:</strong> Light: Bright indirect | Water: When top inch is dry | Humidity: Average</p>
-      
-      <h3>5. Herbs (Basil, Mint, Thyme, Rosemary)</h3>
-      <p><strong>Why they're perfect:</strong></p>
-      <ul>
-        <li>Practical and beautiful</li>
-        <li>Fresh herbs always available</li>
-        <li>Aromatic and attractive</li>
-        <li>Compact growth</li>
-      </ul>
-      <p><strong>Care:</strong> Light: 6+ hours of sun | Water: Keep soil moist | Tip: Harvest regularly</p>
-      
-      <h2>Final Thoughts</h2>
-      <p>Vertical gardens transform small spaces into lush, green sanctuaries. They're perfect for urban apartments, small balconies, and anyone limited on floor space.</p>
-      
-      <p>Start with a simple system, choose plants that match your light conditions, and establish a consistent care routine. Within a few months, you'll have a thriving vertical garden that adds beauty, improves air quality, and creates a peaceful space you'll love spending time in.</p>
-      
-      <p><strong>Remember:</strong> The best vertical garden is one you'll actually maintain. Start small, learn as you go, and expand as you gain confidence.</p>
-    `,
+content: `
+  <p>In recent years, buying plants online has become increasingly popular across the country. Whether you want to decorate your home, improve indoor air quality, or gift greenery to someone special, online plant shopping offers unmatched convenience. However, with so many options available, finding the best site to buy plants online india can feel overwhelming.</p>
+
+  <p>From plant quality and packaging to delivery speed and pricing, several factors determine whether an online nursery is worth your money. In this blog, we’ll explore what makes a platform reliable and how to choose the right one for your gardening needs.</p>
+
+  <h2>Why Buying Plants Online Is a Smart Choice</h2>
+
+  <p>Online plant shopping has transformed the way people build their gardens. Instead of visiting multiple local nurseries, you can browse hundreds of varieties from the comfort of your home.</p>
+
+  <p>Here’s why many plant lovers prefer online platforms:</p>
+
+  <ul>
+    <li>Wide variety of indoor and outdoor plants</li>
+    <li>Easy comparison of prices</li>
+    <li>Doorstep delivery</li>
+    <li>Detailed plant care instructions</li>
+    <li>Seasonal discounts and combo offers</li>
+  </ul>
+
+  <p>The convenience factor alone makes online nurseries highly appealing, especially for busy professionals and urban residents.</p>
+
+  <h2>Key Features of a Reliable Online Plant Store</h2>
+
+  <h3>1. Healthy and Quality Plants</h3>
+
+  <p>A trusted website ensures that plants are grown in hygienic conditions and carefully inspected before shipping. Healthy leaves, strong roots, and proper packaging are signs of quality control.</p>
+
+  <h3>2. Secure Packaging</h3>
+
+  <p>Plants are delicate. Proper packaging prevents soil spillage, root damage, and leaf breakage during transit. The best platforms use eco-friendly yet protective materials.</p>
+
+  <h3>3. Fast and Safe Delivery</h3>
+
+  <p>Quick shipping reduces plant stress. Reliable companies provide tracking details and ensure timely delivery, even in metro cities and remote locations.</p>
+
+  <h3>4. Affordable Pricing</h3>
+
+  <p>Competitive pricing with seasonal offers makes plant shopping budget-friendly. Look for combo deals and first-time buyer discounts.</p>
+
+  <h3>5. Customer Support</h3>
+
+  <p>Responsive customer service is essential in case of damaged plants or delivery delays. A good return or replacement policy adds extra assurance.</p>
+
+  <h2>Popular Categories Available Online</h2>
+
+  <p>A professional online plant store usually offers a wide selection to meet different needs.</p>
+
+  <h3>Indoor Plants</h3>
+
+  <p>Perfect for apartments and office spaces, indoor plants like Snake Plant, Money Plant, and Peace Lily require minimal maintenance.</p>
+
+  <h3>Outdoor Plants</h3>
+
+  <p>Flowering plants, shrubs, and fruit plants are ideal for balconies, terraces, and gardens.</p>
+
+  <h3>Air-Purifying Plants</h3>
+
+  <p>These varieties help improve indoor air quality and are popular among urban homeowners.</p>
+
+  <h3>Succulents and Cacti</h3>
+
+  <p>Low-maintenance and stylish, succulents are perfect for desks and small spaces.</p>
+
+  <h3>Gardening Accessories</h3>
+
+  <p>Pots, fertilizers, soil mixes, and watering tools are often available in one place for added convenience.</p>
+
+  <p>When a platform provides all these categories, it becomes easier to identify the best site to buy plants online india for your specific needs.</p>
+
+  <h2>Benefits of Fast Delivery</h2>
+
+  <p>Fast delivery is not just about convenience—it directly impacts plant health. The longer a plant stays in transit, the more stress it experiences.</p>
+
+  <p>Quick shipping ensures:</p>
+
+  <ul>
+    <li>Fresher and healthier plants upon arrival</li>
+    <li>Reduced risk of root rot or leaf damage</li>
+    <li>Better overall customer satisfaction</li>
+  </ul>
+
+  <p>Top platforms often ship within 2–5 days, depending on your location.</p>
+
+  <h2>How to Compare Prices Smartly</h2>
+
+  <p>Price comparison is essential before placing an order. However, don’t focus only on the lowest price.</p>
+
+  <p>Instead, consider:</p>
+
+  <ul>
+    <li>Plant size and maturity</li>
+    <li>Pot quality</li>
+    <li>Delivery charges</li>
+    <li>Replacement guarantee</li>
+    <li>Combo discounts</li>
+  </ul>
+
+  <p>Sometimes paying slightly more ensures better quality and longevity. The goal is to balance affordability with value.</p>
+
+  <h2>Customer Reviews Matter</h2>
+
+  <p>Before choosing the best site to buy plants online india, always check customer reviews and ratings.</p>
+
+  <p>Reviews reveal:</p>
+
+  <ul>
+    <li>Actual plant condition upon delivery</li>
+    <li>Packaging quality</li>
+    <li>Delivery speed</li>
+    <li>Customer support experience</li>
+  </ul>
+
+  <p>Platforms with consistent positive feedback are usually more reliable.</p>
+
+  <h2>Tips for First-Time Buyers</h2>
+
+  <p>If you’re new to buying plants online, follow these tips:</p>
+
+  <ul>
+    <li>Start with low-maintenance plants</li>
+    <li>Read plant care instructions carefully</li>
+    <li>Choose plants suitable for your climate</li>
+    <li>Check estimated delivery timelines</li>
+    <li>Record an unboxing video in case you need to claim damage</li>
+  </ul>
+
+  <p>These small precautions can ensure a smooth shopping experience.</p>
+
+  <h2>Eco-Friendly and Sustainable Practices</h2>
+
+  <p>Many online nurseries now focus on sustainability. They use biodegradable pots, organic fertilizers, and minimal plastic packaging.</p>
+
+  <p>Supporting such businesses not only beautifies your home but also contributes to environmental conservation.</p>
+
+  <p>Sustainable practices are often a strong indicator of the best site to buy plants online india, as they show long-term commitment to quality and responsibility.</p>
+
+  <h2>Why Great Pricing Makes a Difference</h2>
+
+  <p>Affordable pricing allows customers to experiment with different plant varieties without overspending. Competitive rates combined with fast delivery create a satisfying shopping experience.</p>
+
+  <p>Look for:</p>
+
+  <ul>
+    <li>Festival sales</li>
+    <li>Bulk purchase discounts</li>
+    <li>Subscription plans for regular plant deliveries</li>
+    <li>Loyalty reward programs</li>
+  </ul>
+
+  <p>These offers can significantly reduce costs while expanding your plant collection.</p>
+
+  <h2>Final Thoughts</h2>
+
+  <p>Finding the best site to buy plants online india requires careful consideration of quality, pricing, delivery speed, and customer support. The ideal platform combines healthy plants, secure packaging, quick shipping, and reasonable prices.</p>
+
+  <p>Online plant shopping has made gardening accessible to everyone, whether you live in a small apartment or a large home. By choosing wisely, you can enjoy fresh greenery delivered straight to your doorstep without compromising on quality or budget.</p>
+
+  <p>Take your time to research, compare options, and read reviews. Once you find a reliable store, building your dream garden becomes easier and more enjoyable than ever. 🌿</p>
+`,
   },
 ];

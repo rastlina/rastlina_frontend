@@ -60,6 +60,7 @@ interface WatchAndShopVideoProps {
   thumbnail?: string;
   productName?: string;
   mode?: 'card' | 'detail';
+  autoplay?: boolean;
 }
 
 export const WatchAndShopVideo = memo(({
@@ -67,6 +68,7 @@ export const WatchAndShopVideo = memo(({
   thumbnail,
   productName,
   mode = 'card',
+  autoplay = true,
 }: WatchAndShopVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -102,14 +104,14 @@ export const WatchAndShopVideo = memo(({
     const video = videoRef.current;
     if (!video) return;
 
-    if (isIntersecting) {
-      activeVideos.add(video);
-      pauseOthers(video);
-      video.play().catch(() => {});
-    } else {
-      video.pause();
-      activeVideos.delete(video);
-    }
+    if (isIntersecting && autoplay) {
+  activeVideos.add(video);
+  pauseOthers(video);
+  video.play().catch(() => {});
+} else {
+  video.pause();
+  activeVideos.delete(video);
+}
 
     return () => {
       activeVideos.delete(video);
@@ -172,6 +174,7 @@ export const WatchAndShopVideo = memo(({
           src={embedUrl}
           muted
           loop
+          autoPlay={autoplay}
           playsInline
           webkit-playsinline="true"
           preload="metadata"
