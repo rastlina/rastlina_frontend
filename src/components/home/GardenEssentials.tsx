@@ -13,7 +13,7 @@ const items = [
   {
     title: 'Premium Planters',
     desc: 'Ceramic, Terracotta & Stands',
-    image: balconyImg,
+    image: officeImg,
     link: '/shop?main_category=planters',
   },
   {
@@ -25,7 +25,7 @@ const items = [
   {
     title: 'Plant Care',
     desc: 'Soils, Fertilizers & Tools',
-    image: officeImg,
+    image: balconyImg,
     link: '/shop?main_category=care',
   },
 ];

@@ -52,23 +52,24 @@ export const Footer = () => {
 
   {/* Instagram */}
   <a
-    href="https://www.instagram.com/rastlina2025"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors"
-    aria-label="Instagram"
-  >
-    <Instagram className="h-4 w-4" />
-  </a>
+  href="https://www.instagram.com/rastlina_naturehub/"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors"
+  aria-label="Instagram"
+>
+  <Instagram className="h-4 w-4" />
+</a>
 
-  {/* Facebook Placeholder */}
-  <a
-    href="#"
-    className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors opacity-70"
-    aria-label="Facebook"
-  >
-    <Facebook className="h-4 w-4" />
-  </a>
+<a
+  href="https://www.facebook.com/profile.php?id=61590102247893"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors"
+  aria-label="Facebook"
+>
+  <Facebook className="h-4 w-4" />
+</a>
 
   {/* X / Twitter Placeholder */}
   <a
@@ -126,7 +127,7 @@ export const Footer = () => {
                   href="tel:+919915473575"
                   className="hover:text-accent-gold transition-colors"
                 >
-                  +91 99154 73575
+                  +91 8143814466 
                 </a>
               </li>
 

@@ -110,7 +110,7 @@ export default function Contact() {
             <div className="space-y-4 pt-12 border-t border-white/20 mt-12">
               <div className="flex items-center gap-3 text-sm">
                 <Phone className="h-4 w-4 text-accent-gold" />
-                <span>+91 99154 73575</span>
+                <span>+91 8143814466 </span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Mail className="h-4 w-4 text-accent-gold" />

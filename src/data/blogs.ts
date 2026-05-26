@@ -255,7 +255,7 @@ export const blogs = [
 
   {
     id: 3,
-    title: 'Styling Your Balcony with Vertical Gardens',
+    title: 'Best Site to Buy Plants Online India with Fast Delivery & Great Prices',
     excerpt:
       'Short on space? Here is how to create a lush green wall in small urban apartments. Complete guide to designing, building, and maintaining a stunning vertical garden.',
     image: blog3,
