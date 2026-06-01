@@ -62,7 +62,7 @@ export const Footer = () => {
 </a>
 
 <a
-  href="https://www.facebook.com/profile.php?id=61590102247893"
+  href="https://www.facebook.com/profile.php?id=61590309719114"
   target="_blank"
   rel="noopener noreferrer"
   className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors"
