@@ -1,4 +1,4 @@
-
+import { useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
@@ -18,7 +18,7 @@ import WatchAndShopDetail from '@/pages/WatchAndShopDetail';
 import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 import UserProfile from './pages/UserProfile';
-import Contact from './pages/Contact'; // Imported Contact Page
+import Contact from './pages/Contact';
 import LoginPage from './pages/LoginPage';
 import BlogDetail from '@/pages/BlogDetail';
 import CheckoutPage from '@/pages/CheckoutPage';
@@ -28,54 +28,77 @@ import ShippingPolicyPage from "./pages/ShippingPolicyPage";
 import ReturnsRefundPolicyPage from './pages/ReturnsRefundPage';
 import ReplacementPolicyPage from "./pages/ReplacementPolicyPage";
 
-
 const queryClient = new QueryClient();
+const META_PIXEL_ID = '1051662191229917';
 
-const App = () => (
-  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-    <AuthProvider>   {/* ✅ ADD THIS */}
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <CartProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <ScrollToTop />
+const App = () => {
+  useEffect(() => {
+    const pixelWindow = window as any;
+    if (pixelWindow.fbq) return;
 
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <div className="flex-1">
-                  <Routes>
-                    
-                    <Route path="/" element={<Index />} />
-                    <Route path="/shop" element={<Shop />} />
-                    <Route path="/shop/:category" element={<Shop />} />
-                    <Route path="/product/:slug" element={<ProductDetail />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                    <Route path="/terms-and-conditions" element={<TermsPage />} />
-                    <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
-                    <Route path="/returns-refund-policy" element={<ReturnsRefundPolicyPage />} />
-                    <Route path="/replacement-policy" element={<ReplacementPolicyPage />} />
-                     <Route path="/watch-shop/:slug" element={<WatchAndShopDetail />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/profile" element={<UserProfile />} />
-                    <Route path="/bulk" element={<Contact />} />
-                    <Route path="/blog/:id" element={<BlogDetail />} />
-                    <Route path="/checkout" element={<CheckoutPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+    const fbq: any = function (...args: any[]) {
+      if (fbq.callMethod) fbq.callMethod(...args);
+      else fbq.queue.push(args);
+    };
+    fbq.queue = [];
+    fbq.push = fbq;
+    fbq.loaded = true;
+    fbq.version = '2.0';
+    pixelWindow.fbq = fbq;
+    pixelWindow._fbq = fbq;
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    document.head.appendChild(script);
+
+    fbq('init', META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }, []);
+
+  return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <CartProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <ScrollToTop />
+                <div className="min-h-screen flex flex-col">
+                  <Header />
+                  <div className="flex-1">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/shop" element={<Shop />} />
+                      <Route path="/shop/:category" element={<Shop />} />
+                      <Route path="/product/:slug" element={<ProductDetail />} />
+                      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                      <Route path="/terms-and-conditions" element={<TermsPage />} />
+                      <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                      <Route path="/returns-refund-policy" element={<ReturnsRefundPolicyPage />} />
+                      <Route path="/replacement-policy" element={<ReplacementPolicyPage />} />
+                      <Route path="/watch-shop/:slug" element={<WatchAndShopDetail />} />
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/profile" element={<UserProfile />} />
+                      <Route path="/bulk" element={<Contact />} />
+                      <Route path="/blog/:id" element={<BlogDetail />} />
+                      <Route path="/checkout" element={<CheckoutPage />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </div>
+                  <Footer />
+                  <CartDrawer />
+                  <WhatsAppButton />
                 </div>
-                <Footer />
-                <CartDrawer />
-                <WhatsAppButton />
-              </div>
-
-            </BrowserRouter>
-          </CartProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </AuthProvider>   {/* ✅ END */}
-  </GoogleOAuthProvider>
-);
+              </BrowserRouter>
+            </CartProvider>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>
+  );
+};
 
 export default App;
