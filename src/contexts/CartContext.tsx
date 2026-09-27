@@ -319,6 +319,20 @@ setAppliedCoupon({
       }];
     });
 
+    const trackedQuantity = clampQuantity(quantity, stock);
+    (window as any).fbq?.('track', 'AddToCart', {
+      value: price * trackedQuantity,
+      currency: 'INR',
+      content_ids: [String(product.id)],
+      content_name: product.name,
+      content_type: 'product',
+      contents: [{
+        id: String(product.id),
+        quantity: trackedQuantity,
+        item_price: price,
+      }],
+    });
+
     // Open cart drawer after adding
    
   }, []);
