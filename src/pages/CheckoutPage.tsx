@@ -313,6 +313,21 @@ applyCoupon({
       razorpay_signature: response.razorpay_signature,
     });
 
+    (window as any).fbq?.('track', 'Purchase', {
+      value: checkoutCalc.total,
+      currency: 'INR',
+      content_ids: items.map(item => String(item.product.id)),
+      content_type: 'product',
+      contents: items.map(item => ({
+        id: String(item.product.id),
+        quantity: item.quantity,
+        item_price: item.price,
+      })),
+      num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+    }, {
+      eventID: `purchase_${res.order_id}_${response.razorpay_payment_id}`,
+    });
+
     // Clear everything after successful payment
     clearCart();
     removeCoupon();
