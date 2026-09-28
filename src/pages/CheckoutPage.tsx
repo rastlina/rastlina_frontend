@@ -22,6 +22,36 @@ declare global {
   interface Window { Razorpay: any; }
 }
 
+const RAZORPAY_CHECKOUT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
+
+const loadRazorpayCheckout = (): Promise<boolean> =>
+  new Promise(resolve => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const handleLoad = () => resolve(Boolean(window.Razorpay));
+    const handleError = () => resolve(false);
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[src="' + RAZORPAY_CHECKOUT_URL + '"]',
+    );
+
+    if (existingScript) {
+      existingScript.addEventListener('load', handleLoad, { once: true });
+      existingScript.addEventListener('error', handleError, { once: true });
+      window.setTimeout(handleLoad, 5000);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = RAZORPAY_CHECKOUT_URL;
+    script.async = true;
+    script.onload = handleLoad;
+    script.onerror = handleError;
+    document.head.appendChild(script);
+  });
+
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
 const fmt = (v: number) =>
@@ -290,13 +320,14 @@ applyCoupon({
     };
 
     try {
-      const res = await orderService.createOrder(orderPayload);
-
-      if (!window.Razorpay) {
-        toast.error('Payment gateway failed to load. Please refresh the page.');
+      const razorpayReady = await loadRazorpayCheckout();
+      if (!razorpayReady) {
+        toast.error('Payment gateway failed to load. Please check your connection and try again.');
         setIsPlacingOrder(false);
         return;
       }
+
+      const res = await orderService.createOrder(orderPayload);
 
       const rzpOptions = {
         key: res.key,
