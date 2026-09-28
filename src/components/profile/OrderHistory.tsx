@@ -5,6 +5,7 @@
 //   • Return request: new button using submitOrderReturnRequest
 //   • Request badge shown on collapsed order card
 //   • Pending orders never reach this component (filtered by backend + OrderListView)
+//   • Replaced `any` types with proper interfaces (fixes eslint no-explicit-any)
 
 import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -13,14 +14,91 @@ import {
   Package, Clock, CheckCircle, Truck, XCircle,
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
   RotateCcw, AlertCircle, Gift, ShoppingBag, X, ArrowLeftRight,
+  type LucideIcon,
 } from 'lucide-react';
 import { orderService } from '@/services/api';
 import { toast } from 'sonner';
 
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+type OrderStatus = 'Processing' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled';
+type PaymentStatus = 'Paid' | 'Pending' | 'Failed' | 'Refunded' | 'Refund Pending';
+type RequestStatus = 'Pending' | 'Approved' | 'Rejected' | 'Completed';
+
+interface OrderItem {
+  id: number;
+  product_name: string;
+  product_slug?: string;
+  variant_label?: string;
+  image_url?: string;
+  price: number | string;
+  quantity: number;
+  item_total: number | string;
+}
+
+interface ExchangeCode {
+  code: string;
+  original_order_value: number | string;
+  expires_at?: string;
+}
+
+interface ExchangeRequest {
+  id: number;
+  status: RequestStatus;
+  admin_notes?: string;
+  exchange_code?: ExchangeCode;
+}
+
+interface ReturnRequest {
+  id: number;
+  status: RequestStatus;
+  admin_notes?: string;
+  refund_initiated?: boolean;
+}
+
+interface Order {
+  id: number;
+  order_status: OrderStatus;
+  payment_status: PaymentStatus;
+  total_amount: number | string;
+  subtotal: number | string;
+  discount_amount?: number | string;
+  shipping_fee: number | string;
+  tax_amount?: number | string;
+  coupon_code?: string;
+  exchange_code_used?: string;
+  first_name: string;
+  last_name: string;
+  shipping_address: string;
+  apartment?: string;
+  landmark?: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  phone: string;
+  tracking_link?: string;
+  tracking_note?: string;
+  created_at: string;
+  items: OrderItem[];
+  return_requests?: ExchangeRequest[];
+  order_return_requests?: ReturnRequest[];
+  can_cancel?: boolean;
+  can_request_exchange?: boolean;
+  can_request_return_legacy?: boolean;
+  can_request_return?: boolean;
+}
+
+interface ApiErrorPayload {
+  error?: string;
+  detail?: string;
+  defect_description?: string[];
+  reason?: string[];
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ORDER_STATUS_CONFIG: Record<string, {
-  color: string; icon: any; label: string; step: number;
+const ORDER_STATUS_CONFIG: Record<OrderStatus, {
+  color: string; icon: LucideIcon; label: string; step: number;
 }> = {
   Processing: { color: 'text-blue-700 bg-blue-50 border-blue-200',           icon: Clock,       label: 'Processing', step: 0 },
   Confirmed:  { color: 'text-[#1A3831] bg-[#1A3831]/10 border-[#1A3831]/20', icon: CheckCircle, label: 'Confirmed',  step: 1 },
@@ -29,7 +107,7 @@ const ORDER_STATUS_CONFIG: Record<string, {
   Cancelled:  { color: 'text-red-700 bg-red-50 border-red-200',               icon: XCircle,     label: 'Cancelled',  step: -1 },
 };
 
-const PAYMENT_STATUS_COLOR: Record<string, string> = {
+const PAYMENT_STATUS_COLOR: Record<PaymentStatus, string> = {
   Paid:             'text-green-700 bg-green-50',
   Pending:          'text-yellow-700 bg-yellow-50',
   Failed:           'text-red-700 bg-red-50',
@@ -37,7 +115,7 @@ const PAYMENT_STATUS_COLOR: Record<string, string> = {
   'Refund Pending': 'text-orange-700 bg-orange-50',
 };
 
-const STATUS_STEPS = ['Processing', 'Confirmed', 'Shipped', 'Delivered'];
+const STATUS_STEPS: OrderStatus[] = ['Processing', 'Confirmed', 'Shipped', 'Delivered'];
 
 const fmt = (v: number | string) =>
   new Intl.NumberFormat('en-IN', {
@@ -48,6 +126,15 @@ const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'short', year: 'numeric',
   });
+
+const getErrorMessage = (err: unknown, fields: (keyof ApiErrorPayload)[]): string => {
+  const payload = (err ?? {}) as ApiErrorPayload;
+  for (const field of fields) {
+    const val = payload[field];
+    if (Array.isArray(val) && val[0]) return val[0];
+  }
+  return payload.error || payload.detail || 'Something went wrong. Please try again.';
+};
 
 // ─── Exchange Request Modal ───────────────────────────────────────────────────
 
@@ -75,13 +162,8 @@ function ExchangeModal({ orderId, onClose, onSuccess }: ExchangeModalProps) {
       toast.success('Exchange request submitted! We will review within 2–3 business days.');
       onSuccess();
       onClose();
-    } catch (err: any) {
-      const msg =
-        err?.defect_description?.[0] ||
-        err?.error ||
-        err?.detail ||
-        'Failed to submit request. Please try again.';
-      toast.error(msg);
+    } catch (err) {
+      toast.error(getErrorMessage(err, ['defect_description']));
     } finally {
       setSubmitting(false);
     }
@@ -189,13 +271,8 @@ function ReturnModal({ orderId, onClose, onSuccess }: ReturnModalProps) {
       toast.success('Return request submitted! Our team will review within 2–3 business days.');
       onSuccess();
       onClose();
-    } catch (err: any) {
-      const msg =
-        err?.reason?.[0] ||
-        err?.error ||
-        err?.detail ||
-        'Failed to submit return request. Please try again.';
-      toast.error(msg);
+    } catch (err) {
+      toast.error(getErrorMessage(err, ['reason']));
     } finally {
       setSubmitting(false);
     }
@@ -277,15 +354,15 @@ function ReturnModal({ orderId, onClose, onSuccess }: ReturnModalProps) {
 
 // ─── Request Badge (shown on collapsed card) ──────────────────────────────────
 
-function RequestBadges({ order }: { order: any }) {
-  const exchangeReqs: any[] = order.return_requests ?? [];
-  const returnReqs: any[] = order.order_return_requests ?? [];
+function RequestBadges({ order }: { order: Order }) {
+  const exchangeReqs: ExchangeRequest[] = order.return_requests ?? [];
+  const returnReqs: ReturnRequest[] = order.order_return_requests ?? [];
   const all = [...exchangeReqs, ...returnReqs];
   if (!all.length) return null;
 
   return (
     <div className="flex flex-wrap gap-1.5 mt-2">
-      {exchangeReqs.map((req: any) => (
+      {exchangeReqs.map((req) => (
         <span
           key={`ex-${req.id}`}
           className={`inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full border ${
@@ -300,7 +377,7 @@ function RequestBadges({ order }: { order: any }) {
           Exchange {req.status}
         </span>
       ))}
-      {returnReqs.map((req: any) => (
+      {returnReqs.map((req) => (
         <span
           key={`ret-${req.id}`}
           className={`inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full border ${
@@ -322,7 +399,7 @@ function RequestBadges({ order }: { order: any }) {
 // ─── Order Card ───────────────────────────────────────────────────────────────
 
 interface OrderCardProps {
-  order: any;
+  order: Order;
   expanded: boolean;
   onToggle: () => void;
   onCancelled: () => void;
@@ -349,8 +426,8 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
       const res = await orderService.cancelOrder(order.id);
       toast.success(res.message || 'Order cancelled successfully.');
       onCancelled();
-    } catch (err: any) {
-      toast.error(err?.error || 'Could not cancel this order.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, []) || 'Could not cancel this order.');
     } finally {
       setCancelling(false);
     }
@@ -445,7 +522,7 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Items in this Order</p>
                   <div className="space-y-3">
-                    {order.items?.map((item: any) => (
+                    {order.items?.map((item) => (
                       <div key={item.id} className="flex items-center gap-3 bg-[#F8F7F4] rounded-xl p-3">
                         <div className="w-14 h-14 rounded-xl overflow-hidden bg-white border border-gray-100 flex-shrink-0">
                           {item.image_url
@@ -475,12 +552,14 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
                 {/* Price breakdown */}
                 <div className="bg-[#F8F7F4] rounded-xl p-4 space-y-2">
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Price Breakdown</p>
-                  {[
-                    { label: 'Subtotal', value: fmt(order.subtotal) },
-                    Number(order.discount_amount) > 0 && { label: 'Discount', value: `−${fmt(order.discount_amount)}`, green: true },
-                    { label: 'Shipping', value: Number(order.shipping_fee) === 0 ? 'FREE' : fmt(order.shipping_fee), green: Number(order.shipping_fee) === 0 },
-                    Number(order.tax_amount) > 0 && { label: 'Tax', value: fmt(order.tax_amount) },
-                  ].filter(Boolean).map((row: any) => (
+                  {(
+                    [
+                      { label: 'Subtotal', value: fmt(order.subtotal) },
+                      Number(order.discount_amount) > 0 && { label: 'Discount', value: `−${fmt(order.discount_amount ?? 0)}`, green: true },
+                      { label: 'Shipping', value: Number(order.shipping_fee) === 0 ? 'FREE' : fmt(order.shipping_fee), green: Number(order.shipping_fee) === 0 },
+                      Number(order.tax_amount) > 0 && { label: 'Tax', value: fmt(order.tax_amount ?? 0) },
+                    ] as ({ label: string; value: string; green?: boolean } | false)[]
+                  ).filter((row): row is { label: string; value: string; green?: boolean } => Boolean(row)).map((row) => (
                     <div key={row.label} className="flex justify-between text-sm">
                       <span className="text-gray-500">{row.label}</span>
                       <span className={`font-medium ${row.green ? 'text-[#667D00]' : 'text-gray-900'}`}>{row.value}</span>
@@ -529,7 +608,7 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
                 )}
 
                 {/* Exchange request results */}
-                {order.return_requests?.map((req: any) => (
+                {order.return_requests?.map((req) => (
                   <div key={req.id} className={`rounded-xl p-4 border ${
                     req.status === 'Approved' ? 'bg-[#F0F4E8] border-[#667D00]/30'
                     : req.status === 'Rejected' ? 'bg-red-50 border-red-200'
@@ -563,7 +642,7 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
                 ))}
 
                 {/* Return request results */}
-                {order.order_return_requests?.map((req: any) => (
+                {order.order_return_requests?.map((req) => (
                   <div key={req.id} className={`rounded-xl p-4 border ${
                     req.status === 'Approved' || req.status === 'Completed' ? 'bg-blue-50 border-blue-200'
                     : req.status === 'Rejected' ? 'bg-red-50 border-red-200'
@@ -655,7 +734,7 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
 // ─── Main OrderHistory ────────────────────────────────────────────────────────
 
 interface OrderHistoryProps {
-  orders: any[];
+  orders: Order[];
   loading: boolean;
   currentPage: number;
   totalPages: number;
