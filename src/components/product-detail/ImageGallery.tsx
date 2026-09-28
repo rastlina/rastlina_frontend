@@ -66,7 +66,8 @@ export const ImageGallery = ({
     const diff = touchStartX.current - e.changedTouches[0].clientX;
 
     if (Math.abs(diff) > 40) {
-      diff > 0 ? next() : prev();
+      if (diff > 0) next();
+      else prev();
     }
 
     touchStartX.current = null;

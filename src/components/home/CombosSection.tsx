@@ -14,6 +14,10 @@ const formatPrice = (v: number | string) =>
     style: 'currency', currency: 'INR', maximumFractionDigits: 0,
   }).format(Number(v));
 
+type ProductListResponse = {
+  results?: ApiProduct[];
+};
+
 const ComboCardSkeleton = () => (
   <div className="flex flex-col sm:flex-row bg-white rounded-xl overflow-hidden border border-gray-100 h-full animate-pulse">
     <div className="w-full sm:w-1/2 aspect-square sm:aspect-auto bg-gray-100" />
@@ -33,7 +37,7 @@ const CombosSection = () => {
   useEffect(() => {
     storeService
       .getProducts({ main_category: 'combos', ordering: '-created_at' })
-      .then((res: any) => {
+      .then((res: ApiProduct[] | ProductListResponse) => {
         const items: ApiProduct[] = Array.isArray(res) ? res : res.results ?? [];
         setCombos(items.slice(0, 4));
       })

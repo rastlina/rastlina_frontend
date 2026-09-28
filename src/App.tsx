@@ -31,15 +31,28 @@ import ReplacementPolicyPage from "./pages/ReplacementPolicyPage";
 const queryClient = new QueryClient();
 const META_PIXEL_ID = '1051662191229917';
 
+type MetaPixel = ((...args: unknown[]) => void) & {
+  callMethod?: (...args: unknown[]) => void;
+  queue: unknown[][];
+  push: (...args: unknown[]) => void;
+  loaded: boolean;
+  version: string;
+};
+
+type MetaPixelWindow = Window & {
+  fbq?: MetaPixel;
+  _fbq?: MetaPixel;
+};
+
 const App = () => {
   useEffect(() => {
-    const pixelWindow = window as any;
+    const pixelWindow = window as MetaPixelWindow;
     if (pixelWindow.fbq) return;
 
-    const fbq: any = function (...args: any[]) {
+    const fbq = function (...args: unknown[]) {
       if (fbq.callMethod) fbq.callMethod(...args);
       else fbq.queue.push(args);
-    };
+    } as MetaPixel;
     fbq.queue = [];
     fbq.push = fbq;
     fbq.loaded = true;

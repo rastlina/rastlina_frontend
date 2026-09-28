@@ -9,6 +9,8 @@ const SelfWateringSection = () => {
             src="/self-watering-banner.png" 
             alt="Rastlina Self-Watering Planters - How it works" 
             className="w-full h-auto object-cover"
+            loading="lazy"
+            decoding="async"
           />
         </Link>
       </div>

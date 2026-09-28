@@ -47,6 +47,8 @@ const HeroSection = () => {
               src={slides[current].image}
               alt="Rastlina Banner"
               className="w-full h-full object-cover"
+              fetchPriority="high"
+              decoding="async"
               draggable={false}
             />
           </Link>

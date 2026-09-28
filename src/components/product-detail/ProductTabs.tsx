@@ -5,6 +5,7 @@ import {
   Droplets, Sun, Thermometer, Ruler, PawPrint,
   Check, Leaf, ShieldCheck,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { ApiProductDetail } from '@/pages/ProductDetail';
 
 interface ProductTabsProps {
@@ -67,7 +68,7 @@ export const ProductTabs = ({ product }: ProductTabsProps) => {
     product.air_purifying && {
       icon: Leaf, label: 'Air Purifying', value: 'Yes',
     },
-  ].filter(Boolean) as Array<{ icon: any; label: string; value: string }>;
+  ].filter(Boolean) as Array<{ icon: LucideIcon; label: string; value: string }>;
 
   return (
     <section className="bg-[#FAFAF8] border-y border-gray-200">

@@ -4,8 +4,18 @@
 import { Star, Quote } from 'lucide-react';
 import { useHomeData } from '@/hooks/useHomeData';
 
+type Testimonial = {
+  id: number;
+  user_name: string;
+  role?: string;
+  rating: number;
+  comment: string;
+  date?: string;
+  is_verified_purchase?: boolean;
+};
+
 // Static fallback — only shown when DB has no featured reviews yet
-const STATIC_REVIEWS = [
+const STATIC_REVIEWS: Testimonial[] = [
   {
     id: 1, user_name: 'Samriddhi G.', role: 'Home Gardener', rating: 5,
     comment: 'Absolutely love the plant! It arrived healthy and brightens up my entire home.',
@@ -42,7 +52,7 @@ const Testimonials = () => {
   const apiReviews = data.featured_reviews;
 
   // Use API reviews if available, else static fallback
-  const reviews = apiReviews.length > 0 ? apiReviews : STATIC_REVIEWS;
+  const reviews: Testimonial[] = apiReviews.length > 0 ? apiReviews : STATIC_REVIEWS;
 
   return (
     <section className="py-16 bg-[#FAFAF8]">
@@ -62,7 +72,7 @@ const Testimonials = () => {
         >
           {loading
             ? Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
-            : reviews.map((review: any) => (
+            : reviews.map((review) => (
                 <div
                   key={review.id}
                   className="min-w-[85%] md:min-w-0 snap-center bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:-translate-y-1 transition-transform duration-300 relative flex flex-col"

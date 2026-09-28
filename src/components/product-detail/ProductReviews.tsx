@@ -39,7 +39,7 @@ export const ProductReviews = ({
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [, setUser] = useState<unknown>(null);
 
   useEffect(() => {
     if (authService.isLoggedIn()) setUser(authService.getStoredUser());

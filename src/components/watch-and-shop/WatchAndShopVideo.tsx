@@ -116,7 +116,7 @@ export const WatchAndShopVideo = memo(({
     return () => {
       activeVideos.delete(video);
     };
-  }, [isIntersecting, isYT]);
+  }, [autoplay, isIntersecting, isYT]);
 
   // Dynamic user gesture handlers
   const handleInteraction = () => {

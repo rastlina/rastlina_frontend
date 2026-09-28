@@ -47,6 +47,8 @@ const GardenEssentials = () => (
               src={item.image}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               alt={item.title}
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white">

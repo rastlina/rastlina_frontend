@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import {
   Instagram,
   Facebook,
-  Twitter,
   MapPin,
   Phone,
   Mail,
@@ -71,15 +70,6 @@ export const Footer = () => {
   <Facebook className="h-4 w-4" />
 </a>
 
-  {/* X / Twitter Placeholder */}
-  <a
-    href="#"
-    className="p-2.5 rounded-full bg-white/10 hover:bg-accent-gold transition-colors opacity-70"
-    aria-label="X"
-  >
-    <Twitter className="h-4 w-4" />
-  </a>
-
 </div>
           </div>
 
@@ -127,7 +117,7 @@ export const Footer = () => {
                   href="tel:+919915473575"
                   className="hover:text-accent-gold transition-colors"
                 >
-                  +91 8143814466 
+                  +91 99154 73575
                 </a>
               </li>
 
@@ -182,7 +172,7 @@ export const Footer = () => {
         <div className="pt-6 border-t border-white/10 flex flex-col lg:flex-row items-center justify-between gap-4 text-xs text-white/55">
 
           <p className="text-center lg:text-left">
-            © 2025 Rastlina Plants. All rights reserved.
+            © 2026 Rastlina Nature Hub Private Limited. All rights reserved.
           </p>
 
           <div className="flex items-center gap-1 text-center">

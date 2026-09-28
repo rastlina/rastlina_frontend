@@ -35,6 +35,33 @@ const emptyForm = {
   landmark: '',
 };
 
+type AddressForm = typeof emptyForm;
+type AddressFormField = keyof AddressForm;
+type ApiError = { non_field_errors?: string[] };
+
+const formFields: Array<{
+  key: AddressFormField;
+  label: string;
+  placeholder: string;
+  full?: boolean;
+  hint?: string;
+  type?: string;
+}> = [
+  { key: 'first_name', label: 'First Name *', placeholder: 'e.g. John' },
+  { key: 'last_name', label: 'Last Name', placeholder: 'e.g. Doe' },
+  { key: 'phone', label: 'Phone *', placeholder: '10-digit mobile number', type: 'tel' },
+  {
+    key: 'address',
+    label: 'Street Address *',
+    full: true,
+    placeholder: 'Flat No, Building, Street Name, Area/Sector',
+    hint: 'Please include Block, Street, and Area details here.',
+  },
+  { key: 'city', label: 'City *', placeholder: 'e.g. Hyderabad' },
+  { key: 'state', label: 'State *', placeholder: 'e.g. Telangana' },
+  { key: 'zip_code', label: 'ZIP Code *', placeholder: '6-digit Pincode', type: 'text' },
+];
+
 
 // Validation regex patterns
 const phoneRegex = /^[0-9]{10}$/; // Exactly 10 digits
@@ -203,8 +230,9 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
       setShowForm(false);
       setErrors({});
       toast.success(editing ? 'Address updated!' : 'Address saved!');
-    } catch (err: any) {
-      toast.error(err?.non_field_errors?.[0] || 'Failed to save address');
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      toast.error(apiError.non_field_errors?.[0] || 'Failed to save address');
     } finally { 
       setSaving(false); 
     }
@@ -341,28 +369,14 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
         <div className="border border-border/30 rounded-xl p-5 space-y-4 bg-muted/20">
           <h4 className="font-semibold text-sm text-foreground">{editing ? 'Edit Address' : 'New Address'}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[
-              { key: 'first_name', label: 'First Name *', placeholder: 'e.g. John' },
-              { key: 'last_name', label: 'Last Name', placeholder: 'e.g. Doe' },
-              { key: 'phone', label: 'Phone *', placeholder: '10-digit mobile number', type: 'tel' },
-              { 
-                key: 'address', 
-                label: 'Street Address *', 
-                full: true, 
-                placeholder: 'Flat No, Building, Street Name, Area/Sector',
-                hint: 'Please include Block, Street, and Area details here.'
-              },
-              { key: 'city', label: 'City *', placeholder: 'e.g. Hyderabad' },
-              { key: 'state', label: 'State *', placeholder: 'e.g. Telangana' },
-              { key: 'zip_code', label: 'ZIP Code *', placeholder: '6-digit Pincode', type: 'text' },
-            ].map(({ key, label, full, placeholder, hint, type = 'text' }) => (
+            {formFields.map(({ key, label, full, placeholder, hint, type = 'text' }) => (
               <div key={key} className={full ? 'sm:col-span-2' : ''}>
                 <label className="block text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">
                   {label}
                 </label>
                 <input
                   type={type}
-                  value={(form as any)[key]}
+                  value={form[key]}
                   onChange={(e) => {
                     if (key === 'phone') {
                       handlePhoneChange(e.target.value);
