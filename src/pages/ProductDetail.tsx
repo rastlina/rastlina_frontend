@@ -342,7 +342,7 @@ const ProductDetail = () => {
   const primaryImage = product.images.find((image) => image.is_primary)?.image || product.images[0]?.image;
   // Product descriptions in the catalogue can be editorially updated over time.
   // Keep search metadata factual and consistently tied to the product being sold.
-  const productDescription = `Buy ${product.name} online from Rastlina Nature Hub Private Limited. Explore ${product.category_name || 'indoor plants'} with doorstep delivery across India.`;
+  const productDescription = `Buy ${product.name} as a ready-to-gift indoor plant set from Rastlina Nature Hub Private Limited. Includes a self-watering pot and soil mix, with doorstep delivery across India.`;
   const productSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',

@@ -22,7 +22,7 @@ const Home = () => {
     <main className="w-full overflow-x-hidden pt-[110px]">
       <Seo
         title="Buy Indoor Plants Online in India | Rastlina"
-        description="Shop healthy indoor plants and plant combos online at Rastlina. Thoughtfully selected plants with doorstep delivery across India."
+        description="Shop ready-to-gift indoor plants online at Rastlina. Each set includes a healthy plant, self-watering pot and soil mix, with doorstep delivery across India."
         schema={{
           '@context': 'https://schema.org',
           '@type': ['Organization', 'OnlineStore'],
@@ -30,6 +30,7 @@ const Home = () => {
           legalName: 'Rastlina Nature Hub Private Limited',
           taxID: '36AAPCR7860K1ZK',
           alternateName: 'Rastlina',
+          description: 'Ready-to-gift indoor plant sets with healthy plants, self-watering pots and soil mix, delivered across India.',
           url: 'https://www.rastlina.com/',
           logo: 'https://www.rastlina.com/logo.png',
           email: 'info.rastlina@gmail.com',
@@ -49,6 +50,16 @@ const Home = () => {
       />
       <h1 className="sr-only">Buy Indoor Plants Online in India</h1>
       <HeroSection />
+      <section className="bg-[#F8F7F4] px-4 py-8 text-center">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="font-serif text-2xl font-bold text-[#1A3831] md:text-3xl">
+            Ready-to-Gift Indoor Plants for Every Occasion
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#4A5A51] md:text-base">
+            Every Rastlina set is thoughtfully prepared with a healthy indoor plant, self-watering pot and soil mix—ready to gift and easy to enjoy.
+          </p>
+        </div>
+      </section>
       <SocialProof />
       <CreativeCategories />
       <ShopByFeeling />

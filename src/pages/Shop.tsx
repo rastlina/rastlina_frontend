@@ -180,7 +180,7 @@ const getTitle = () => {
     <div className="min-h-screen bg-[#FAFAF7] pt-[110px]" style={{ fontFamily: "'Lora', Georgia, serif" }}>
       <Seo
         title={`${getTitle()} | Buy Indoor Plants Online | Rastlina`}
-        description={`Browse ${getTitle().toLowerCase()} at Rastlina. Shop healthy indoor plants and plant combos online in India.`}
+        description={`Browse ${getTitle().toLowerCase()} at Rastlina. Shop ready-to-gift indoor plants with a self-watering pot and soil mix, delivered across India.`}
         path={`/shop${location.search}`}
       />
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
