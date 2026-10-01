@@ -175,6 +175,10 @@ export const Footer = () => {
             © 2026 Rastlina Nature Hub Private Limited. All rights reserved.
           </p>
 
+          <p className="text-center">
+            GSTIN: 36AAPCR7860K1ZK
+          </p>
+
           <div className="flex items-center gap-1 text-center">
             Made with
             <Heart className="h-3.5 w-3.5 text-red-500 mx-1 fill-red-500" />

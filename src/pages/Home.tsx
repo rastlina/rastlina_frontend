@@ -29,6 +29,7 @@ const Home = () => {
           '@type': ['Organization', 'OnlineStore'],
           name: 'Rastlina Nature Hub Private Limited',
           legalName: 'Rastlina Nature Hub Private Limited',
+          taxID: '36AAPCR7860K1ZK',
           alternateName: 'Rastlina',
           url: 'https://www.rastlina.com/',
           logo: 'https://www.rastlina.com/logo.png',
