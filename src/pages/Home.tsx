@@ -24,6 +24,20 @@ const Home = () => {
       <Seo
         title="Buy Indoor Plants & Planters Online in India | Rastlina"
         description="Shop healthy indoor plants, self-watering planters, seeds and plant-care essentials online at Rastlina. Fast delivery across India."
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: 'Rastlina Nature Hub Private Limited',
+          alternateName: 'Rastlina',
+          url: 'https://www.rastlina.com/',
+          logo: 'https://www.rastlina.com/logo.png',
+          email: 'info.rastlina@gmail.com',
+          telephone: '+91-99154-73575',
+          sameAs: [
+            'https://www.instagram.com/rastlina_naturehub/',
+            'https://www.facebook.com/profile.php?id=61590309719114',
+          ],
+        }}
       />
       <h1 className="sr-only">Buy Indoor Plants and Planters Online in India</h1>
       <HeroSection />
