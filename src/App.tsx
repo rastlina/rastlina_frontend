@@ -13,6 +13,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import ScrollToTop from "@/components/ScrollToTop"; 
 import WhatsAppButton from "./components/home/WhatsAppButton";
+import { RouteSeo } from '@/components/seo/RouteSeo';
 import Index from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import WatchAndShopDetail from '@/pages/WatchAndShopDetail';
@@ -80,6 +81,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               <BrowserRouter>
+                <RouteSeo />
                 <ScrollToTop />
                 <div className="min-h-screen flex flex-col">
                   <Header />
