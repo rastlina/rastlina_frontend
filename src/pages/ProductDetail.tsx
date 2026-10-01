@@ -340,7 +340,9 @@ const ProductDetail = () => {
 
   const productPrice = activeVariant?.final_price ?? Number(product.price);
   const primaryImage = product.images.find((image) => image.is_primary)?.image || product.images[0]?.image;
-  const productDescription = product.description?.trim() || `Buy ${product.name} online from Rastlina with delivery across India.`;
+  // Product descriptions in the catalogue can be editorially updated over time.
+  // Keep search metadata factual and consistently tied to the product being sold.
+  const productDescription = `Buy ${product.name} online from Rastlina Nature Hub Private Limited. Explore ${product.category_name || 'plants and garden essentials'} with doorstep delivery across India.`;
   const productSchema = {
     '@context': 'https://schema.org',
     '@type': 'Product',

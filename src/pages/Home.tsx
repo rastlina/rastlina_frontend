@@ -26,13 +26,21 @@ const Home = () => {
         description="Shop healthy indoor plants, self-watering planters, seeds and plant-care essentials online at Rastlina. Fast delivery across India."
         schema={{
           '@context': 'https://schema.org',
-          '@type': 'Organization',
+          '@type': ['Organization', 'OnlineStore'],
           name: 'Rastlina Nature Hub Private Limited',
+          legalName: 'Rastlina Nature Hub Private Limited',
           alternateName: 'Rastlina',
           url: 'https://www.rastlina.com/',
           logo: 'https://www.rastlina.com/logo.png',
           email: 'info.rastlina@gmail.com',
           telephone: '+91-99154-73575',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: '4th Floor, Lake View Towers, Safari Nagar, Kondapur',
+            addressLocality: 'Hyderabad',
+            postalCode: '500084',
+            addressCountry: 'IN',
+          },
           sameAs: [
             'https://www.instagram.com/rastlina_naturehub/',
             'https://www.facebook.com/profile.php?id=61590309719114',
