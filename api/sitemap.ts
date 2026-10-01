@@ -12,7 +12,7 @@ const SITE_URL = 'https://www.rastlina.com';
 const PRODUCT_API_URL = 'https://api.rastlina.com/api/store/products/';
 
 function xmlEscape(value: string) {
-  return value.replace(/[<>&'\"]/g, (character) => ({
+  return value.replace(/[<>&'"]/g, (character) => ({
     '<': '&lt;',
     '>': '&gt;',
     '&': '&amp;',
