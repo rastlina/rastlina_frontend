@@ -257,7 +257,7 @@ export const blogs = [
     id: 3,
     title: 'Best Site to Buy Plants Online India with Fast Delivery & Great Prices',
     excerpt:
-      'Short on space? Here is how to create a lush green wall in small urban apartments. Complete guide to designing, building, and maintaining a stunning vertical garden.',
+      'A practical guide to choosing a trusted online plant store in India, with tips on plant quality, delivery, pricing, customer support, and finding the right plants for your space.',
     image: blog3,
     date: 'Sep 15, 2025',
     tag: 'Decor',
