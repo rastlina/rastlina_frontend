@@ -14,6 +14,7 @@ import { WhyChooseUs } from '@/components/product-detail/WhyChooseUs';
 import { ProductSuggestions } from '@/components/product-detail/ProductSuggestions';
 import { ProductFAQ } from '@/components/product-detail/ProductFAQ';
 import { FixedBottomBar } from '@/components/product-detail/FixedBottomBar';
+import { Seo, SITE_URL_BASE } from '@/components/seo/Seo';
 
 // ─── Types matching the backend serializer exactly ────────────────────────────
 
@@ -336,10 +337,42 @@ const ProductDetail = () => {
       </div>
     );
   }
+
+  const productPrice = activeVariant?.final_price ?? Number(product.price);
+  const primaryImage = product.images.find((image) => image.is_primary)?.image || product.images[0]?.image;
+  const productDescription = product.description?.trim() || `Buy ${product.name} online from Rastlina with delivery across India.`;
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    sku: product.sku,
+    description: productDescription,
+    image: product.images.map((image) => image.image),
+    brand: { '@type': 'Brand', name: 'Rastlina' },
+    offers: {
+      '@type': 'Offer',
+      url: `${SITE_URL_BASE}/product/${product.slug}`,
+      priceCurrency: 'INR',
+      price: productPrice,
+      availability: product.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+    ...(product.review_count > 0 && product.average_rating > 0
+      ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.average_rating, reviewCount: product.review_count } }
+      : {}),
+  };
   // console.log('PRODUCT DATA', product);
 
   return (
     <main className="bg-white pt-[120px] pb-32 relative">
+      <Seo
+        title={`Buy ${product.name} Online in India | Rastlina`}
+        description={productDescription.slice(0, 155)}
+        path={`/product/${product.slug}`}
+        image={primaryImage}
+        type="product"
+        schema={productSchema}
+      />
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 max-w-7xl py-3">
         <nav className="text-sm text-gray-500 font-medium flex items-center gap-1.5 flex-wrap">

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -70,6 +71,7 @@ const App = () => {
   }, []);
 
   return (
+    <HelmetProvider>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
@@ -111,6 +113,7 @@ const App = () => {
         </QueryClientProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
+    </HelmetProvider>
   );
 };
 

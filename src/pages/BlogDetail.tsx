@@ -3,6 +3,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { blogs } from '@/data/blogs';
+import { Seo } from '@/components/seo/Seo';
 
 const BlogDetailPage = () => {
   const { id } = useParams();
@@ -23,6 +24,21 @@ const BlogDetailPage = () => {
 
   return (
     <div className="bg-white min-h-screen">
+      <Seo
+        title={`${blog.title} | Rastlina`}
+        description={blog.excerpt || blog.title}
+        path={`/blog/${blog.id}`}
+        image={blog.image}
+        type="article"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: blog.title,
+          image: blog.image,
+          datePublished: blog.date,
+          publisher: { '@type': 'Organization', name: 'Rastlina', url: 'https://www.rastlina.com/' },
+        }}
+      />
       {/* Hero Image */}
       <div className="w-full h-[400px] overflow-hidden">
         <img
