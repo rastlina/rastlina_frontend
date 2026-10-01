@@ -179,8 +179,8 @@ const getTitle = () => {
   return (
     <div className="min-h-screen bg-[#FAFAF7] pt-[110px]" style={{ fontFamily: "'Lora', Georgia, serif" }}>
       <Seo
-        title={`${getTitle()} | Buy Plants Online | Rastlina`}
-        description={`Browse ${getTitle().toLowerCase()} at Rastlina. Shop healthy plants, planters and plant-care essentials online in India.`}
+        title={`${getTitle()} | Buy Indoor Plants Online | Rastlina`}
+        description={`Browse ${getTitle().toLowerCase()} at Rastlina. Shop healthy indoor plants and plant combos online in India.`}
         path={`/shop${location.search}`}
       />
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">

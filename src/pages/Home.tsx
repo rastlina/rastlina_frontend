@@ -8,7 +8,6 @@ import NewArrivals from '@/components/home/NewArrivals';
 import WatchAndShopSection from '@/components/home/WatchAndShopSection';
 import OffersSection from '@/components/home/OffersSection';
 import SelfWateringSection from '@/components/home/SelfWateringSection';
-import GardenEssentials from '@/components/home/GardenEssentials';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import CombosSection from '@/components/home/CombosSection';
 import Testimonials from '@/components/home/Testimonials';
@@ -22,8 +21,8 @@ const Home = () => {
   return (
     <main className="w-full overflow-x-hidden pt-[110px]">
       <Seo
-        title="Buy Indoor Plants & Planters Online in India | Rastlina"
-        description="Shop healthy indoor plants, self-watering planters, seeds and plant-care essentials online at Rastlina. Fast delivery across India."
+        title="Buy Indoor Plants Online in India | Rastlina"
+        description="Shop healthy indoor plants and plant combos online at Rastlina. Thoughtfully selected plants with doorstep delivery across India."
         schema={{
           '@context': 'https://schema.org',
           '@type': ['Organization', 'OnlineStore'],
@@ -48,7 +47,7 @@ const Home = () => {
           ],
         }}
       />
-      <h1 className="sr-only">Buy Indoor Plants and Planters Online in India</h1>
+      <h1 className="sr-only">Buy Indoor Plants Online in India</h1>
       <HeroSection />
       <SocialProof />
       <CreativeCategories />
@@ -58,7 +57,6 @@ const Home = () => {
       <NewArrivals />
      
       <SelfWateringSection />
-      <GardenEssentials />
       <WhyChooseUs />
       <OffersSection />
       <CombosSection />
