@@ -3,9 +3,42 @@ import sharp from 'sharp';
 import { readFile } from 'node:fs/promises';
 
 export function imageAssets(): Plugin {
+  const heroModule = '\0virtual:rastlina-hero';
   return {
     name: 'rastlina-image-assets',
-    apply: 'build',
+    resolveId(id) { if (id === 'virtual:rastlina-hero') return heroModule; },
+    async load(id) {
+      if (id !== heroModule) return;
+      // A build-time public banner snapshot makes the first visible content
+      // independent of the runtime catalogue request. Unknown/new images
+      // still use their live API URLs.
+      try {
+        const response = await fetch('https://api.rastlina.com/api/store/home-data/', { signal: AbortSignal.timeout(20000) });
+        if (!response.ok) throw new Error('Homepage unavailable');
+        const data = await response.json();
+        const slides = [];
+        for (const slide of (data.hero_slides || []).slice(0, 10)) {
+          const url = new URL(slide.image);
+          if (url.origin !== 'https://api.rastlina.com' || !url.pathname.startsWith('/media/hero_slides/')) continue;
+          try {
+            const image = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(20000) });
+            if (!image.ok) continue;
+            const buffer = Buffer.from(await image.arrayBuffer());
+            if (buffer.length > 20_000_000) continue;
+            const basename = url.pathname.split('/').pop()!.replace(/\.[^.]+$/, '');
+            for (const width of [768, 1600]) {
+              const optimized = await sharp(buffer).resize({ width, withoutEnlargement: true }).webp({ quality: 82 }).toBuffer();
+              this.emitFile({ type: 'asset', fileName: `optimized/hero-${basename}-${width}.webp`, source: optimized });
+            }
+            slides.push({ id: slide.id, image: slide.image, link_url: slide.link_url, optimizedImage: `/optimized/hero-${basename}-1600.webp`, mobileImage: `/optimized/hero-${basename}-768.webp` });
+          } catch { this.warn('A banner keeps its live API fallback.'); }
+        }
+        return `export default ${JSON.stringify(slides)};`;
+      } catch {
+        this.warn('Banner snapshot unavailable; runtime catalogue remains the fallback.');
+        return 'export default [];';
+      }
+    },
     async generateBundle() {
       for (const [source, output, width] of [
         ['logo.png', 'logo-optimized.webp', 520],

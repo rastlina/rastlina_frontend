@@ -3,7 +3,11 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), {
+    name: 'test-hero-module',
+    resolveId(id) { if (id === 'virtual:rastlina-hero') return '\0test-hero'; },
+    load(id) { if (id === '\0test-hero') return 'export default [];'; },
+  }],
   test: {
     environment: "jsdom",
     globals: true,
