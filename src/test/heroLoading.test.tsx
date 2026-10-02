@@ -18,6 +18,8 @@ it('shows an eager responsive banner while catalogue data is pending', () => {
   const banner = screen.getByAltText('Rastlina Banner');
   expect(banner).toHaveAttribute('src', '/first.webp');
   expect(banner).toHaveAttribute('loading', 'eager');
+  expect(banner).toHaveClass('h-auto');
+  expect(banner).not.toHaveClass('object-cover');
   expect(banner).toHaveAttribute('srcset', '/first-mobile.webp 768w, /first.webp 1600w');
   expect(banner.parentElement?.parentElement).not.toHaveAttribute('style');
 });

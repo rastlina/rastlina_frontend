@@ -19,14 +19,14 @@ const HeroSection = () => {
   if (!slides.length) return null;
 
   return (
-     <section className="relative w-full h-[50vh] md:h-[80vh] overflow-hidden bg-[#F8F7F4] -mt-[1px]">
+     <section className="relative w-full md:h-[80vh] overflow-hidden bg-[#F8F7F4] -mt-[1px]">
       {/* Slides */}
         <div
-          className="absolute inset-0"
+          className="relative md:absolute md:inset-0"
         >
           <Link
             to={activeSlide.link_url || '/shop'}
-            className="block w-full h-full"
+            className="block w-full md:h-full"
             tabIndex={0}
           >
             <img
@@ -38,7 +38,9 @@ const HeroSection = () => {
                 if (event.currentTarget.getAttribute('src') !== activeSlide.image) event.currentTarget.src = activeSlide.image;
               }}
               alt="Rastlina Banner"
-              className="w-full h-full object-cover"
+              className="w-full h-auto md:h-full md:object-cover"
+              width={1600}
+              height={894}
               fetchPriority="high"
               loading="eager"
               decoding="async"
