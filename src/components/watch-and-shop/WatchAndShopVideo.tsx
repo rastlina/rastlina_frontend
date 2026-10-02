@@ -81,6 +81,9 @@ export const WatchAndShopVideo = memo(({
 
   const isYT = isYouTubeUrl(videoUrl);
   const embedUrl = isYT ? toYouTubeEmbed(videoUrl) : videoUrl;
+  const cover = thumbnail?.startsWith('https://api.rastlina.com/media/watch_shop/')
+    ? `/optimized/watch-${thumbnail.split('/').pop()?.split('?')[0].replace(/\.[^.]+$/, '')}.webp`
+    : thumbnail;
 
   // ── Intersection Observer to trigger viewport runtime playback transitions ──
   useEffect(() => {
@@ -139,7 +142,14 @@ export const WatchAndShopVideo = memo(({
       {/* 1. SEAMLESS REEL COVER IMAGE PLACEHOLDER */}
       {thumbnail && !isLoaded && (
         <img
-          src={thumbnail}
+          src={cover}
+          loading="lazy"
+          decoding="async"
+          width={600}
+          height={1067}
+          onError={(event) => {
+            if (thumbnail && event.currentTarget.getAttribute('src') !== thumbnail) event.currentTarget.src = thumbnail;
+          }}
           alt={productName || 'Premium item visualization'}
           className="absolute inset-0 w-full h-full object-cover z-30 transition-opacity duration-500 ease-out pointer-events-none"
         />

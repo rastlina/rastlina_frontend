@@ -33,7 +33,10 @@ export const Footer = () => {
             <Link to="/" className="inline-block">
               <div className="bg-white p-2.5 rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:scale-[1.02] transition-transform">
                 <img
-                  src="/logo.png"
+                  src="/logo-optimized.webp"
+                  width={520}
+                  height={196}
+                  loading="lazy"
                   alt="Rastlina Logo"
                   className="h-14 w-auto object-contain"
                 />
