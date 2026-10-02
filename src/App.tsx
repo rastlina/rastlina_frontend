@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -15,20 +15,20 @@ import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "./components/home/WhatsAppButton";
 import { RouteSeo } from '@/components/seo/RouteSeo';
 import Index from "./pages/Home";
-import ProductDetail from "./pages/ProductDetail";
-import WatchAndShopDetail from '@/pages/WatchAndShopDetail';
-import Shop from "./pages/Shop";
-import NotFound from "./pages/NotFound";
-import UserProfile from './pages/UserProfile';
-import Contact from './pages/Contact';
-import LoginPage from './pages/LoginPage';
-import BlogDetail from '@/pages/BlogDetail';
-import CheckoutPage from '@/pages/CheckoutPage';
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import TermsPage from "./pages/TermsPage";
-import ShippingPolicyPage from "./pages/ShippingPolicyPage";
-import ReturnsRefundPolicyPage from './pages/ReturnsRefundPage';
-import ReplacementPolicyPage from "./pages/ReplacementPolicyPage";
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const WatchAndShopDetail = lazy(() => import('./pages/WatchAndShopDetail'));
+const Shop = lazy(() => import('./pages/Shop'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
+const Contact = lazy(() => import('./pages/Contact'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const BlogDetail = lazy(() => import('./pages/BlogDetail'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const ShippingPolicyPage = lazy(() => import('./pages/ShippingPolicyPage'));
+const ReturnsRefundPolicyPage = lazy(() => import('./pages/ReturnsRefundPage'));
+const ReplacementPolicyPage = lazy(() => import('./pages/ReplacementPolicyPage'));
 
 const queryClient = new QueryClient();
 const META_PIXEL_ID = '1051662191229917';
@@ -86,6 +86,7 @@ const App = () => {
                 <div className="min-h-screen flex flex-col">
                   <Header />
                   <div className="flex-1">
+                    <Suspense fallback={<div className="min-h-[60vh] pt-36 text-center" role="status">Loading Rastlina…</div>}>
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/shop" element={<Shop />} />
@@ -104,6 +105,7 @@ const App = () => {
                       <Route path="/checkout" element={<CheckoutPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
+                    </Suspense>
                   </div>
                   <Footer />
                   <CartDrawer />

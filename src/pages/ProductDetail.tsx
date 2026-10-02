@@ -15,6 +15,7 @@ import { ProductSuggestions } from '@/components/product-detail/ProductSuggestio
 import { ProductFAQ } from '@/components/product-detail/ProductFAQ';
 import { FixedBottomBar } from '@/components/product-detail/FixedBottomBar';
 import { Seo, SITE_URL_BASE } from '@/components/seo/Seo';
+import { applyProductEditorial } from '@/data/productEditorial';
 
 // ─── Types matching the backend serializer exactly ────────────────────────────
 
@@ -198,7 +199,7 @@ const ProductDetail = () => {
       storeService.getFAQs(),
     ])
       .then(([prod, related, faqData]) => {
-        setProduct(prod);
+        setProduct(applyProductEditorial(prod));
         setRelatedProducts(related?.results || []);
 
         const validatedFaqs: FAQ[] = (faqData || []).map((item: any, index: number) => ({
@@ -330,6 +331,7 @@ const ProductDetail = () => {
   if (error || !product) {
     return (
       <div className="pt-[120px] pb-32 flex flex-col items-center justify-center min-h-[60vh]">
+        <Seo title="Product Unavailable | Rastlina" description="This product could not be loaded. Browse Rastlina’s indoor plants." path={`/product/${slug}`} noIndex />
         <p className="text-2xl font-serif font-bold text-gray-900 mb-4">Product not found</p>
         <Link to="/shop" className="text-[#667D00] font-bold hover:underline">
           ← Back to Shop
@@ -348,7 +350,7 @@ const ProductDetail = () => {
     '@type': 'Product',
     name: product.name,
     sku: product.sku,
-    description: productDescription,
+    description: product.description,
     image: product.images.map((image) => image.image),
     brand: { '@type': 'Brand', name: 'Rastlina' },
     offers: {
@@ -373,7 +375,15 @@ const ProductDetail = () => {
         path={`/product/${product.slug}`}
         image={primaryImage}
         type="product"
-        schema={productSchema}
+        schema={[productSchema, {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL_BASE },
+            { '@type': 'ListItem', position: 2, name: 'Shop', item: `${SITE_URL_BASE}/shop` },
+            { '@type': 'ListItem', position: 3, name: product.name, item: `${SITE_URL_BASE}/product/${product.slug}` },
+          ],
+        }]}
       />
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 max-w-7xl py-3">

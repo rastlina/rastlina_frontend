@@ -1,7 +1,7 @@
 // src/hooks/useHomeData.ts
 // Fetches all homepage data in a single API call.
 // Each section reads from the same cached response — zero duplicate requests.
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { storeService } from '@/services/api';
 import type { ApiProduct } from '@/components/products/ProductCard';
 
@@ -59,19 +59,12 @@ const EMPTY: HomeData = {
 };
 
 export function useHomeData() {
-  const [data, setData] = useState<HomeData>(EMPTY);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-
-    storeService
-      .getHomeData()
-      .then((res: HomeData) => {
-        if (!cancelled) {
-          setData({
+  const query = useQuery({
+    queryKey: ['rastlina-home-data'],
+    staleTime: 60_000,
+    queryFn: async (): Promise<HomeData> => {
+      const res: HomeData = await storeService.getHomeData();
+      return {
             hero_slides: res.hero_slides ?? [],
             new_arrivals: (res.new_arrivals ?? []).slice(0, 8),
             best_sellers: (res.best_sellers ?? []).slice(0, 8),
@@ -80,18 +73,8 @@ export function useHomeData() {
             featured_categories: res.featured_categories ?? [],
             featured_spaces: res.featured_spaces ?? [],
             featured_reviews: res.featured_reviews ?? [],
-          });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setError(true);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => { cancelled = true; };
-  }, []);
-
-  return { data, loading, error };
+      };
+    },
+  });
+  return { data: query.data ?? EMPTY, loading: query.isPending, error: query.isError };
 }
