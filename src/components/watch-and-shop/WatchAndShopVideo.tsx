@@ -75,6 +75,7 @@ export const WatchAndShopVideo = memo(({
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
   
   // Controls overlay visibility state toggle logic
   const [showControls, setShowControls] = useState(false);
@@ -93,6 +94,7 @@ export const WatchAndShopVideo = memo(({
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsIntersecting(entry.isIntersecting);
+        if (entry.isIntersecting) setShouldLoad(true);
       },
       { threshold: 0.1 }
     );
@@ -181,13 +183,13 @@ export const WatchAndShopVideo = memo(({
         /* 3. HARDWARE-ACCELERATED STANDALONE MP4 PIPELINE */
         <video
           ref={videoRef}
-          src={embedUrl}
+          src={shouldLoad ? embedUrl : undefined}
           muted
           loop
-          autoPlay={autoplay}
+          autoPlay={autoplay && isIntersecting}
           playsInline
           webkit-playsinline="true"
-          preload="metadata"
+          preload="none"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10"
           onCanPlay={() => setIsLoaded(true)}
           onError={() => setHasError(true)}

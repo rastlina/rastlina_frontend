@@ -29,7 +29,7 @@ const HeroSection = () => {
   return (
      <section className="relative w-full h-[50vh] md:h-[80vh] overflow-hidden bg-[#F8F7F4] -mt-[1px]">
       {/* Slides */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={slides[current].id}
           initial={{ opacity: 0 }}

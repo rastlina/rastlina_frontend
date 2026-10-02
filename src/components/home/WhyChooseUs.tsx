@@ -1,7 +1,25 @@
 import { Droplets, Palette, ShieldCheck, Leaf } from 'lucide-react';
 import livingImg from '@/assets/category-living.jpg';
+import { useEffect, useRef, useState } from 'react';
 
 const WhyChooseUs = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setVisible(entry.isIntersecting);
+      if (entry.isIntersecting) setShouldLoad(true);
+    }, { threshold: 0.1 });
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    if (visible) videoRef.current?.play().catch(() => {});
+    else videoRef.current?.pause();
+  }, [visible]);
   return (
     <section className="py-16 bg-white border-t border-gray-100">
       <div className="container-custom">
@@ -11,9 +29,11 @@ const WhyChooseUs = () => {
 
         <div className="w-full max-w-5xl mx-auto mb-12 rounded-2xl overflow-hidden shadow-xl aspect-[21/9] relative bg-black/5">
            <video 
-             src="/rastlina-animation.mp4" 
+             ref={videoRef}
+             src={shouldLoad ? '/rastlina-animation.mp4' : undefined}
+             preload="none"
              className="w-full h-full object-cover"
-             autoPlay
+             autoPlay={visible}
              muted
              loop
              playsInline
