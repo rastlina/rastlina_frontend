@@ -3,7 +3,6 @@
 // Auto-slides every 5 seconds. Dot pagination. Data from /store/home-data/.
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useHomeData } from '@/hooks/useHomeData';
 
 const HeroSection = () => {
@@ -29,13 +28,8 @@ const HeroSection = () => {
   return (
      <section className="relative w-full h-[50vh] md:h-[80vh] overflow-hidden bg-[#F8F7F4] -mt-[1px]">
       {/* Slides */}
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
+        <div
           key={slides[current].id}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: 'easeInOut' }}
           className="absolute inset-0"
         >
           <Link
@@ -48,12 +42,12 @@ const HeroSection = () => {
               alt="Rastlina Banner"
               className="w-full h-full object-cover"
               fetchPriority="high"
+              loading="eager"
               decoding="async"
               draggable={false}
             />
           </Link>
-        </motion.div>
-      </AnimatePresence>
+        </div>
 
       {/* Dot pagination */}
       {slides.length > 1 && (
