@@ -1,7 +1,5 @@
 // src/components/home/HeroSection.tsx
-// Full-width image slider — image only, no overlays.
-// Auto-slides every 5 seconds. Dot pagination. Data from /store/home-data/.
-import { useState, useEffect } from 'react';
+// One stable, responsive banner keeps the main message visible during loading.
 import { Link } from 'react-router-dom';
 import { useHomeData } from '@/hooks/useHomeData';
 import initialSlides from 'virtual:rastlina-hero';
@@ -9,20 +7,8 @@ import initialSlides from 'virtual:rastlina-hero';
 const HeroSection = () => {
   const { data, loading } = useHomeData();
   const slides = loading ? initialSlides : data.hero_slides;
-  const [current, setCurrent] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const activeSlide = slides[current] ?? slides[0];
+  const activeSlide = slides[0];
   const optimizedSlide = initialSlides.find(slide => slide.image === activeSlide?.image);
-
-  // Auto-advance
-  useEffect(() => {
-    if (slides.length <= 1 || !imageLoaded) return;
-    const t = setTimeout(() => {
-      setImageLoaded(false);
-      setCurrent(i => (i + 1) % slides.length);
-    }, 10000);
-    return () => clearTimeout(t);
-  }, [slides.length, imageLoaded, current]);
 
   if (loading && !slides.length) {
     return (
@@ -47,7 +33,6 @@ const HeroSection = () => {
               src={optimizedSlide?.optimizedImage || activeSlide.image}
               srcSet={optimizedSlide ? `${optimizedSlide.mobileImage} 768w, ${optimizedSlide.optimizedImage} 1600w` : undefined}
               sizes="100vw"
-              onLoad={() => setImageLoaded(true)}
               onError={event => {
                 event.currentTarget.removeAttribute('srcset');
                 if (event.currentTarget.getAttribute('src') !== activeSlide.image) event.currentTarget.src = activeSlide.image;
@@ -62,21 +47,6 @@ const HeroSection = () => {
           </Link>
         </div>
 
-      {/* Dot pagination */}
-      {slides.length > 1 && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2.5 z-20">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => { setImageLoaded(false); setCurrent(i); }}
-              aria-label={`Go to slide ${i + 1}`}
-              className={`rounded-full transition-all duration-300 shadow-sm ${
-                i === current ? 'w-8 h-1.5 bg-white' : 'w-2 h-2 bg-white/50 hover:bg-white/80'
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </section>
   );
 };

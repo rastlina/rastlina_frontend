@@ -22,15 +22,14 @@ it('shows an eager responsive banner while catalogue data is pending', () => {
   expect(banner.parentElement?.parentElement).not.toHaveAttribute('style');
 });
 
-it('does not rotate away from an image that has not finished loading', () => {
+it('keeps one stable banner even when more banners exist in the catalogue', () => {
   vi.useFakeTimers();
   render(<MemoryRouter><HeroSection /></MemoryRouter>);
   const banner = screen.getByAltText('Rastlina Banner');
   act(() => { vi.advanceTimersByTime(30000); });
   expect(banner).toHaveAttribute('src', '/first.webp');
   fireEvent.load(banner);
-  act(() => { vi.advanceTimersByTime(10000); });
-  expect(banner).toHaveAttribute('src', '/second.webp');
-  act(() => { vi.advanceTimersByTime(30000); });
-  expect(banner).toHaveAttribute('src', '/second.webp');
+  act(() => { vi.advanceTimersByTime(60000); });
+  expect(banner).toHaveAttribute('src', '/first.webp');
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
 });
