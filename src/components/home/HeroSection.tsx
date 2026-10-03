@@ -35,6 +35,9 @@ const HeroSection = ({ onReady }: { onReady?: () => void }) => {
             className="block w-full md:h-full"
             tabIndex={0}
           >
+            <picture>
+              {optimizedSlide?.mobileAvif && <source type="image/avif"
+                srcSet={`${optimizedSlide.mobileAvif} 768w, ${optimizedSlide.optimizedAvif} 1600w`} sizes="100vw" />}
             <img
               ref={imageRef}
               src={optimizedSlide?.optimizedImage || activeSlide.image}
@@ -42,6 +45,11 @@ const HeroSection = ({ onReady }: { onReady?: () => void }) => {
               sizes="100vw"
               onLoad={onReady}
               onError={event => {
+                const avifSource = event.currentTarget.closest('picture')?.querySelector('source[srcset]');
+                if (avifSource) {
+                  avifSource.removeAttribute('srcset');
+                  return;
+                }
                 event.currentTarget.removeAttribute('srcset');
                 if (event.currentTarget.getAttribute('src') !== activeSlide.image) event.currentTarget.src = activeSlide.image;
               }}
@@ -54,6 +62,7 @@ const HeroSection = ({ onReady }: { onReady?: () => void }) => {
               decoding="async"
               draggable={false}
             />
+            </picture>
           </Link>
         </div>
 

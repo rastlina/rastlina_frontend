@@ -5,6 +5,8 @@ declare module 'virtual:rastlina-hero' {
     link_url?: string;
     optimizedImage: string;
     mobileImage: string;
+    optimizedAvif?: string;
+    mobileAvif?: string;
   }>;
   export default slides;
 }

@@ -23,6 +23,18 @@ try {
   // Root index files take precedence over rewrites on static hosts. Preserve
   // the empty SPA shell separately for shop, product and account routes.
   await writeFile('dist/app.html', template);
+  const styles = template.match(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/);
+  if (!styles || !styles[1].startsWith('/assets/')) throw new Error('Missing homepage stylesheet');
+  const css = await readFile(`dist${styles[1]}`, 'utf8');
+  template = template.replace(styles[0], `<style>${css.replace(/<\/style/gi, '<\\/style')}</style>`);
+  // Discover the responsive image before the inline stylesheet and let it
+  // take priority over the non-render-blocking app bootstrap download.
+  const preload = template.match(/<link rel="preload"[^>]*as="image"[^>]*>/);
+  if (preload) {
+    template = template.replace(preload[0], '');
+    template = template.replace(/(<meta name="viewport"[^>]*>)/, `$1${preload[0]}`);
+  }
+  template = template.replace('<script type="module"', '<script fetchpriority="low" type="module"');
   template = template.replace('<div id="root"></div>', `<div id="root" data-prerendered="true">${html}</div>`);
   template = template.replace(/<title>[^<]*<\/title>/, helmet.title.toString());
   template = template.replace(/<meta name="robots"[^>]*>/, '');
