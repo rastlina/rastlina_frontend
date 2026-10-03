@@ -9,7 +9,10 @@ const HeroSection = ({ onReady }: { onReady?: () => void }) => {
   const imageRef = useRef<HTMLImageElement>(null);
   useEffect(() => {
     // The prerendered image may have loaded before hydration attaches onLoad.
-    if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) onReady?.();
+    if (imageRef.current?.complete) {
+      if (imageRef.current.naturalWidth > 0) onReady?.();
+      else imageRef.current.dispatchEvent(new Event('error'));
+    }
   }, [onReady]);
   const { data, loading, error } = useHomeData();
   const slides = loading || error ? initialSlides : data.hero_slides;

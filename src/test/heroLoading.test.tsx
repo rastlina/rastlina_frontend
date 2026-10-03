@@ -11,7 +11,7 @@ vi.mock('virtual:rastlina-hero', () => ({ default: [
   { id: 2, image: 'https://api.rastlina.com/media/hero_slides/second.png', optimizedImage: '/second.webp', mobileImage: '/second-mobile.webp' },
 ] }));
 
-afterEach(() => { cleanup(); vi.useRealTimers(); });
+afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); });
 
 it('shows an eager responsive banner while catalogue data is pending', () => {
   const onReady = vi.fn();
@@ -37,6 +37,15 @@ it('falls back from AVIF to WebP before using the original image', () => {
   fireEvent.error(banner);
   expect(banner).not.toHaveAttribute('srcset');
   expect(banner).toHaveAttribute('src', 'https://api.rastlina.com/media/hero_slides/first.png');
+});
+
+it('recovers an image error that happened before hydration attached its handlers', () => {
+  vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(true);
+  vi.spyOn(HTMLImageElement.prototype, 'naturalWidth', 'get').mockReturnValue(0);
+  render(<MemoryRouter><HeroSection /></MemoryRouter>);
+  const banner = screen.getByAltText('Rastlina Banner');
+  expect(banner.parentElement?.querySelector('source')).not.toHaveAttribute('srcset');
+  expect(banner).toHaveAttribute('src', '/first.webp');
 });
 
 it('keeps one stable banner even when more banners exist in the catalogue', () => {
