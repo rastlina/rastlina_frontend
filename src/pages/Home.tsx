@@ -1,22 +1,25 @@
 // src/pages/Home.tsx
 import HeroSection from '@/components/home/HeroSection';
 import SocialProof from '@/components/home/SocialProof';
-import CreativeCategories from '@/components/home/CreativeCategories';
-import ShopByFeeling from '@/components/home/ShopByFeeling';
-import BestSellers from '@/components/home/BestSellers';
-import NewArrivals from '@/components/home/NewArrivals';
-import WatchAndShopSection from '@/components/home/WatchAndShopSection';
-import OffersSection from '@/components/home/OffersSection';
-import SelfWateringSection from '@/components/home/SelfWateringSection';
-import WhyChooseUs from '@/components/home/WhyChooseUs';
-import CombosSection from '@/components/home/CombosSection';
-import Testimonials from '@/components/home/Testimonials';
-
-import Blogs from '@/components/home/Blogs';
-import GrowingSimple from '@/components/home/GrowingSimple';
+import { lazy, Suspense, startTransition, useCallback, useEffect, useState } from 'react';
 import { Seo } from '@/components/seo/Seo';
 
+const HomeSections = lazy(() => import('@/components/home/HomeSections'));
+
 const Home = () => {
+  const [sectionsReady, setSectionsReady] = useState(false);
+  const showSections = useCallback(() => {
+    startTransition(() => setSectionsReady(true));
+  }, []);
+  const onHeroReady = useCallback(() => {
+    // Let the browser paint the first screen before mounting the catalogue.
+    requestAnimationFrame(() => requestAnimationFrame(showSections));
+  }, [showSections]);
+  useEffect(() => {
+    // Automatic fallback: no scrolling or user interaction is required.
+    const timeout = window.setTimeout(showSections, 3000);
+    return () => window.clearTimeout(timeout);
+  }, [showSections]);
   return (
     <main className="home-content w-full overflow-x-hidden pt-[110px]">
       <Seo
@@ -48,7 +51,7 @@ const Home = () => {
         }}
       />
       <h1 className="sr-only">Buy Indoor Plants Online in India</h1>
-      <HeroSection />
+      <HeroSection onReady={onHeroReady} />
       <section className="bg-[#F8F7F4] px-4 py-8 text-center">
         <div className="mx-auto max-w-3xl">
           <h2 className="font-serif text-2xl font-bold text-[#1A3831] md:text-3xl">
@@ -60,20 +63,9 @@ const Home = () => {
         </div>
       </section>
       <SocialProof />
-      <CreativeCategories />
-      <ShopByFeeling />
-      <BestSellers />
-      <WatchAndShopSection />
-      <NewArrivals />
-     
-      <SelfWateringSection />
-      <WhyChooseUs />
-      <OffersSection />
-      <CombosSection />
-      <Testimonials />
-     
-      <Blogs />
-      <GrowingSimple />
+      <Suspense fallback={<div className="min-h-[1200px]" aria-label="Loading plant collections" />}>
+        {sectionsReady ? <HomeSections /> : <div className="min-h-[1200px]" aria-label="Loading plant collections" />}
+      </Suspense>
     </main>
   );
 };

@@ -14,7 +14,8 @@ vi.mock('virtual:rastlina-hero', () => ({ default: [
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
 it('shows an eager responsive banner while catalogue data is pending', () => {
-  render(<MemoryRouter><HeroSection /></MemoryRouter>);
+  const onReady = vi.fn();
+  render(<MemoryRouter><HeroSection onReady={onReady} /></MemoryRouter>);
   const banner = screen.getByAltText('Rastlina Banner');
   expect(banner).toHaveAttribute('src', '/first.webp');
   expect(banner).toHaveAttribute('loading', 'eager');
@@ -22,6 +23,8 @@ it('shows an eager responsive banner while catalogue data is pending', () => {
   expect(banner).not.toHaveClass('object-cover');
   expect(banner).toHaveAttribute('srcset', '/first-mobile.webp 768w, /first.webp 1600w');
   expect(banner.parentElement?.parentElement).not.toHaveAttribute('style');
+  fireEvent.load(banner);
+  expect(onReady).toHaveBeenCalledTimes(1);
 });
 
 it('keeps one stable banner even when more banners exist in the catalogue', () => {

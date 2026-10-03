@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useHomeData } from '@/hooks/useHomeData';
 import initialSlides from 'virtual:rastlina-hero';
 
-const HeroSection = () => {
+const HeroSection = ({ onReady }: { onReady?: () => void }) => {
   const { data, loading, error } = useHomeData();
   const slides = loading || error ? initialSlides : data.hero_slides;
   const activeSlide = slides[0];
@@ -33,6 +33,7 @@ const HeroSection = () => {
               src={optimizedSlide?.optimizedImage || activeSlide.image}
               srcSet={optimizedSlide ? `${optimizedSlide.mobileImage} 768w, ${optimizedSlide.optimizedImage} 1600w` : undefined}
               sizes="100vw"
+              onLoad={onReady}
               onError={event => {
                 event.currentTarget.removeAttribute('srcset');
                 if (event.currentTarget.getAttribute('src') !== activeSlide.image) event.currentTarget.src = activeSlide.image;
