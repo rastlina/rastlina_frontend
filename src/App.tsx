@@ -74,7 +74,7 @@ const App = () => {
       if ('requestIdleCallback' in window) {
         window.requestIdleCallback(appendScript, { timeout: 2000 });
       } else {
-        window.setTimeout(appendScript, 0);
+        globalThis.setTimeout(appendScript, 0);
       }
     };
     if (document.readyState === 'complete') loadPixel();
