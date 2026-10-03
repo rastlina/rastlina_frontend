@@ -54,6 +54,9 @@ type MetaPixelWindow = Window & {
 
 const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: ReactNode }> }) => {
   useEffect(() => {
+    document.dispatchEvent(new Event('rastlina:ready'));
+  }, []);
+  useEffect(() => {
     const pixelWindow = window as MetaPixelWindow;
     if (pixelWindow.fbq) return;
 

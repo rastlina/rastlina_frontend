@@ -1,5 +1,7 @@
 import { createServer } from 'vite';
 import { readFile, writeFile } from 'node:fs/promises';
+import postcss from 'postcss';
+import { homeBootstrap } from './homeBootstrap.mjs';
 
 // Render only the public first screen. No product prices, stock, personal
 // information or authenticated API responses are captured in static HTML.
@@ -26,7 +28,10 @@ try {
   const styles = template.match(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/);
   if (!styles || !styles[1].startsWith('/assets/')) throw new Error('Missing homepage stylesheet');
   const css = await readFile(`dist${styles[1]}`, 'utf8');
-  template = template.replace(styles[0], `<style>${css.replace(/<\/style/gi, '<\\/style')}</style>`);
+  const cssTree = postcss.parse(css);
+  let fontCss = '';
+  cssTree.walkAtRules('font-face', rule => { fontCss += rule.toString(); rule.remove(); });
+  template = template.replace(styles[0], `<style>${cssTree.toString().replace(/<\/style/gi, '<\\/style')}</style>`);
   // Discover the responsive image before the inline stylesheet and let it
   // take priority over the non-render-blocking app bootstrap download.
   const preload = template.match(/<link rel="preload"[^>]*as="image"[^>]*>/);
@@ -34,7 +39,9 @@ try {
     template = template.replace(preload[0], '');
     template = template.replace(/(<meta name="viewport"[^>]*>)/, `$1${preload[0]}`);
   }
-  template = template.replace('<script type="module"', '<script fetchpriority="low" type="module"');
+  const entry = template.match(/<script type="module"[^>]*src="([^"]+)"[^>]*><\/script>/);
+  if (!entry) throw new Error('Missing homepage app entry');
+  template = template.replace(entry[0], `<script type="module">${homeBootstrap(entry[1], fontCss)}</script>`);
   template = template.replace('<div id="root"></div>', `<div id="root" data-prerendered="true">${html}</div>`);
   template = template.replace(/<title>[^<]*<\/title>/, helmet.title.toString());
   template = template.replace(/<meta name="robots"[^>]*>/, '');

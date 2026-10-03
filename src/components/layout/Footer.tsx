@@ -195,6 +195,10 @@ export const Footer = () => {
               <img
                 src="https://www.staffarc.in/images/Staffarc-logo.png"
                 alt="StaffArc logo"
+                loading="lazy"
+                decoding="async"
+                width={16}
+                height={16}
                 className="h-4 w-4 object-contain"
               />
               StaffArc
