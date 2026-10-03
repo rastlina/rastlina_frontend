@@ -61,17 +61,6 @@ export function imageAssets(): Plugin {
       },
     },
     async generateBundle() {
-      try {
-        const response = await fetch('https://www.staffarc.in/images/Staffarc-logo.png', {
-          redirect: 'error', signal: AbortSignal.timeout(10000),
-        });
-        if (!response.ok) throw new Error('Credit logo unavailable');
-        const input = Buffer.from(await response.arrayBuffer());
-        if (input.length > 5_000_000) throw new Error('Credit logo too large');
-        const logo = await sharp(input).resize({ width: 48, height: 48, fit: 'inside', withoutEnlargement: true }).webp({ quality: 82 }).toBuffer();
-        this.emitFile({ type: 'asset', fileName: 'optimized/footer-credit.webp', source: logo });
-        console.log(`Footer credit: ${input.length} -> ${logo.length} bytes`);
-      } catch { this.warn('Credit logo optimization unavailable; original remains the fallback.'); }
       for (const family of ['inter', 'playfair-display']) {
         this.emitFile({
           type: 'asset', fileName: `optimized/font-${family}-LICENSE.txt`,

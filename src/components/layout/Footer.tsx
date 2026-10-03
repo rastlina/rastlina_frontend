@@ -6,7 +6,6 @@ import {
   Phone,
   Mail,
   Clock,
-  Heart,
 } from 'lucide-react';
 
 const footerLinks = [
@@ -181,33 +180,6 @@ export const Footer = () => {
           <p className="text-center">
             GSTIN: 36AAPCR7860K1ZK
           </p>
-
-          <div className="flex items-center gap-1 text-center">
-            Made with
-            <Heart className="h-3.5 w-3.5 text-red-500 mx-1 fill-red-500" />
-            by
-            <a
-              href="https://staffarc.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-orange-400 hover:underline ml-1"
-            >
-              <img
-                src="/optimized/footer-credit.webp"
-                onError={(event) => {
-                  const original = 'https://www.staffarc.in/images/Staffarc-logo.png';
-                  if (event.currentTarget.src !== original) event.currentTarget.src = original;
-                }}
-                alt="StaffArc logo"
-                loading="lazy"
-                decoding="async"
-                width={16}
-                height={16}
-                className="h-4 w-4 object-contain"
-              />
-              StaffArc
-            </a>
-          </div>
 
           <p className="text-center lg:text-right">
             Designed with 🌿 in Hyderabad
