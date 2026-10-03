@@ -4,7 +4,7 @@ import { homeBootstrap } from '../../build/homeBootstrap.mjs';
 afterEach(() => {
   document.dispatchEvent(new Event('rastlina:ready'));
   document.body.innerHTML = '';
-  document.head.querySelectorAll('script, style').forEach(node => node.remove());
+  document.head.querySelectorAll('script, style, link[rel="stylesheet"]').forEach(node => node.remove());
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
@@ -43,4 +43,20 @@ it('starts automatically even when the banner never loads', () => {
   window.eval(homeBootstrap('/assets/test-entry.js', ''));
   vi.advanceTimersByTime(3000);
   expect(document.head.querySelector('script')).toHaveAttribute('src', '/assets/test-entry.js');
+});
+
+it('loads complete styles after the banner and before interactive app startup', () => {
+  vi.useFakeTimers();
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { callback(0); return 1; });
+  document.body.innerHTML = '<img alt="Rastlina Banner" src="/banner.avif">';
+  window.eval(homeBootstrap('/assets/test-entry.js', '', '/assets/all.css'));
+  expect(document.head.querySelector('link')).toBeNull();
+  document.querySelector('img')!.dispatchEvent(new Event('load'));
+  const sheet = document.head.querySelector('link')!;
+  expect(sheet).toHaveAttribute('href', '/assets/all.css');
+  expect(document.head.querySelector('script')).toBeNull();
+  sheet.dispatchEvent(new Event('load'));
+  expect(document.head.querySelector('script')).toHaveAttribute('src', '/assets/test-entry.js');
+  vi.advanceTimersByTime(6000);
+  expect(document.head.querySelectorAll('script')).toHaveLength(1);
 });

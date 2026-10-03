@@ -193,7 +193,11 @@ export const Footer = () => {
               className="flex items-center gap-1 text-orange-400 hover:underline ml-1"
             >
               <img
-                src="https://www.staffarc.in/images/Staffarc-logo.png"
+                src="/optimized/footer-credit.webp"
+                onError={(event) => {
+                  const original = 'https://www.staffarc.in/images/Staffarc-logo.png';
+                  if (event.currentTarget.src !== original) event.currentTarget.src = original;
+                }}
                 alt="StaffArc logo"
                 loading="lazy"
                 decoding="async"

@@ -1,7 +1,9 @@
-export function homeBootstrap(modulePath, fontCss) {
+export function homeBootstrap(modulePath, fontCss, stylesheetPath = '') {
   if (!modulePath.startsWith('/assets/')) throw new Error('Unexpected homepage entry path');
   const entry = JSON.stringify(modulePath).replace(/</g, '\\u003c');
   const fonts = JSON.stringify(fontCss).replace(/</g, '\\u003c');
+  if (stylesheetPath && !stylesheetPath.startsWith('/assets/')) throw new Error('Unexpected homepage stylesheet path');
+  const stylesheet = JSON.stringify(stylesheetPath).replace(/</g, '\\u003c');
   return `(() => {
     let started = false;
     let ready = false;
@@ -12,12 +14,26 @@ export function homeBootstrap(modulePath, fontCss) {
       const fonts = document.createElement('style');
       fonts.textContent = ${fonts};
       document.head.appendChild(fonts);
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.crossOrigin = 'anonymous';
-      script.fetchPriority = urgent ? 'high' : 'low';
-      script.src = ${entry};
-      document.head.appendChild(script);
+      let scriptStarted = false;
+      const startScript = () => {
+        if (scriptStarted) return;
+        scriptStarted = true;
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.crossOrigin = 'anonymous';
+        script.fetchPriority = urgent ? 'high' : 'low';
+        script.src = ${entry};
+        document.head.appendChild(script);
+      };
+      if (${stylesheet}) {
+        const sheet = document.createElement('link');
+        sheet.rel = 'stylesheet';
+        sheet.href = ${stylesheet};
+        sheet.addEventListener('load', startScript, { once: true });
+        sheet.addEventListener('error', startScript, { once: true });
+        document.head.appendChild(sheet);
+        setTimeout(startScript, 3000);
+      } else startScript();
     };
     const captureClick = event => {
       if (ready || !(event.target instanceof Element)) return;
