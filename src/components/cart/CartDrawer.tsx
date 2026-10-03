@@ -1,5 +1,4 @@
 // src/components/cart/CartDrawer.tsx
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
@@ -27,24 +26,17 @@ export const CartDrawer = () => {
   const freeShippingUnlocked = remainingForFreeShipping === 0 && siteConfig.free_shipping_threshold > 0;
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
         <>
           {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             onClick={closeCart}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
           />
 
           {/* Drawer */}
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          <div
             className="fixed right-0 top-0 h-full w-full max-w-[420px] bg-white shadow-2xl z-[101] flex flex-col"
           >
             {/* Header */}
@@ -346,9 +338,9 @@ export const CartDrawer = () => {
                 </p>
               </div>
             )}
-          </motion.div>
+          </div>
         </>
       )}
-    </AnimatePresence>
+    </>
   );
 };

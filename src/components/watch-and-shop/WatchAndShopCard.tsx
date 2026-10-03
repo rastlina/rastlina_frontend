@@ -6,7 +6,6 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Play } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { WatchAndShopVideo } from './WatchAndShopVideo';
 import type { WatchAndShopItem } from '@/hooks/useWatchAndShop';
 
@@ -15,12 +14,9 @@ interface WatchAndShopCardProps {
   index?: number;
 }
 
-export const WatchAndShopCard = memo(({ item, index = 0 }: WatchAndShopCardProps) => {
+export const WatchAndShopCard = memo(({ item }: WatchAndShopCardProps) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: Math.min(index * 0.08, 0.32) }}
+    <div
       // Fixed width: creates the snap-scrolling effect
       className="flex-shrink-0 w-[220px] sm:w-[240px] md:w-[260px] snap-start"
     >
@@ -61,7 +57,7 @@ export const WatchAndShopCard = memo(({ item, index = 0 }: WatchAndShopCardProps
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 });
 

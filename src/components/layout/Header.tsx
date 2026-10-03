@@ -8,7 +8,6 @@ import {
   Briefcase, Search, User, Leaf, Tag,
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { motion, AnimatePresence } from 'framer-motion';
 import { storeService } from '@/services/api';
 import { contentService } from '@/services/api';
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -89,18 +88,14 @@ const TopBar = () => {
 
   return (
     <div className="bg-[#1A3831] text-white py-2.5 flex items-center justify-center h-[38px] overflow-hidden">
-      <AnimatePresence mode="wait">
-        <motion.p
+      <>
+        <p
           key={idx}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.3 }}
           className="text-xs md:text-sm font-medium tracking-wide text-center px-4"
         >
           {offers[idx]}
-        </motion.p>
-      </AnimatePresence>
+        </p>
+      </>
     </div>
   );
 };
@@ -144,11 +139,7 @@ const PlantsMegaMenu = ({
   onClick={closeMenu}
 />
       
-<motion.div
-  initial={{ opacity: 0, y: -10 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ opacity: 0, y: -10 }}
-  transition={{ duration: 0.2 }}
+<div
   className={`fixed left-0 w-full z-50 pointer-events-none transition-all duration-300 ${
     isScrolled ? 'top-[72px]' : 'top-[110px]'
   }`}
@@ -164,20 +155,16 @@ const PlantsMegaMenu = ({
                 onClick={closeMenu} 
                 className="rounded-xl overflow-hidden h-28 relative group cursor-pointer block shadow-sm bg-[#1A3831]"
               >
-                <AnimatePresence mode="sync">
+                <>
                   {currentSlide && (
-                    <motion.img
+                    <img
                       key={currentImageIndex}
                       src={currentSlide.image}
                       alt={currentSlide.title}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 1, ease: "easeInOut" }} 
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                   )}
-                </AnimatePresence>
+                </>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/20 flex items-center p-6 z-10">
                   <div>
                     {currentSlide?.subtitle && (
@@ -263,7 +250,7 @@ const PlantsMegaMenu = ({
 
           </div>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 };
@@ -273,10 +260,7 @@ const SimpleDropdown = ({ categories, mainSlug, closeMenu }: {
 }) => (
   <>
     <div className="fixed inset-0 top-[120px] z-40" onClick={closeMenu} />
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 8 }}
+    <div
       className="absolute top-full left-0 w-56 z-50 pt-1"
     >
       <div className="bg-white shadow-xl border border-gray-100 rounded-xl overflow-hidden">
@@ -298,7 +282,7 @@ const SimpleDropdown = ({ categories, mainSlug, closeMenu }: {
           </Link>
         ))}
       </div>
-    </motion.div>
+    </div>
   </>
 );
 
@@ -332,15 +316,6 @@ export const Header = () => {
     storeService.getNavbarData().then(setNavData).catch(() => {});
   }, []);
   
-
-  // Fetch sizes for plants megamenu
-useEffect(() => {
-  storeService.getNavbarData()
-    .then((data) => {
-      setNavData(data);
-    })
-    .catch((err) => console.error("Navbar fetch error:", err));
-}, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -412,7 +387,7 @@ const extraNavItems = [
 
           {/* ── MOBILE ── */}
           <div className="lg:hidden h-[70px] flex items-center justify-between">
-            <button className="p-2 -ml-2 text-[#1A3831]" onClick={() => { setMobileOpen(!mobileOpen); setMobileSearchOpen(false); }}>
+            <button aria-label="Toggle menu" aria-expanded={mobileOpen} className="p-2 -ml-2 text-[#1A3831]" onClick={() => { setMobileOpen(!mobileOpen); setMobileSearchOpen(false); }}>
               {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
             <Link to="/" className="absolute left-1/2 -translate-x-1/2">
@@ -420,10 +395,10 @@ const extraNavItems = [
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             </Link>
             <div className="flex items-center gap-1">
-              <button className="p-2 text-gray-800" onClick={() => { setMobileSearchOpen(!mobileSearchOpen); setMobileOpen(false); }}>
+              <button aria-label="Toggle search" aria-expanded={mobileSearchOpen} className="p-2 text-gray-800" onClick={() => { setMobileSearchOpen(!mobileSearchOpen); setMobileOpen(false); }}>
                 <Search className="h-5 w-5" />
               </button>
-              <button className="relative p-2 text-[#1A3831]" onClick={openCart}>
+              <button aria-label="Open cart" className="relative p-2 text-[#1A3831]" onClick={openCart}>
                 <ShoppingBag className="h-6 w-6 stroke-[1.5]" />
                 {totalItems > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-[#FACC15] text-black text-[10px] font-extrabold rounded-full h-4.5 w-4.5 min-w-[18px] h-[18px] flex items-center justify-center shadow-sm px-0.5">
@@ -456,7 +431,7 @@ const extraNavItems = [
         <ChevronDown className={`h-3 w-3 opacity-50 transition-transform ${activeDropdown === 'plants' ? 'rotate-180' : ''}`} />
       </button>
 
-      <AnimatePresence>
+      <>
         {activeDropdown === 'plants' && (
           <PlantsMegaMenu
   heroSlides={heroSlides}
@@ -467,7 +442,7 @@ const extraNavItems = [
   isScrolled={isScrolled}
 />
         )}
-      </AnimatePresence>
+      </>
     </div>
   )}
 
@@ -483,11 +458,11 @@ const extraNavItems = [
                       <ChevronDown className={`h-3 w-3 opacity-50 transition-transform ${activeDropdown === cat.slug ? 'rotate-180' : ''}`} />
                     )}
                   </button>
-                  <AnimatePresence>
+                  <>
                     {activeDropdown === cat.slug && cat.categories.length > 0 && (
                       <SimpleDropdown categories={cat.categories} mainSlug={cat.slug} closeMenu={() => setActiveDropdown(null)} />
                     )}
-                  </AnimatePresence>
+                  </>
                 </div>
               ))}
 
@@ -530,7 +505,7 @@ const extraNavItems = [
                 )}
               </Link>
 
-              <button className="relative p-2 text-[#1A3831]" onClick={openCart}>
+              <button aria-label="Open cart" className="relative p-2 text-[#1A3831]" onClick={openCart}>
                 <ShoppingBag className="h-7 w-7 stroke-[1.5]" />
                 {totalItems > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-[#FACC15] text-black text-[10px] font-extrabold rounded-full min-w-[20px] h-5 flex items-center justify-center shadow-sm px-1">
@@ -544,10 +519,9 @@ const extraNavItems = [
         
 
         {/* Mobile search bar */}
-        <AnimatePresence>
+        <>
           {mobileSearchOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            <div
               className="lg:hidden border-t border-gray-100 bg-white overflow-hidden"
             >
               <div className="px-4 py-3">
@@ -563,15 +537,14 @@ const extraNavItems = [
                   </button>
                 </form>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </>
 
         {/* Mobile drawer */}
-        <AnimatePresence>
+        <>
           {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+            <div
               className="lg:hidden absolute top-[70px] left-0 w-full bg-white border-t border-gray-100 z-40 overflow-y-auto"
               style={{ maxHeight: 'calc(100vh - 108px)' }}
             >
@@ -600,9 +573,9 @@ const extraNavItems = [
                       </span>
                       <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${mobileExpanded === 'plants' ? 'rotate-180' : ''}`} />
                     </div>
-                    <AnimatePresence>
+                    <>
                       {mobileExpanded === 'plants' && (
-                        <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+                        <div className="overflow-hidden">
                           <div className="pb-4 space-y-1 pl-2">
                             
                             {/* By Size */}
@@ -641,9 +614,9 @@ const extraNavItems = [
   All Plants
 </Link>
                           </div>
-                        </motion.div>
+                        </div>
                       )}
-                    </AnimatePresence>
+                    </>
                   </div>
                 )}
 
@@ -657,9 +630,9 @@ const extraNavItems = [
                         <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${mobileExpanded === cat.slug ? 'rotate-180' : ''}`} />
                       )}
                     </div>
-                    <AnimatePresence>
+                    <>
                       {mobileExpanded === cat.slug && cat.categories.length > 0 && (
-                        <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+                        <div className="overflow-hidden">
                           <div className="pb-4 space-y-1 pl-2">
                             {cat.categories.map(sub => (
                               <Link key={sub.id} to={`/shop?category=${sub.slug}`}
@@ -667,9 +640,9 @@ const extraNavItems = [
                                 className="block py-2 text-sm text-gray-700 hover:text-[#667D00] font-medium">{sub.name}</Link>
                             ))}
                           </div>
-                        </motion.div>
+                        </div>
                       )}
-                    </AnimatePresence>
+                    </>
                   </div>
                 ))}
 
@@ -681,9 +654,9 @@ const extraNavItems = [
                   </Link>
                 ))}
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </>
       </header>
     </div>
   );
