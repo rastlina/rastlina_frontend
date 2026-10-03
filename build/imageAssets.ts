@@ -53,6 +53,12 @@ export function imageAssets(): Plugin {
       },
     },
     async generateBundle() {
+      for (const family of ['inter', 'playfair-display']) {
+        this.emitFile({
+          type: 'asset', fileName: `optimized/font-${family}-LICENSE.txt`,
+          source: await readFile(`node_modules/@fontsource-variable/${family}/LICENSE`),
+        });
+      }
       for (const [source, output, width] of [
         ['logo.png', 'logo-optimized.webp', 520],
         ['self-watering-banner.png', 'self-watering-banner-optimized.webp', 1400],
