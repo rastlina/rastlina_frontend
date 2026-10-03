@@ -1,7 +1,6 @@
 // src/components/products/ProductCard.tsx
 import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { formatPrice } from '@/utils/variantHelpers';
 import { normalizeProductName } from '@/utils/productName';
 
@@ -38,7 +37,7 @@ interface ProductCardProps {
   index?: number;
 }
 
-export const ProductCard = ({ product: sourceProduct, index = 0 }: ProductCardProps) => {
+export const ProductCard = ({ product: sourceProduct }: ProductCardProps) => {
   const product = { ...sourceProduct, name: normalizeProductName(sourceProduct.name) };
   const availableColors = product.available_colors ?? [];
 
@@ -59,13 +58,7 @@ export const ProductCard = ({ product: sourceProduct, index = 0 }: ProductCardPr
   const hasReviews = product.review_count > 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.35,
-        delay: Math.min(index * 0.06, 0.4),
-      }}
+    <div
       className="group h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300"
     >
       <Link
@@ -208,7 +201,7 @@ export const ProductCard = ({ product: sourceProduct, index = 0 }: ProductCardPr
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 };
 

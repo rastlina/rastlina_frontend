@@ -1,8 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('@fontsource-variable/playfair-display/files/playfair-display-latin-wght-normal.woff2') format('woff2');
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Keep all catalogue content in the DOM for search and accessibility, while
+   allowing the browser to skip expensive layout/paint below the first screen. */
+.home-content > :nth-child(n + 5) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
 
 @layer base {
   :root {

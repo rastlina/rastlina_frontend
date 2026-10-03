@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
@@ -62,18 +61,28 @@ const App = () => {
     pixelWindow.fbq = fbq;
     pixelWindow._fbq = fbq;
 
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-    document.head.appendChild(script);
-
     fbq('init', META_PIXEL_ID);
     fbq('track', 'PageView');
+    // Queue events immediately, but do not compete with first-screen resources.
+    const loadPixel = () => {
+      const appendScript = () => {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        document.head.appendChild(script);
+      };
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(appendScript, { timeout: 2000 });
+      } else {
+        window.setTimeout(appendScript, 0);
+      }
+    };
+    if (document.readyState === 'complete') loadPixel();
+    else window.addEventListener('load', loadPixel, { once: true });
   }, []);
 
   return (
     <HelmetProvider>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
@@ -116,7 +125,6 @@ const App = () => {
           </TooltipProvider>
         </QueryClientProvider>
       </AuthProvider>
-    </GoogleOAuthProvider>
     </HelmetProvider>
   );
 };

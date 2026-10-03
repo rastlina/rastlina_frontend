@@ -1,12 +1,18 @@
 // src/pages/LoginPage.tsx
 import { useState, useEffect } from 'react';
-import { useGoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, Leaf } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
+  return <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <LoginForm />
+  </GoogleOAuthProvider>;
+}
+
+function LoginForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, googleLogin, signup, isLoggedIn } = useAuth();

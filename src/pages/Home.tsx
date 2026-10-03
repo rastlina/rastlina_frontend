@@ -14,12 +14,11 @@ import Testimonials from '@/components/home/Testimonials';
 
 import Blogs from '@/components/home/Blogs';
 import GrowingSimple from '@/components/home/GrowingSimple';
-import WhatsAppButton from '@/components/home/WhatsAppButton';
 import { Seo } from '@/components/seo/Seo';
 
 const Home = () => {
   return (
-    <main className="w-full overflow-x-hidden pt-[110px]">
+    <main className="home-content w-full overflow-x-hidden pt-[110px]">
       <Seo
         title="Buy Indoor Plants Online in India | Rastlina"
         description="Shop ready-to-gift indoor plants online at Rastlina. Each set includes a healthy plant, self-watering pot and soil mix, with doorstep delivery across India."
@@ -75,7 +74,6 @@ const Home = () => {
      
       <Blogs />
       <GrowingSimple />
-      <WhatsAppButton />
     </main>
   );
 };

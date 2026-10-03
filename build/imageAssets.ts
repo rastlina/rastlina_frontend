@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 export function imageAssets(): Plugin {
   const heroModule = '\0virtual:rastlina-hero';
+  let firstHero: { mobileImage: string; optimizedImage: string } | undefined;
   return {
     name: 'rastlina-image-assets',
     resolveId(id) { if (id === 'virtual:rastlina-hero') return heroModule; },
@@ -33,11 +34,23 @@ export function imageAssets(): Plugin {
             slides.push({ id: slide.id, image: slide.image, link_url: slide.link_url, optimizedImage: `/optimized/hero-${basename}-1600.webp`, mobileImage: `/optimized/hero-${basename}-768.webp` });
           } catch { this.warn('A banner keeps its live API fallback.'); }
         }
+        firstHero = slides[0];
         return `export default ${JSON.stringify(slides)};`;
       } catch {
         this.warn('Banner snapshot unavailable; runtime catalogue remains the fallback.');
         return 'export default [];';
       }
+    },
+    transformIndexHtml: {
+      order: 'post',
+      handler() {
+        if (!firstHero) return;
+        return [{ tag: 'link', injectTo: 'head', attrs: {
+          rel: 'preload', as: 'image', href: firstHero.optimizedImage,
+          imagesrcset: `${firstHero.mobileImage} 768w, ${firstHero.optimizedImage} 1600w`,
+          imagesizes: '100vw', fetchpriority: 'high',
+        } }];
+      },
     },
     async generateBundle() {
       for (const [source, output, width] of [
