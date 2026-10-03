@@ -120,24 +120,33 @@ function loadCoupon(): AppliedCoupon | null {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>(loadCart);
+  const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(loadCoupon);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [storageReady, setStorageReady] = useState(false);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(DEFAULT_CONFIG);
   const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
 
+  useEffect(() => {
+    setItems(loadCart());
+    setAppliedCoupon(loadCoupon());
+    setStorageReady(true);
+  }, []);
+
   // Persist cart
   useEffect(() => {
+    if (!storageReady) return;
     try { localStorage.setItem(CART_KEY, JSON.stringify(items)); } catch {}
-  }, [items]);
+  }, [items, storageReady]);
 
   // Persist coupon
   useEffect(() => {
+    if (!storageReady) return;
     try {
       if (appliedCoupon) localStorage.setItem(COUPON_KEY, JSON.stringify(appliedCoupon));
       else localStorage.removeItem(COUPON_KEY);
     } catch {}
-  }, [appliedCoupon]);
+  }, [appliedCoupon, storageReady]);
 
   // Fetch site config + available coupons on mount
   useEffect(() => {

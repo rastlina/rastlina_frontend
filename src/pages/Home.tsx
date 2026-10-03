@@ -63,9 +63,11 @@ const Home = () => {
         </div>
       </section>
       <SocialProof />
-      <Suspense fallback={<div className="min-h-[1200px]" aria-label="Loading plant collections" />}>
-        {sectionsReady ? <HomeSections /> : <div className="min-h-[1200px]" aria-label="Loading plant collections" />}
-      </Suspense>
+      {sectionsReady ? (
+        <Suspense fallback={<div className="min-h-[1200px]" aria-label="Loading plant collections" />}>
+          <HomeSections />
+        </Suspense>
+      ) : <div className="min-h-[1200px]" aria-label="Loading plant collections" />}
     </main>
   );
 };

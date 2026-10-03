@@ -25,7 +25,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => authService.getStoredUser());
+  // A consistent first render lets the public homepage hydrate safely.
+  const [user, setUser] = useState<User | null>(null);
 
   const refreshUser = async () => {
     try {
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 useEffect(() => {
   const initAuth = async () => {
+    try { setUser(authService.getStoredUser()); } catch { setUser(null); }
     if (authService.isLoggedIn()) {
       try {
         await refreshUser(); // ✅ always validate token

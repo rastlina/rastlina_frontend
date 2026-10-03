@@ -1,11 +1,10 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { HelmetProvider } from 'react-helmet-async';
+import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -30,6 +29,14 @@ const ReturnsRefundPolicyPage = lazy(() => import('./pages/ReturnsRefundPage'));
 const ReplacementPolicyPage = lazy(() => import('./pages/ReplacementPolicyPage'));
 
 const queryClient = new QueryClient();
+
+function RouteBoundary({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  // The eager homepage must hydrate as one tree before provider effects update.
+  // Lazy routes still retain their normal loading boundary.
+  return pathname === '/' ? <>{children}</> :
+    <Suspense fallback={<div className="min-h-[60vh] pt-36 text-center" role="status">Loading Rastlina…</div>}>{children}</Suspense>;
+}
 const META_PIXEL_ID = '1051662191229917';
 
 type MetaPixel = ((...args: unknown[]) => void) & {
@@ -45,7 +52,7 @@ type MetaPixelWindow = Window & {
   _fbq?: MetaPixel;
 };
 
-const App = () => {
+const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: ReactNode }> }) => {
   useEffect(() => {
     const pixelWindow = window as MetaPixelWindow;
     if (pixelWindow.fbq) return;
@@ -82,20 +89,19 @@ const App = () => {
   }, []);
 
   return (
-    <HelmetProvider>
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <CartProvider>
               <Toaster />
               <Sonner />
-              <BrowserRouter>
+              <Router>
                 <RouteSeo />
                 <ScrollToTop />
                 <div className="min-h-screen flex flex-col">
                   <Header />
                   <div className="flex-1">
-                    <Suspense fallback={<div className="min-h-[60vh] pt-36 text-center" role="status">Loading Rastlina…</div>}>
+                    <RouteBoundary>
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/shop" element={<Shop />} />
@@ -114,18 +120,17 @@ const App = () => {
                       <Route path="/checkout" element={<CheckoutPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
-                    </Suspense>
+                    </RouteBoundary>
                   </div>
                   <Footer />
                   <CartDrawer />
                   <WhatsAppButton />
                 </div>
-              </BrowserRouter>
+              </Router>
             </CartProvider>
           </TooltipProvider>
         </QueryClientProvider>
       </AuthProvider>
-    </HelmetProvider>
   );
 };
 

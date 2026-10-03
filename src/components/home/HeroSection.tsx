@@ -3,8 +3,14 @@
 import { Link } from 'react-router-dom';
 import { useHomeData } from '@/hooks/useHomeData';
 import initialSlides from 'virtual:rastlina-hero';
+import { useEffect, useRef } from 'react';
 
 const HeroSection = ({ onReady }: { onReady?: () => void }) => {
+  const imageRef = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    // The prerendered image may have loaded before hydration attaches onLoad.
+    if (imageRef.current?.complete && imageRef.current.naturalWidth > 0) onReady?.();
+  }, [onReady]);
   const { data, loading, error } = useHomeData();
   const slides = loading || error ? initialSlides : data.hero_slides;
   const activeSlide = slides[0];
@@ -30,6 +36,7 @@ const HeroSection = ({ onReady }: { onReady?: () => void }) => {
             tabIndex={0}
           >
             <img
+              ref={imageRef}
               src={optimizedSlide?.optimizedImage || activeSlide.image}
               srcSet={optimizedSlide ? `${optimizedSlide.mobileImage} 768w, ${optimizedSlide.optimizedImage} 1600w` : undefined}
               sizes="100vw"

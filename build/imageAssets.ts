@@ -10,6 +10,10 @@ export function imageAssets(): Plugin {
     resolveId(id) { if (id === 'virtual:rastlina-hero') return heroModule; },
     async load(id) {
       if (id !== heroModule) return;
+      if (process.env.RASTLINA_PRERENDER === '1') {
+        const snapshot = await readFile('dist/hero-snapshot.json', 'utf8');
+        return `export default ${snapshot};`;
+      }
       // A build-time public banner snapshot makes the first visible content
       // independent of the runtime catalogue request. Unknown/new images
       // still use their live API URLs.
@@ -35,9 +39,11 @@ export function imageAssets(): Plugin {
           } catch { this.warn('A banner keeps its live API fallback.'); }
         }
         firstHero = slides[0];
+        this.emitFile({ type: 'asset', fileName: 'hero-snapshot.json', source: JSON.stringify(slides) });
         return `export default ${JSON.stringify(slides)};`;
       } catch {
         this.warn('Banner snapshot unavailable; runtime catalogue remains the fallback.');
+        this.emitFile({ type: 'asset', fileName: 'hero-snapshot.json', source: '[]' });
         return 'export default [];';
       }
     },
