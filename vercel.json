@@ -20,7 +20,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/home.html"
+      "destination": "/index.html"
     },
     {
       "source": "/sitemap.xml",
@@ -28,7 +28,7 @@
     },
     {
       "source": "/((?!api/|static/|media/).*)",
-      "destination": "/index.html"
+      "destination": "/app.html"
     }
   ]
 }
