@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 const SITE_URL = 'https://www.rastlina.com';
-const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
+const DEFAULT_IMAGE = `${SITE_URL}/og-image.webp`;
 
 type SeoProps = {
   title: string;
@@ -37,6 +37,7 @@ export function Seo({
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={normalizedImage} />
       <meta name="twitter:title" content={title} />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={normalizedImage} />
       {schema && (

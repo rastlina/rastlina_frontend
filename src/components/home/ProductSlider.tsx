@@ -98,9 +98,9 @@ export const ProductSlider = ({
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6 px-1">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
+          {title && <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
             {title}
-          </h2>
+          </h2>}
 
           <Link
             to={viewAllHref}

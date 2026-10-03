@@ -40,9 +40,8 @@ interface HomeContentResponse {
 }
 
 const DEFAULT_OFFERS = [
-  '🌿 Free Shipping on orders above ₹1999',
-  '✨ Buy 2 Plants @ ₹699 — Use Code: GREEN2',
-  '🏺 Flat 20% OFF on Ceramic Planters',
+  '🌿 Ready-to-gift indoor plants',
+  '✨ Self-watering pot and soil mix included',
 ];
 
 const TopBar = () => {
@@ -554,7 +553,7 @@ const extraNavItems = [
               <div className="px-4 py-3">
                 <form onSubmit={handleSearch} className="relative">
                   <input
-                    type="text" placeholder="Search plants, seeds, pots..."
+                    type="text" placeholder="Search indoor plants..."
                     value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                     className="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#667D00] focus:ring-1 focus:ring-[#667D00] bg-gray-50"
                     autoFocus

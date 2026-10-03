@@ -15,6 +15,7 @@ const BlogDetailPage = () => {
   if (!blog) {
     return (
       <div className="min-h-screen flex items-center justify-center">
+        <Seo title="Blog Not Found | Rastlina" description="The requested Rastlina article was not found." path={`/blog/${id}`} noIndex />
         <h1 className="text-2xl font-bold">
           Blog Not Found
         </h1>

@@ -49,6 +49,10 @@ export function imageAssets(): Plugin {
         this.emitFile({ type: 'asset', fileName: output, source: optimized });
         console.log(`${source}: ${input.length} -> ${optimized.length} bytes`);
       }
+      const socialImage = await sharp(await readFile('public/self-watering-banner.png'))
+        .resize({ width: 1200, height: 630, fit: 'contain', background: '#F8F7F4' })
+        .webp({ quality: 82 }).toBuffer();
+      this.emitFile({ type: 'asset', fileName: 'og-image.webp', source: socialImage });
       // Compile current reel covers into static assets rather than making
       // visitors download multi-megabyte PNGs. Original URLs remain fallbacks.
       try {

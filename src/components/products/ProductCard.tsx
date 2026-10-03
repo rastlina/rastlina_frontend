@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { formatPrice } from '@/utils/variantHelpers';
+import { normalizeProductName } from '@/utils/productName';
 
 export interface ApiProduct {
   id: number;
@@ -37,7 +38,8 @@ interface ProductCardProps {
   index?: number;
 }
 
-export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
+export const ProductCard = ({ product: sourceProduct, index = 0 }: ProductCardProps) => {
+  const product = { ...sourceProduct, name: normalizeProductName(sourceProduct.name) };
   const availableColors = product.available_colors ?? [];
 
   // Primary image
@@ -76,6 +78,9 @@ export const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             src={displayImage?.image}
             alt={product.name}
             loading="lazy"
+            decoding="async"
+            width={480}
+            height={600}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
 

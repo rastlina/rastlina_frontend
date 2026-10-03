@@ -27,7 +27,7 @@ function urlEntry(path: string, changefreq: string, priority: string) {
 
 export default async function handler(_: unknown, response: ResponseLike) {
   try {
-    const productResponse = await fetch(PRODUCT_API_URL);
+    const productResponse = await fetch(PRODUCT_API_URL, { signal: AbortSignal.timeout(20000) });
     if (!productResponse.ok) throw new Error(`Product API returned ${productResponse.status}`);
 
     const products = (await productResponse.json()) as Product[];
@@ -40,9 +40,12 @@ export default async function handler(_: unknown, response: ResponseLike) {
       urlEntry('/blog/3', 'monthly', '0.6'),
       urlEntry('/shipping-policy', 'yearly', '0.3'),
       urlEntry('/returns-refund-policy', 'yearly', '0.3'),
+      urlEntry('/privacy-policy', 'yearly', '0.3'),
+      urlEntry('/terms-and-conditions', 'yearly', '0.3'),
+      urlEntry('/replacement-policy', 'yearly', '0.3'),
     ];
-    const productEntries = products.map(({ slug }) =>
-      urlEntry(`/product/${xmlEscape(slug)}`, 'weekly', '0.8'),
+    const productEntries = [...new Set(products.map(({ slug }) => slug).filter(Boolean))].map((slug) =>
+      urlEntry(`/product/${xmlEscape(encodeURIComponent(slug))}`, 'weekly', '0.8'),
     );
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...staticEntries, ...productEntries].join('')}</urlset>`;

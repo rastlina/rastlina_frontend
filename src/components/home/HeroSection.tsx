@@ -5,8 +5,8 @@ import { useHomeData } from '@/hooks/useHomeData';
 import initialSlides from 'virtual:rastlina-hero';
 
 const HeroSection = () => {
-  const { data, loading } = useHomeData();
-  const slides = loading ? initialSlides : data.hero_slides;
+  const { data, loading, error } = useHomeData();
+  const slides = loading || error ? initialSlides : data.hero_slides;
   const activeSlide = slides[0];
   const optimizedSlide = initialSlides.find(slide => slide.image === activeSlide?.image);
 
