@@ -1,14 +1,15 @@
-// src/components/home/CreativeCategories.tsx
-// Fetches featured categories dynamically from /store/home-data/.
-// Circular image cards in a horizontal scrolling row.
+// Featured categories retain their existing API images, names, and destinations.
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
 import { useHomeData } from '@/hooks/useHomeData';
 
-const SkeletonCircle = () => (
-  <div className="flex flex-col items-center gap-2 flex-shrink-0">
-    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-100 animate-pulse" />
-    <div className="h-3 w-14 bg-gray-100 rounded animate-pulse" />
+const imageFrame =
+  'aspect-square overflow-hidden rounded-[44%_44%_7%_7%] border-[8px] border-white bg-[#F0F4E8] shadow-[0_15px_24px_-15px_rgba(37,70,51,0.38)]';
+
+const SkeletonCard = () => (
+  <div className="min-w-0 snap-start" aria-hidden="true">
+    <div className={`${imageFrame} animate-pulse`} />
+    <div className="mt-4 h-4 w-32 animate-pulse rounded bg-gray-100" />
+    <div className="mt-2 h-3 w-24 animate-pulse rounded bg-gray-100" />
   </div>
 );
 
@@ -17,56 +18,45 @@ const CreativeCategories = () => {
   const categories = data.featured_categories;
 
   return (
-    <section className="py-8 bg-white">
+    <section className="bg-[#FBF8EF] py-8 md:py-10">
       <div className="container-custom">
-        <div className="flex items-center justify-between mb-5 px-1">
-          <h2 className="text-xl md:text-2xl font-serif font-bold text-[#1A3831]">
-            Explore by Category
-          </h2>
-          
-        </div>
-
-        <div
-  className="
-    flex gap-5 md:gap-10
-    overflow-x-auto md:overflow-visible
-    pb-3 snap-x no-scrollbar px-1
-    md:justify-center
-  "
-  style={{ scrollbarWidth: 'none' }}
->
+        <h2 className="mb-6 font-serif text-xl font-bold text-[#1A3831] md:text-2xl">
+          Explore by Category
+        </h2>
+        <div className="grid auto-cols-[180px] grid-flow-col gap-6 overflow-x-auto px-1 pb-6 pt-1 snap-x snap-proximity no-scrollbar md:auto-cols-auto md:grid-flow-row md:grid-cols-3 md:overflow-visible lg:grid-cols-5">
           {loading
-            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCircle key={i} />)
+            ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
             : categories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  to={`/shop?category=${cat.slug}`}
-                  className="group flex flex-col items-center gap-2 flex-shrink-0 snap-start"
-                >
-                  {/* Circle */}
-                  <div className="relative w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-[#BFA275] transition-all duration-300 p-0.5">
-                    <div className="w-full h-full rounded-full overflow-hidden">
-                      {cat.image ? (
-                        <img
-                          src={cat.image}
-                          alt={cat.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[#F0F4E8] flex items-center justify-center">
-                          <span className="text-2xl">🌿</span>
-                        </div>
-                      )}
+              <Link
+                key={cat.id}
+                to={`/shop?category=${cat.slug}`}
+                className="group min-w-0 snap-start rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A3831] focus-visible:ring-offset-4"
+              >
+                <div className={imageFrame}>
+                  {cat.image ? (
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      width={320}
+                      height={320}
+                      className="h-full w-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-[1.035] motion-reduce:transition-none"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center" aria-hidden="true">
+                      <span className="text-4xl">🌿</span>
                     </div>
-                  </div>
-                  {/* Label */}
-                  <span className="text-sm md:text-base font-semibold text-gray-600 group-hover:text-[#1A3831] transition-colors text-center w-24 md:w-32 leading-tight">
-                    {cat.name}
-                  </span>
-                </Link>
-              ))
-          }
+                  )}
+                </div>
+                <h3 className="mb-1 mt-4 font-serif text-[17px] font-medium leading-snug text-[#1A3831] md:text-lg">
+                  {cat.name}
+                </h3>
+                <span className="text-xs text-[#6C7D65]">
+                  Explore collection <span aria-hidden="true">↗</span>
+                </span>
+              </Link>
+            ))}
         </div>
       </div>
     </section>
@@ -74,3 +64,4 @@ const CreativeCategories = () => {
 };
 
 export default CreativeCategories;
+
