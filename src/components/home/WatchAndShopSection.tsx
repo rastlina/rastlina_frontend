@@ -1,104 +1,73 @@
-// src/components/home/WatchAndShopSection.tsx
-// "Watch & Shop" homepage section.
-// Same slider pattern as ProductSlider — snap scroll, desktop arrows, mobile swipe.
-// Fetches up to 4 active Watch & Shop items.
-
-import { useRef, useCallback, useState, useEffect } from 'react';
-
-import { useWatchAndShopList } from '@/hooks/useWatchAndShop';
+// Four supplied MP4 clips with verified catalogue destinations.
 import { WatchAndShopCard } from '@/components/watch-and-shop/WatchAndShopCard';
+import type { WatchAndShopItem } from '@/hooks/useWatchAndShop';
 
-// ── Skeleton card ─────────────────────────────────────────────────────────────
-const SkeletonCard = () => (
-  <div className="flex-shrink-0 w-[220px] sm:w-[240px] md:w-[260px] snap-start">
-    <div className="aspect-[9/16] rounded-2xl bg-gray-100 animate-pulse" />
-  </div>
+const items: WatchAndShopItem[] = [
+  {
+    "id": 46,
+    "title": "Rex Begonia",
+    "slug": "rex-begonia",
+    "video_url": "/videos/watch-shop/rex-begonia.mp4",
+    "thumbnail": "/videos/watch-shop/rex-begonia.jpg",
+    "order": 0,
+    "is_active": true,
+    "product_slug": "rex-begonia"
+  },
+  {
+    "id": 15,
+    "title": "Calathea Ornata",
+    "slug": "calathea-ornata",
+    "video_url": "/videos/watch-shop/calathea-ornata.mp4",
+    "thumbnail": "/videos/watch-shop/calathea-ornata.jpg",
+    "order": 1,
+    "is_active": true,
+    "product_slug": "calathea-ornata"
+  },
+  {
+    "id": 8,
+    "title": "Aglaonema Suksom Jaipong",
+    "slug": "aglaonema-suksom-jaipong",
+    "video_url": "/videos/watch-shop/aglaonema-suksom-jaipong.mp4",
+    "thumbnail": "/videos/watch-shop/aglaonema-suksom-jaipong.jpg",
+    "order": 2,
+    "is_active": true,
+    "product_slug": "aglaonema-suksom-jaipong"
+  },
+  {
+    "id": 42,
+    "title": "Philodendron Moonshine",
+    "slug": "philodendron-moonshine",
+    "video_url": "/videos/watch-shop/philodendron-moonshine.mp4",
+    "thumbnail": "/videos/watch-shop/philodendron-moonshine.jpg",
+    "order": 3,
+    "is_active": true,
+    "product_slug": "philodendron-moonshine"
+  }
+];
+
+const WatchAndShopSection = () => (
+  <section className="py-12 bg-[#0F1E17]">
+    <div className="container-custom">
+      <div className="flex items-center justify-between mb-7 px-1">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-white">Watch & Shop</h2>
+          <p className="text-[#667D00] text-sm font-medium mt-0.5">See it in action — then get it</p>
+        </div>
+      </div>
+      <div
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3 scroll-smooth md:justify-center"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {items.map((item, index) => (
+          <WatchAndShopCard key={item.id} item={item} index={index} />
+        ))}
+      </div>
+      <div className="flex justify-center gap-1.5 mt-4 md:hidden">
+        {items.map(item => <div key={item.id} className="w-1.5 h-1.5 rounded-full bg-white/30" />)}
+      </div>
+    </div>
+  </section>
 );
 
-// ── Section ───────────────────────────────────────────────────────────────────
-const WatchAndShopSection = () => {
-  const { items, loading } = useWatchAndShopList();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(true);
-
-  const updateScrollState = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 8);
-    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8);
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    updateScrollState();
-    el.addEventListener('scroll', updateScrollState, { passive: true });
-    return () => el.removeEventListener('scroll', updateScrollState);
-  }, [items, updateScrollState]);
-
-  const scroll = useCallback((dir: 'left' | 'right') => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const card = el.querySelector('[class*="snap-start"]') as HTMLElement | null;
-    const cardWidth = card ? card.offsetWidth + 16 : 276;
-    el.scrollBy({ left: dir === 'left' ? -cardWidth : cardWidth, behavior: 'smooth' });
-  }, []);
-
-  // Don't render the section if we have nothing to show (and not loading)
-  if (!loading && items.length === 0) return null;
-
-  return (
-    <section className="py-12 bg-[#0F1E17]">
-      <div className="container-custom">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-7 px-1">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-serif font-bold text-white">
-              Watch & Shop
-            </h2>
-            <p className="text-[#667D00] text-sm font-medium mt-0.5">
-              See it in action — then get it
-            </p>
-          </div>
-
-          {/* Arrow controls — desktop */}
-          
-        </div>
-
-        {/* Slider */}
-        <div
-          ref={scrollRef}
-          className="
-flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3 scroll-smooth
-md:justify-center
-"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {loading
-            ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-            : items.map((item, i) => (
-                <WatchAndShopCard key={item.id} item={item} index={i} />
-              ))
-          }
-          {/* Trailing spacer */}
-          
-        </div>
-
-        {/* Mobile hint dots */}
-        {!loading && items.length > 1 && (
-          <div className="flex justify-center gap-1.5 mt-4 md:hidden">
-            {items.map((_, i) => (
-              <div
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-white/30"
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
-};
-
 export default WatchAndShopSection;
+
