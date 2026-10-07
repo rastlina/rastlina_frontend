@@ -1,6 +1,5 @@
 // src/components/watch-and-shop/WatchAndShopVideo.tsx
-// Smart video player optimized for a clean, luxury e-commerce experience.
-// Automatically crops out YouTube title headers, timeline scrubbers, and playback controls.
+// Muted, looping video with standard playback controls hidden.
 
 import { useRef, useEffect, useState, memo } from 'react';
 
@@ -23,7 +22,7 @@ function isYouTubeUrl(url: string): boolean {
  * Extracts the 11-character video ID and appends strict parameter flags
  * to disable native interfaces before rendering the iframe framework.
  */
-function toYouTubeEmbed(url: string): string {
+function toYouTubeEmbed(url: string, autoplay: boolean): string {
   let videoId = '';
 
   if (url.includes('embed/')) {
@@ -40,15 +39,15 @@ function toYouTubeEmbed(url: string): string {
   if (!videoId || videoId.length !== 11) return url;
 
   const params = new URLSearchParams({
-    autoplay: '1',
+    autoplay: autoplay ? '1' : '0',
     mute: '1',
     loop: '1',
     playlist: videoId,     // Mandatory reference token to enable repeating loops
     controls: '0',         // Hides playbars, timeline sliders, and volume handles
-    modestbranding: '1',   // Minimizes prominent corporate logo placement passes
-    rel: '0',              // Prevents end-of-clip recommendation window popups
+    disablekb: '1',        // Disables YouTube keyboard playback shortcuts
+    fs: '0',               // Hides the fullscreen control
+    rel: '0',              // Limits related videos to the same channel
     playsinline: '1',      // Disables system video fullscreen takeovers on smartphones
-    showinfo: '0',         // Legacy parameter protection fallback against top title bars
     iv_load_policy: '3',   // Blocks interactive subscription popups and annotation overlays
   });
 
@@ -77,11 +76,9 @@ export const WatchAndShopVideo = memo(({
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(false);
   
-  // Controls overlay visibility state toggle logic
-  const [showControls, setShowControls] = useState(false);
 
   const isYT = isYouTubeUrl(videoUrl);
-  const embedUrl = isYT ? toYouTubeEmbed(videoUrl) : videoUrl;
+  const embedUrl = isYT ? toYouTubeEmbed(videoUrl, autoplay) : videoUrl;
   const cover = thumbnail?.startsWith('https://api.rastlina.com/media/watch_shop/')
     ? `/optimized/watch-${thumbnail.split('/').pop()?.split('?')[0].replace(/\.[^.]+$/, '')}.webp`
     : thumbnail;
@@ -123,17 +120,10 @@ export const WatchAndShopVideo = memo(({
     };
   }, [autoplay, isIntersecting, isYT]);
 
-  // Dynamic user gesture handlers
-  const handleInteraction = () => {
-    setShowControls(prev => !prev);
-  };
 
   return (
     <div
       ref={containerRef}
-      onClick={handleInteraction}
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
       className={[
         'relative w-full overflow-hidden bg-black select-none group cursor-pointer',
         mode === 'detail'
@@ -157,33 +147,25 @@ export const WatchAndShopVideo = memo(({
         />
       )}
 
-      {/* 2. THREE-STAGE LUXURY OVERSCAN BRANDING OVERLAY MASK */}
+      {/* YouTube uses supported parameters for looping and hidden controls. */}
       {isYT ? (
-        <div 
-          className={[
-            "absolute w-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-700",
-            // The magic crop formulas:
-            // 1. We stretch the height to 135% to convert horizontal view lines into clean vertical ratios.
-            // 2. We use scale-[1.35] to safely crop top-banner metadata and bottom media controls beyond the visible bounds.
-            "aspect-[9/16] h-[135%] scale-[1.35]",
-            isLoaded ? "opacity-100" : "opacity-0"
-          ].join(' ')}
-        >
+        isIntersecting && (
           <iframe
-            src={isIntersecting ? embedUrl : ''}
-            title={productName || 'Luxury Brand Feed'}
+            src={embedUrl}
+            title={productName || 'Watch & Shop video'}
             allow="autoplay; encrypted-media; picture-in-picture"
             frameBorder="0"
             onLoad={() => setIsLoaded(true)}
-            className="w-full h-full object-cover pointer-events-none"
-            style={{ pointerEvents: 'none' }}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            tabIndex={-1}
           />
-        </div>
+        )
       ) : (
         /* 3. HARDWARE-ACCELERATED STANDALONE MP4 PIPELINE */
         <video
           ref={videoRef}
           src={shouldLoad ? embedUrl : undefined}
+          controls={false}
           muted
           loop
           autoPlay={autoplay && isIntersecting}
@@ -194,13 +176,6 @@ export const WatchAndShopVideo = memo(({
           onCanPlay={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
         />
-      )}
-
-      {/* 4. INVISIBLE GESTURE GLASS PROTECTION SHIELD
-          Sits directly on top of the iframe to intercept context switches when controls are hidden.
-      */}
-      {isYT && isLoaded && !showControls && (
-        <div className="absolute inset-0 w-full h-full z-20 bg-transparent" />
       )}
 
       {/* 5. ERROR DIAGNOSTIC FRAME DISPLAY */}
