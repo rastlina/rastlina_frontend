@@ -3,55 +3,112 @@
 
 import { useRef, useEffect, useState, memo } from 'react';
 
-// ── Module-level registry so only one native video asset plays at a time ──
-const activeVideos = new Set<HTMLVideoElement>();
-
-function pauseOthers(except: HTMLVideoElement) {
-  activeVideos.forEach(v => {
-    if (v !== except && !v.paused) v.pause();
-  });
-}
-
 // ── YouTube Embed Formatting Helpers ───────────────────────────────────────────
 
 function isYouTubeUrl(url: string): boolean {
-  return /youtube\.com|youtu\.be|youtube-nocookie\.com/.test(url);
+  try {
+    const parsed = new URL(url.trim(), 'https://www.youtube.com');
+    const host = parsed.hostname.toLowerCase();
+    return host === 'youtu.be' || host === 'youtube.com' ||
+      host.endsWith('.youtube.com') || host === 'youtube-nocookie.com' ||
+      host.endsWith('.youtube-nocookie.com');
+  } catch {
+    return false;
+  }
 }
 
-/**
- * Extracts the 11-character video ID and appends strict parameter flags
- * to disable native interfaces before rendering the iframe framework.
- */
 function toYouTubeEmbed(url: string, autoplay: boolean): string {
-  let videoId = '';
+  const parsed = new URL(url.trim(), 'https://www.youtube.com');
+  const segments = parsed.pathname.split('/').filter(Boolean);
+  const host = parsed.hostname.toLowerCase();
+  const videoId = host === 'youtu.be'
+    ? segments[0]
+    : parsed.searchParams.get('v') ||
+      (['embed', 'shorts', 'live', 'v'].includes(segments[0]) ? segments[1] : '');
 
-  if (url.includes('embed/')) {
-    videoId = url.split('embed/')[1]?.split('?')[0];
-  } else if (url.includes('shorts/')) {
-    videoId = url.split('shorts/')[1]?.split('?')[0];
-  } else if (url.includes('v=')) {
-    videoId = url.split('v=')[1]?.split('&')[0];
-  } else {
-    const match = url.match(/youtu\.be\/([^?&]+)/);
-    if (match) videoId = match[1];
-  }
-
-  if (!videoId || videoId.length !== 11) return url;
+  // Do not embed a regular YouTube page when the video ID cannot be read.
+  if (!videoId || !/^[a-zA-Z0-9_-]{11}$/.test(videoId)) return '';
 
   const params = new URLSearchParams({
     autoplay: autoplay ? '1' : '0',
     mute: '1',
     loop: '1',
-    playlist: videoId,     // Mandatory reference token to enable repeating loops
-    controls: '0',         // Hides playbars, timeline sliders, and volume handles
-    disablekb: '1',        // Disables YouTube keyboard playback shortcuts
-    fs: '0',               // Hides the fullscreen control
-    rel: '0',              // Limits related videos to the same channel
-    playsinline: '1',      // Disables system video fullscreen takeovers on smartphones
-    iv_load_policy: '3',   // Blocks interactive subscription popups and annotation overlays
+    playlist: videoId,
+    controls: '0',
+    disablekb: '1',
+    fs: '0',
+    rel: '0',
+    playsinline: '1',
+    iv_load_policy: '3',
+    enablejsapi: '1',
+    ...(typeof window !== 'undefined' ? { origin: window.location.origin } : {}),
   });
-
   return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+}
+
+interface YouTubePlayer {
+  mute(): void;
+  playVideo(): void;
+  pauseVideo(): void;
+  seekTo(seconds: number, allowSeekAhead: boolean): void;
+  destroy(): void;
+}
+interface YouTubePlayerEvent { target: YouTubePlayer; data: number; }
+interface YouTubeAPI {
+  Player: new (element: HTMLElement, options: {
+    events: {
+      onReady(event: YouTubePlayerEvent): void;
+      onStateChange(event: YouTubePlayerEvent): void;
+      onError(event: YouTubePlayerEvent): void;
+    };
+  }) => YouTubePlayer;
+}
+type YouTubeWindow = Window & {
+  YT?: YouTubeAPI;
+  onYouTubeIframeAPIReady?: () => void;
+};
+
+let apiPromise: Promise<YouTubeAPI> | null = null;
+
+// Share the API script, but create an independent player for every card.
+function loadYouTubeAPI(): Promise<YouTubeAPI> {
+  const ytWindow = window as YouTubeWindow;
+  if (ytWindow.YT?.Player) return Promise.resolve(ytWindow.YT);
+  if (apiPromise) return apiPromise;
+  apiPromise = new Promise<YouTubeAPI>((resolve, reject) => {
+    const previousReady = ytWindow.onYouTubeIframeAPIReady;
+    let script = document.querySelector<HTMLScriptElement>(
+      'script[src="https://www.youtube.com/iframe_api"]'
+    );
+    const cleanup = () => {
+      window.clearTimeout(timeout);
+      script?.removeEventListener('error', fail);
+    };
+    const fail = () => {
+      cleanup();
+      reject(new Error('YouTube player could not load'));
+    };
+    const timeout = window.setTimeout(fail, 20000);
+    ytWindow.onYouTubeIframeAPIReady = () => {
+      cleanup();
+      if (ytWindow.YT?.Player) resolve(ytWindow.YT);
+      else reject(new Error('YouTube player is unavailable'));
+      previousReady?.();
+    };
+    if (!script) {
+      script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.async = true;
+      script.addEventListener('error', fail, { once: true });
+      document.head.appendChild(script);
+    } else {
+      script.addEventListener('error', fail, { once: true });
+    }
+  }).catch(error => {
+    apiPromise = null;
+    throw error;
+  });
+  return apiPromise;
 }
 
 interface WatchAndShopVideoProps {
@@ -71,6 +128,10 @@ export const WatchAndShopVideo = memo(({
 }: WatchAndShopVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const youtubeHostRef = useRef<HTMLDivElement>(null);
+  const youtubePlayerRef = useRef<YouTubePlayer | null>(null);
+  const youtubeReadyRef = useRef(false);
+  const playbackRef = useRef({ visible: false, autoplay });
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
@@ -100,25 +161,98 @@ export const WatchAndShopVideo = memo(({
     return () => observer.disconnect();
   }, []);
 
-  // ── Native HTML5 standard streaming lifecycle (.mp4 local asset fallback) ──
+  // Resume/pause without removing the iframe or affecting other cards.
+  useEffect(() => {
+    playbackRef.current = { visible: isIntersecting, autoplay };
+    const player = youtubePlayerRef.current;
+    if (!player || !youtubeReadyRef.current) return;
+    if (isIntersecting && autoplay) {
+      player.mute();
+      player.playVideo();
+    } else {
+      player.pauseVideo();
+    }
+  }, [isIntersecting, autoplay]);
+
+  useEffect(() => {
+    const host = youtubeHostRef.current;
+    if (!isYT || !shouldLoad || !embedUrl || !host) return;
+    let cancelled = false;
+    let player: YouTubePlayer | null = null;
+    setIsLoaded(false);
+    setHasError(false);
+    youtubeReadyRef.current = false;
+
+    loadYouTubeAPI().then(api => {
+      if (cancelled) return;
+      // The API owns this child; React owns the surrounding host.
+      const iframe = document.createElement('iframe');
+      iframe.src = embedUrl;
+      iframe.title = productName || 'Watch & Shop video';
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+      iframe.setAttribute('frameborder', '0');
+      iframe.tabIndex = -1;
+      iframe.className = 'w-full h-full pointer-events-none';
+      host.replaceChildren(iframe);
+      player = new api.Player(iframe, {
+        events: {
+          onReady: event => {
+            if (cancelled) return;
+            youtubePlayerRef.current = event.target;
+            youtubeReadyRef.current = true;
+            event.target.mute();
+            if (playbackRef.current.visible && playbackRef.current.autoplay) {
+              event.target.playVideo();
+            }
+          },
+          onStateChange: event => {
+            if (cancelled) return;
+            // Keep the thumbnail until actual playback starts.
+            if (event.data === 1) setIsLoaded(true);
+            // Backup for the normal loop/playlist parameters.
+            if (event.data === 0 && playbackRef.current.visible &&
+                playbackRef.current.autoplay) {
+              event.target.seekTo(0, true);
+              event.target.playVideo();
+            }
+          },
+          onError: () => {
+            if (!cancelled) setHasError(true);
+          },
+        },
+      });
+      youtubePlayerRef.current = player;
+    }).catch(() => {
+      if (!cancelled) setHasError(true);
+    });
+
+    return () => {
+      cancelled = true;
+      youtubeReadyRef.current = false;
+      youtubePlayerRef.current = null;
+      player?.destroy();
+      host.replaceChildren();
+    };
+  }, [isYT, shouldLoad, embedUrl, productName]);
+
+  // Each visible card plays independently; one card must not pause the others.
   useEffect(() => {
     if (isYT) return;
     const video = videoRef.current;
     if (!video) return;
+    if (shouldLoad && isIntersecting && autoplay) {
+      video.muted = true;
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+    return () => video.pause();
+  }, [autoplay, isIntersecting, isYT, shouldLoad, videoUrl]);
 
-    if (isIntersecting && autoplay) {
-  activeVideos.add(video);
-  pauseOthers(video);
-  video.play().catch(() => {});
-} else {
-  video.pause();
-  activeVideos.delete(video);
-}
-
-    return () => {
-      activeVideos.delete(video);
-    };
-  }, [autoplay, isIntersecting, isYT]);
+  useEffect(() => {
+    setHasError(false);
+    setIsLoaded(false);
+  }, [videoUrl]);
 
 
   return (
@@ -149,17 +283,10 @@ export const WatchAndShopVideo = memo(({
 
       {/* YouTube uses supported parameters for looping and hidden controls. */}
       {isYT ? (
-        isIntersecting && (
-          <iframe
-            src={embedUrl}
-            title={productName || 'Watch & Shop video'}
-            allow="autoplay; encrypted-media; picture-in-picture"
-            frameBorder="0"
-            onLoad={() => setIsLoaded(true)}
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            tabIndex={-1}
-          />
-        )
+        <div
+          ref={youtubeHostRef}
+          className="absolute inset-0 w-full h-full"
+        />
       ) : (
         /* 3. HARDWARE-ACCELERATED STANDALONE MP4 PIPELINE */
         <video
@@ -170,7 +297,6 @@ export const WatchAndShopVideo = memo(({
           loop
           autoPlay={autoplay && isIntersecting}
           playsInline
-          webkit-playsinline="true"
           preload="none"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none z-10"
           onCanPlay={() => setIsLoaded(true)}
@@ -179,7 +305,7 @@ export const WatchAndShopVideo = memo(({
       )}
 
       {/* 5. ERROR DIAGNOSTIC FRAME DISPLAY */}
-      {hasError && !isYT && (
+      {(hasError || (isYT && !embedUrl)) && (
         <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 z-40">
           <p className="text-zinc-500 text-[10px] tracking-widest uppercase font-mono">Asset Inaccessible</p>
         </div>
@@ -189,3 +315,4 @@ export const WatchAndShopVideo = memo(({
 });
 
 WatchAndShopVideo.displayName = 'WatchAndShopVideo';
+
