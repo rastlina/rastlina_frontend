@@ -1,6 +1,6 @@
 // src/components/watch-and-shop/WatchAndShopCard.tsx
 // Single card for the Watch & Shop homepage section.
-// Clicking anywhere navigates to /watch-shop/:slug
+// Clicking the card opens its linked product page.
 // Video autoplays when visible (handled by WatchAndShopVideo IntersectionObserver).
 
 import { memo } from 'react';
@@ -21,7 +21,7 @@ export const WatchAndShopCard = memo(({ item }: WatchAndShopCardProps) => {
       className="flex-shrink-0 w-[220px] sm:w-[240px] md:w-[260px] snap-start"
     >
       <Link
-        to={`/watch-shop/${item.slug}`}
+        to={item.product_slug ? `/product/${encodeURIComponent(item.product_slug)}` : `/watch-shop/${encodeURIComponent(item.slug)}`}
         className="block group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
         aria-label={`Watch & Shop: ${item.title}`}
       >
@@ -62,3 +62,4 @@ export const WatchAndShopCard = memo(({ item }: WatchAndShopCardProps) => {
 });
 
 WatchAndShopCard.displayName = 'WatchAndShopCard';
+
