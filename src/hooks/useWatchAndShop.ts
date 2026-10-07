@@ -11,7 +11,7 @@ export interface WatchAndShopItem {
   id: number;
   title: string;
   slug: string;
-  video_url: string;       // YouTube URL, direct MP4, or embed URL
+  video_url: string;       // uploaded MP4 URL from the backend
   thumbnail: string;       // fallback image while video loads
   order: number;
   is_active: boolean;
@@ -32,17 +32,22 @@ export function useWatchAndShopList() {
 
     storeService
       .getWatchAndShop()
-     .then((response: any) => {
-  if (cancelled) return;
-
-  const data = response.watch_and_shop || response || [];
-
-  const active = data.filter(
-    (i: WatchAndShopItem) => i.is_active
-  );
-
-  setItems(active);
-})
+      .then((response: unknown) => {
+        if (cancelled) return;
+        const body = response as {
+          watch_and_shop?: WatchAndShopItem[];
+          results?: WatchAndShopItem[];
+        };
+        const data = Array.isArray(response)
+          ? response as WatchAndShopItem[]
+          : body?.watch_and_shop ?? body?.results ?? [];
+        const active = data.filter(item =>
+          item.is_active && item.product_slug &&
+          typeof item.video_url === 'string' &&
+          /\.mp4(?:[?#]|$)/i.test(item.video_url)
+        );
+        setItems(active.sort((a, b) => a.order - b.order || a.id - b.id).slice(0, 4));
+      })
       .catch(() => {
         if (!cancelled) setError(true);
       })
