@@ -19,7 +19,7 @@ const DEFAULT_ITEMS: SocialProofItem[] = [
   {
     id: 1,
     icon: 'smile',
-    title: '10k+',
+    title: '1k+',
     subtitle: 'Happy Homes',
     order: 1,
     is_active: true,
