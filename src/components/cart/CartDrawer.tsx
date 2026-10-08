@@ -1,5 +1,5 @@
 // src/components/cart/CartDrawer.tsx
-import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2 } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,16 +14,22 @@ export const CartDrawer = () => {
     isOpen, closeCart,
     items, removeFromCart, updateQuantity,
     totals, totalItems,
-    appliedCoupon, removeCoupon,
-    nextCoupon, remainingForNextCoupon,
-    freeShippingProgress, remainingForFreeShipping,
+    appliedCoupon, removeCoupon, availableCoupons,
     siteConfig,
   } = useCart();
 
   const navigate = useNavigate();
   const subtotal = totals.subtotal;
   const totalSaved = totals.totalSavings;
-  const freeShippingUnlocked = remainingForFreeShipping === 0 && siteConfig.free_shipping_threshold > 0;
+  const freeDeliveryTarget = Number(siteConfig.free_shipping_threshold || 499);
+  const tenPercentTarget = 999;
+  const progressPercent = Math.min(100, Math.max(0, (subtotal / tenPercentTarget) * 100));
+  const tenPercentCoupon = availableCoupons.find(coupon =>
+    coupon.discount_type === 'percentage' && Number(coupon.value) === 10 && Number(coupon.min_order_value) === tenPercentTarget
+  );
+  const tenPercentApplied = Boolean(
+    tenPercentCoupon && appliedCoupon?.code === tenPercentCoupon.code && subtotal >= tenPercentTarget
+  );
 
   return (
     <>
@@ -58,54 +64,42 @@ export const CartDrawer = () => {
               </button>
             </div>
 
-            {/* ── Free shipping / coupon nudge banner ── */}
+            {/* ── Two-stage delivery and savings progress ── */}
             {items.length > 0 && (
-              <div className={`px-5 py-4 flex flex-col gap-3 border-b ${
-                freeShippingUnlocked ? 'bg-[#667D00]/10 border-[#667D00]/20' : 'bg-[#F8F7F4] border-gray-100'
-              }`}>
-                {/* Free shipping progress */}
-                {siteConfig.free_shipping_threshold > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <Truck className={`h-3.5 w-3.5 flex-shrink-0 ${freeShippingUnlocked ? 'text-[#667D00]' : 'text-gray-400'}`} />
-                      <p className="text-xs font-medium text-gray-700">
-                        {freeShippingUnlocked
-                          ? <span className="text-[#667D00] font-bold">🎉 You unlocked Free Delivery!</span>
-                          : <>Add <span className="font-bold text-[#1A3831]">{formatPrice(remainingForFreeShipping)}</span> more for Free Delivery</>
-                        }
-                      </p>
-                    </div>
-                    
-                  </div>
-                )}
+              <div className="border-b border-[#DCE5DA] bg-[#F2F6F0] px-4 py-3.5">
+                <p className="mb-2.5 text-xs font-medium text-[#243B31]" aria-live="polite">
+                  {subtotal < freeDeliveryTarget ? (
+                    <>Add <strong>{formatPrice(freeDeliveryTarget - subtotal)}</strong> more to unlock free delivery</>
+                  ) : subtotal < tenPercentTarget ? (
+                    <><strong className="text-[#1A6B50]">Free delivery unlocked!</strong> Add <strong>{formatPrice(tenPercentTarget - subtotal)}</strong> more to unlock 10% off</>
+                  ) : tenPercentApplied ? (
+                    <><strong className="text-[#1A6B50]">10% off applied automatically!</strong> Free delivery is unlocked too.</>
+                  ) : (
+                    <><strong className="text-[#1A6B50]">Free delivery unlocked!</strong> Your cart reached the 10% off milestone.</>
+                  )}
+                </p>
 
-                {/* Coupon nudge — show only if not already auto-applied */}
-                {!appliedCoupon && nextCoupon && remainingForNextCoupon > 0 && (
-                  <p className="text-xs font-medium text-gray-600 flex items-center gap-1.5 mt-0.5">
-                    <Tag className="h-3 w-3 text-[#BFA275] flex-shrink-0" />
-                    Add{' '}
-                    <span className="font-bold text-[#1A3831]">{formatPrice(remainingForNextCoupon)}</span>
-                    {' '}more to get{' '}
-                    <span className="font-bold text-[#667D00]">
-                      {nextCoupon.discount_type === 'percentage'
-  ? `${Number(nextCoupon.value)}% OFF`
-  : `${formatPrice(nextCoupon.value)} OFF`}
-                    </span>
-                  </p>
-                )}
+                <div className="relative mx-1 h-8" role="img" aria-label={`Cart progress ${Math.round(progressPercent)} percent toward 10 percent savings at ₹999`}>
+                  <div className="absolute inset-x-0 top-3.5 h-1.5 rounded-full bg-[#D5DED2]" />
+                  <div
+                    className="absolute left-0 top-3.5 h-1.5 rounded-full bg-gradient-to-r from-[#1A6B50] to-[#94B56C] transition-[width] duration-700 ease-out"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                  <span className="absolute left-1/2 top-[11px] h-3 w-3 -translate-x-1/2 rounded-full border-2 border-[#F2F6F0] bg-[#A7B99A]" aria-hidden="true" />
+                  <span
+                    className="absolute top-0 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-[#F2F6F0] bg-[#155B46] text-white shadow-md transition-[left] duration-700 ease-out"
+                    style={{ left: `${Math.min(96, Math.max(4, progressPercent))}%` }}
+                    aria-hidden="true"
+                  >
+                    <Truck className="h-4 w-4" />
+                  </span>
+                  <span className="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border border-[#155B46] bg-white text-[10px] font-extrabold text-[#155B46] shadow-sm">10%</span>
+                </div>
 
-                {/* Auto-applied coupon chip */}
-                {appliedCoupon && (
-                  <div className="flex items-center justify-between mt-0.5">
-                    <div className="flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-[#667D00]" />
-                      <span className="text-xs font-bold text-[#667D00]">
-                        {appliedCoupon.code} applied — saving {formatPrice(appliedCoupon.discount)}
-                      </span>
-                    </div>
-                    
-                  </div>
-                )}
+                <div className="mt-1 flex justify-between text-[9px] font-semibold uppercase tracking-wide text-[#637568]">
+                  <span>Free delivery · {formatPrice(freeDeliveryTarget)}</span>
+                  <span>10% off · ₹999</span>
+                </div>
               </div>
             )}
 
@@ -331,10 +325,10 @@ export const CartDrawer = () => {
                   className="flex w-full items-center justify-center gap-2 bg-[#1A3831] hover:bg-[#112520] text-white min-h-12 rounded-xl px-2 font-bold text-xs sm:text-sm uppercase tracking-wide transition-colors shadow-md"
                 >
                   <span className="whitespace-nowrap">Checkout — {formatPrice(totals.total)}</span>
-                  <span aria-label="PhonePe, Google Pay and CRED UPI" className="flex shrink-0 items-center gap-1">
-                    <span title="PhonePe UPI" className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[10px] font-black normal-case text-[#5F259F]">पे</span>
-                    <span title="Google Pay UPI" className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black normal-case text-[#4285F4]">G</span>
-                    <span title="CRED UPI" className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[9px] font-black normal-case text-black">C</span>
+                  <span aria-label="PhonePe, Google Pay and CRED UPI" className="flex shrink-0 items-center -space-x-2">
+                    <span title="PhonePe UPI" className="z-20 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-[#5F259F] text-[11px] font-black normal-case text-white">पे</span>
+                    <span title="Google Pay UPI" className="z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-white text-base font-black normal-case text-[#4285F4]">G</span>
+                    <span title="CRED UPI" className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-black text-white"><ShieldCheck className="h-4 w-4" /></span>
                   </span>
                 </Button>
 
