@@ -191,3 +191,15 @@
 .blog-content ul {
   @apply list-disc;
 }
+
+@keyframes reward-pop {
+  0% { opacity: 0; transform: translateY(6px) scale(0.94); }
+  65% { opacity: 1; transform: translateY(-2px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes reward-total-flip {
+  0% { opacity: 0; transform: perspective(500px) rotateX(90deg); }
+  55% { opacity: 1; transform: perspective(500px) rotateX(-12deg); }
+  100% { opacity: 1; transform: perspective(500px) rotateX(0deg); }
+}

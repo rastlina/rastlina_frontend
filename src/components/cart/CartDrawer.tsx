@@ -1,5 +1,5 @@
 // src/components/cart/CartDrawer.tsx
-import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -332,7 +332,13 @@ export const CartDrawer = () => {
                   <span aria-label="PhonePe, Google Pay and CRED UPI" className="flex shrink-0 items-center -space-x-2">
                     <span title="PhonePe UPI" className="z-20 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-[#5F259F] text-[11px] font-black normal-case text-white">पे</span>
                     <span title="Google Pay UPI" className="z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-white text-base font-black normal-case text-[#4285F4]">G</span>
-                    <span title="CRED UPI" className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-black text-white"><ShieldCheck className="h-4 w-4" /></span>
+                    <span title="CRED UPI" className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-black text-white">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+                        <path d="M5 2.5h14v13.2L12 20.5 5 15.7V2.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                        <path d="M8.2 6h8.3v3.1H8.1v5.1l3.9 2.3 4-2.3v-1.5" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                        <path d="m10.1 12.1 1.8 1.1 2.2-1.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" />
+                      </svg>
+                    </span>
                   </span>
                 </Button>
 
