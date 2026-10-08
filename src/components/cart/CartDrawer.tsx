@@ -1,5 +1,5 @@
 // src/components/cart/CartDrawer.tsx
-import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -30,6 +30,11 @@ export const CartDrawer = () => {
   const tenPercentApplied = Boolean(
     tenPercentCoupon && appliedCoupon?.code === tenPercentCoupon.code && subtotal >= tenPercentTarget
   );
+  const rewardStage = subtotal >= tenPercentTarget
+    ? 'discount-unlocked'
+    : subtotal >= freeDeliveryTarget
+      ? 'delivery-unlocked'
+      : 'progress';
 
   return (
     <>
@@ -66,16 +71,16 @@ export const CartDrawer = () => {
 
             {/* ── Two-stage delivery and savings progress ── */}
             {items.length > 0 && (
-              <div className="border-b border-[#DCE5DA] bg-[#F2F6F0] px-4 py-3.5">
+              <div key={rewardStage} className="border-b border-[#DCE5DA] bg-[#F2F6F0] px-4 py-3.5">
                 <p className="mb-2.5 text-xs font-medium text-[#243B31]" aria-live="polite">
                   {subtotal < freeDeliveryTarget ? (
                     <>Add <strong>{formatPrice(freeDeliveryTarget - subtotal)}</strong> more to unlock free delivery</>
                   ) : subtotal < tenPercentTarget ? (
-                    <><strong className="text-[#1A6B50]">Free delivery unlocked!</strong> Add <strong>{formatPrice(tenPercentTarget - subtotal)}</strong> more to unlock 10% off</>
+                    <><span className="mr-1 inline-block motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]" aria-hidden="true">🎉</span><strong className="text-[#1A6B50]">Free delivery unlocked!</strong> Add <strong>{formatPrice(tenPercentTarget - subtotal)}</strong> more to unlock 10% off</>
                   ) : tenPercentApplied ? (
-                    <><strong className="text-[#1A6B50]">10% off applied automatically!</strong> Free delivery is unlocked too.</>
+                    <><span className="mr-1 inline-block motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]" aria-hidden="true">🎊</span><strong className="text-[#1A6B50]">Congratulations! 10% off applied automatically.</strong></>
                   ) : (
-                    <><strong className="text-[#1A6B50]">Free delivery unlocked!</strong> Your cart reached the 10% off milestone.</>
+                    <><span className="mr-1 inline-block motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]" aria-hidden="true">🎉</span><strong className="text-[#1A6B50]">Congratulations! Your cart reached the 10% off milestone.</strong></>
                   )}
                 </p>
 
@@ -93,7 +98,7 @@ export const CartDrawer = () => {
                   >
                     <Truck className="h-4 w-4" />
                   </span>
-                  <span className="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border border-[#155B46] bg-white text-[10px] font-extrabold text-[#155B46] shadow-sm">10%</span>
+                  <span className={`absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-extrabold shadow-sm transition-colors duration-500 ${subtotal >= tenPercentTarget ? 'border-[#667D00] bg-[#667D00] text-white' : 'border-[#155B46] bg-white text-[#155B46]'}`}>10%</span>
                 </div>
 
                 <div className="mt-1 flex justify-between text-[9px] font-semibold uppercase tracking-wide text-[#637568]">
@@ -268,19 +273,6 @@ export const CartDrawer = () => {
 
  
 
-  {totals.couponDiscount > 0 && appliedCoupon && (
-    <div className="flex justify-between text-sm text-[#667D00]">
-      <span className="flex items-center gap-1">
-        <Tag className="h-3 w-3" />
-        Coupon ({appliedCoupon.code})
-      </span>
-
-      <span className="font-bold">
-        −{formatPrice(totals.couponDiscount)}
-      </span>
-    </div>
-  )}
-
   <div className="flex justify-between text-sm text-gray-700">
     <span>Subtotal</span>
     <span className="font-bold">
@@ -306,13 +298,25 @@ export const CartDrawer = () => {
   )}
 </div>
 
+  {totals.couponDiscount > 0 && appliedCoupon && (
+    <div className="flex justify-between text-sm font-semibold text-[#667D00]">
+      <span>Discount — {appliedCoupon.discount_type === 'percentage' ? `${Number(appliedCoupon.value)}% off` : appliedCoupon.code}</span>
+      <span>−{formatPrice(totals.couponDiscount)}</span>
+    </div>
+  )}
+
 
   <div className="flex justify-between items-center pt-3 mt-2 border-t border-gray-100">
     <span className="font-bold text-[#1A3831] text-base">
       To Pay
     </span>
 
-    <span className="font-extrabold text-[#1A3831] text-2xl">
+    {totals.couponDiscount > 0 && (
+      <span className="mr-2 text-sm font-semibold text-gray-400 line-through">
+        {formatPrice(totals.total + totals.couponDiscount)}
+      </span>
+    )}
+    <span key={totals.total} className="inline-block origin-center font-extrabold text-[#1A3831] text-2xl motion-safe:animate-[reward-total-flip_700ms_ease-out_1]">
       {formatPrice(totals.total)}
     </span>
   </div>
@@ -328,7 +332,13 @@ export const CartDrawer = () => {
                   <span aria-label="PhonePe, Google Pay and CRED UPI" className="flex shrink-0 items-center -space-x-2">
                     <span title="PhonePe UPI" className="z-20 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-[#5F259F] text-[11px] font-black normal-case text-white">पे</span>
                     <span title="Google Pay UPI" className="z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-white text-base font-black normal-case text-[#4285F4]">G</span>
-                    <span title="CRED UPI" className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-black text-white"><ShieldCheck className="h-4 w-4" /></span>
+                    <span title="CRED UPI" className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1A3831] bg-black text-white">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+                        <path d="M5 2.5h14v13.2L12 20.5 5 15.7V2.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                        <path d="M8.2 6h8.3v3.1H8.1v5.1l3.9 2.3 4-2.3v-1.5" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                        <path d="m10.1 12.1 1.8 1.1 2.2-1.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" />
+                      </svg>
+                    </span>
                   </span>
                 </Button>
 
