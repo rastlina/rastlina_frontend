@@ -511,6 +511,7 @@ const ProductDetail = () => {
       {/* ── Fixed Bottom Bar ── */}
       <FixedBottomBar
         productName={product.name}
+        productImage={getCartImage(product.images, activeVariant?.color_id ?? selectedColorId)}
         canAddToCart={canAddToCart}
         activeVariant={activeVariant}
         quantity={quantity}
