@@ -328,9 +328,14 @@ export const CartDrawer = () => {
                 {/* Checkout CTA */}
                 <Button
                   onClick={() => { closeCart(); navigate('/checkout'); }}
-                  className="w-full bg-[#1A3831] hover:bg-[#112520] text-white h-12 rounded-xl font-bold text-sm uppercase tracking-wider transition-colors shadow-md"
+                  className="flex w-full items-center justify-center gap-2 bg-[#1A3831] hover:bg-[#112520] text-white min-h-12 rounded-xl px-2 font-bold text-xs sm:text-sm uppercase tracking-wide transition-colors shadow-md"
                 >
-                  Checkout — {formatPrice(totals.total)}
+                  <span className="whitespace-nowrap">Checkout — {formatPrice(totals.total)}</span>
+                  <span aria-label="PhonePe, Google Pay and CRED UPI" className="flex shrink-0 items-center gap-1">
+                    <span title="PhonePe UPI" className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[10px] font-black normal-case text-[#5F259F]">पे</span>
+                    <span title="Google Pay UPI" className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black normal-case text-[#4285F4]">G</span>
+                    <span title="CRED UPI" className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[9px] font-black normal-case text-black">C</span>
+                  </span>
                 </Button>
 
                 <p className="text-center text-[10px] text-gray-400 font-medium">
