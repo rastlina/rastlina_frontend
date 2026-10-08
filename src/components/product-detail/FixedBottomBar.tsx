@@ -31,7 +31,7 @@ export const FixedBottomBar = ({
   const canDec = quantity > 1;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-[#E8E4DB] bg-[#FFFEFC]/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-[#E5D9C5] bg-[#F3EBDD]/95 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
       <div className="container-custom flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3">
 
         {/* Product identity remains visible on phones as well as desktop. */}
@@ -62,7 +62,7 @@ export const FixedBottomBar = ({
         <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-3">
           {/* Quantity selector — only when variant is in stock */}
           {canAddToCart && (
-            <div className="flex items-center gap-2 bg-[#F8F7F4] rounded-xl border border-gray-200 px-1">
+            <div className="hidden items-center gap-2 rounded-xl border border-[#E5D9C5] bg-[#F8F7F4] px-1 sm:flex">
               <button
                 onClick={() => canDec && onQuantityChange(quantity - 1)}
                 disabled={!canDec}

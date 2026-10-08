@@ -342,8 +342,8 @@ setAppliedCoupon({
       }],
     });
 
-    // Open cart drawer after adding
-   
+    // Show the cart immediately so customers can review the item they just added.
+    setIsOpen(true);
   }, []);
 
   const removeFromCart = useCallback((productId: number, sizeName: string, colorName: string) => {
