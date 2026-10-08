@@ -31,7 +31,7 @@ export const FixedBottomBar = ({
   const canDec = quantity > 1;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-[#E5D9C5] bg-[#F3EBDD]/95 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-[#CBD9C9] bg-[#E8F0E8]/95 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
       <div className="container-custom flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3">
 
         {/* Product identity remains visible on phones as well as desktop. */}
