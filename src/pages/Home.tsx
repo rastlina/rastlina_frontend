@@ -36,7 +36,7 @@ const Home = () => {
           url: 'https://www.rastlina.com/',
           logo: 'https://www.rastlina.com/logo.png',
           email: 'info.rastlina@gmail.com',
-          telephone: '+91-99154-73575',
+          telephone: '+91-81438-14466',
           address: {
             '@type': 'PostalAddress',
             streetAddress: '4th Floor, Lake View Towers, Safari Nagar, Kondapur',

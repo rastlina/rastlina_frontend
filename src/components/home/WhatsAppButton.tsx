@@ -1,5 +1,9 @@
+import { useLocation } from 'react-router-dom';
+
 const WhatsAppButton = () => {
-  const phoneNumber = "919915473575"; 
+  const { pathname } = useLocation();
+  const isProductPage = pathname.startsWith('/product/');
+  const phoneNumber = "918143814466";
   const message = "Hi Rastlina! I'm interested in your plants.";
   
   return (
@@ -8,7 +12,7 @@ const WhatsAppButton = () => {
       target="_blank"
       rel="noopener noreferrer"
       // Replaced bg-[#556B2F] and hover:bg-[#3d4d21] with bg-primary and hover:bg-primary/90
-      className="fixed bottom-6 right-6 z-50 bg-primary hover:bg-primary/90 text-white p-3.5 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center"
+      className={`fixed ${isProductPage ? 'bottom-36 sm:bottom-6' : 'bottom-6'} right-4 z-50 flex items-center justify-center rounded-full bg-primary p-3.5 text-white shadow-lg transition-transform hover:scale-110 sm:right-6`}
       aria-label="Chat on WhatsApp"
     >
       <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
