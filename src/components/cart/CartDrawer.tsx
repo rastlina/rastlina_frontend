@@ -36,6 +36,14 @@ export const CartDrawer = () => {
       ? 'delivery-unlocked'
       : 'progress';
 
+  const rewardCelebration = (
+    <span key={rewardStage} className="mr-1 inline-flex items-center gap-1 align-middle" aria-hidden="true">
+      <span className="text-[#CDA85C] motion-safe:animate-[reward-confetti_900ms_ease-out_1]">✦</span>
+      <span className="text-[#155B46] motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]">🎉</span>
+      <span className="text-[#91A96D] motion-safe:animate-[reward-confetti_900ms_ease-out_1]" style={{ animationDelay: '140ms' }}>✧</span>
+    </span>
+  );
+
   return (
     <>
       {isOpen && (
@@ -71,16 +79,16 @@ export const CartDrawer = () => {
 
             {/* ── Two-stage delivery and savings progress ── */}
             {items.length > 0 && (
-              <div key={rewardStage} className="border-b border-[#DCE5DA] bg-[#F2F6F0] px-4 py-3.5">
+              <div className="border-b border-[#DCE5DA] bg-[#F2F6F0] px-4 py-3.5">
                 <p className="mb-2.5 text-xs font-medium text-[#243B31]" aria-live="polite">
                   {subtotal < freeDeliveryTarget ? (
                     <>Add <strong>{formatPrice(freeDeliveryTarget - subtotal)}</strong> more to unlock free delivery</>
                   ) : subtotal < tenPercentTarget ? (
-                    <><span className="mr-1 inline-block motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]" aria-hidden="true">🎉</span><strong className="text-[#1A6B50]">Free delivery unlocked!</strong> Add <strong>{formatPrice(tenPercentTarget - subtotal)}</strong> more to unlock 10% off</>
+                    <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">Congratulations! Free delivery unlocked!</strong> Add <strong>{formatPrice(tenPercentTarget - subtotal)}</strong> more to unlock 10% off</>
                   ) : tenPercentApplied ? (
-                    <><span className="mr-1 inline-block motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]" aria-hidden="true">🎊</span><strong className="text-[#1A6B50]">Congratulations! 10% off applied automatically.</strong></>
+                    <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">Congratulations! Your 10% discount is applied.</strong></>
                   ) : (
-                    <><span className="mr-1 inline-block motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]" aria-hidden="true">🎉</span><strong className="text-[#1A6B50]">Congratulations! Your cart reached the 10% off milestone.</strong></>
+                    <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">Congratulations! Your cart unlocked the 10% off milestone.</strong></>
                   )}
                 </p>
 
@@ -98,7 +106,7 @@ export const CartDrawer = () => {
                   >
                     <Truck className="h-4 w-4" />
                   </span>
-                  <span className={`absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-extrabold shadow-sm transition-colors duration-500 ${subtotal >= tenPercentTarget ? 'border-[#667D00] bg-[#667D00] text-white' : 'border-[#155B46] bg-white text-[#155B46]'}`}>10%</span>
+                  <span className={`absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-extrabold shadow-sm transition-colors duration-500 ${subtotal >= tenPercentTarget ? 'border-[#155B46] bg-[#155B46] text-white' : 'border-[#155B46] bg-white text-[#155B46]'}`}>10%</span>
                 </div>
 
                 <div className="mt-1 flex justify-between text-[9px] font-semibold uppercase tracking-wide text-[#637568]">
