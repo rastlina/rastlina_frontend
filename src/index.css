@@ -216,3 +216,43 @@
   60% { opacity: 1; transform: translateY(-2px) scale(1.04); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* Clearly visible, short-lived celebration when the cart reaches a reward. */
+.reward-milestone-popup {
+  position: fixed;
+  z-index: 9999;
+  top: max(1rem, env(safe-area-inset-top));
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  max-width: calc(100vw - 2rem);
+  padding: .75rem 1rem;
+  border: 1px solid rgba(205, 168, 92, .55);
+  border-radius: 999px;
+  background: #fff;
+  color: #155b46;
+  font-size: .875rem;
+  font-weight: 750;
+  line-height: 1.25;
+  box-shadow: 0 12px 35px rgba(15, 45, 35, .24);
+  animation: reward-toast 2600ms cubic-bezier(.2,.8,.2,1) both;
+  pointer-events: none;
+}
+
+.reward-total-value {
+  animation: reward-total-flip 900ms cubic-bezier(.2,.8,.2,1) both;
+  backface-visibility: hidden;
+  transform-origin: center;
+}
+
+@keyframes reward-toast {
+  0% { opacity: 0; transform: translate(-50%, -18px) scale(.82); }
+  12%, 78% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -8px) scale(.96); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reward-milestone-popup { animation-duration: 1ms; }
+  .reward-total-value { animation: none; }
+}
