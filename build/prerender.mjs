@@ -13,7 +13,7 @@ const server = await createServer({
   ssr: { noExternal: ['react-helmet-async'] },
 });
 try {
-  const { render } = await server.ssrLoadModule('/src/entry-server.tsx');
+  const { render, renderMetadata, metadataPaths } = await server.ssrLoadModule('/src/entry-server.tsx');
   const { html, helmet } = render();
   if (!html.includes('Rastlina Banner') || !html.includes('Ready-to-Gift Indoor Plants')) {
     throw new Error('Public homepage prerender is incomplete; refusing to publish it.');
@@ -25,6 +25,14 @@ try {
   // Root index files take precedence over rewrites on static hosts. Preserve
   // the empty SPA shell separately for shop, product and account routes.
   await writeFile('dist/app.html', template);
+  for (const path of metadataPaths) {
+    const metadata = renderMetadata(path);
+    const shell = template.replace(/<title[^>]*>[^<]*<\/title>/, metadata.title.toString())
+      .replace(/<meta name="robots"[^>]*>/, '')
+      .replace('</head>', `${metadata.meta.toString()}${metadata.link.toString()}</head>`);
+    // Normal createRoot startup is retained; only metadata is rendered here.
+    await writeFile(`dist/seo-${path.slice(1)}.html`, shell);
+  }
   const styles = template.match(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/);
   if (!styles || !styles[1].startsWith('/assets/')) throw new Error('Missing homepage stylesheet');
   const css = await readFile(`dist${styles[1]}`, 'utf8');

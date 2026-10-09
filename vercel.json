@@ -26,6 +26,13 @@
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },
+    { "source": "/shop", "destination": "/seo-shop.html" },
+    { "source": "/bulk", "destination": "/seo-bulk.html" },
+    { "source": "/privacy-policy", "destination": "/seo-privacy-policy.html" },
+    { "source": "/terms-and-conditions", "destination": "/seo-terms-and-conditions.html" },
+    { "source": "/shipping-policy", "destination": "/seo-shipping-policy.html" },
+    { "source": "/returns-refund-policy", "destination": "/seo-returns-refund-policy.html" },
+    { "source": "/replacement-policy", "destination": "/seo-replacement-policy.html" },
     {
       "source": "/((?!api/|static/|media/).*)",
       "destination": "/app.html"

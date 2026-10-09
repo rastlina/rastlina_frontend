@@ -12,6 +12,7 @@ export const blogs = [
       'Invite prosperity and positive energy with these specifically curated plants for your sanctuary. Discover which plants attract wealth, health, and harmony according to ancient Vastu Shastra principles.',
     image: blog1,
     date: 'Oct 12, 2025',
+    publishedDate: '2025-10-12',
     tag: 'Vastu',
     content: `
       <p>Bringing plants into your home is not just about aesthetics — it is also believed to attract positive energy, prosperity, and harmony according to Vastu Shastra, the ancient Indian science of architecture and design.</p>
@@ -110,6 +111,7 @@ export const blogs = [
       'Understanding the signs of thirst vs. root rot. A comprehensive guide to keeping your lily happy with expert tips on watering, light, humidity, and troubleshooting common problems.',
     image: blog2,
     date: 'Sep 28, 2025',
+    publishedDate: '2025-09-28',
     tag: 'Plant Care',
     content: `
       <p>Peace Lilies are beautiful indoor plants known for their glossy green leaves and elegant white flowers. However, drooping leaves are one of the most common issues Peace Lily owners face.</p>
@@ -260,6 +262,7 @@ export const blogs = [
       'A practical guide to choosing a trusted online plant store in India, with tips on plant quality, delivery, pricing, customer support, and finding the right plants for your space.',
     image: blog3,
     date: 'Sep 15, 2025',
+    publishedDate: '2025-09-15',
     tag: 'Decor',
 content: `
   <p>In recent years, buying plants online has become increasingly popular across the country. Whether you want to decorate your home, improve indoor air quality, or gift greenery to someone special, online plant shopping offers unmatched convenience. However, with so many options available, finding the best site to buy plants online india can feel overwhelming.</p>

@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
+import { canonicalUrl, schemaJson, SITE_URL } from '@/lib/seoUrls';
 
-const SITE_URL = 'https://www.rastlina.com';
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.webp`;
 
 type SeoProps = {
@@ -22,7 +22,7 @@ export function Seo({
   noIndex = false,
   schema,
 }: SeoProps) {
-  const canonical = new URL(path, SITE_URL).toString();
+  const canonical = canonicalUrl(path);
   const normalizedImage = image.startsWith('http') ? image : new URL(image, SITE_URL).toString();
 
   return (
@@ -36,12 +36,14 @@ export function Seo({
       <meta property="og:type" content={type} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={normalizedImage} />
+      <meta property="og:site_name" content="Rastlina" />
+      <meta property="og:locale" content="en_IN" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={normalizedImage} />
       {schema && (
-        <script type="application/ld+json">{JSON.stringify(schema)}</script>
+        <script type="application/ld+json">{schemaJson(schema)}</script>
       )}
     </Helmet>
   );

@@ -1,7 +1,12 @@
 import { useLocation } from 'react-router-dom';
 import { Seo } from './Seo';
 
-const publicPages: Record<string, { title: string; description: string }> = {
+// eslint-disable-next-line react-refresh/only-export-components -- Shared metadata is also read by the prerender build.
+export const publicPages: Record<string, { title: string; description: string }> = {
+  '/shop': {
+    title: 'All Products | Buy Indoor Plants Online | Rastlina',
+    description: 'Browse all products at Rastlina. Shop ready-to-gift indoor plants with a self-watering pot and soil mix, delivered across India.',
+  },
   '/privacy-policy': {
     title: 'Privacy Policy | Rastlina',
     description: 'Read the privacy policy for Rastlina Nature Hub Private Limited.',
@@ -34,7 +39,8 @@ export function RouteSeo() {
   const { pathname } = useLocation();
   const page = publicPages[pathname];
 
-  if (page) return <Seo {...page} path={pathname} />;
+  // Shop owns its filtered metadata after the application starts.
+  if (page && pathname !== '/shop') return <Seo {...page} path={pathname} />;
 
   if (privatePaths.has(pathname) || pathname.startsWith('/watch-shop/')) {
     return <Seo title="Rastlina" description="Rastlina online store." path={pathname} noIndex />;

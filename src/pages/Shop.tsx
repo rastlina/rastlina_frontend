@@ -1,6 +1,6 @@
 // src/pages/Shop.tsx
 // Fully API-integrated shop page with dynamic filters from backend
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { SlidersHorizontal, X, ChevronDown, Loader2, Search } from 'lucide-react';
 import { storeService } from '@/services/api';
@@ -30,6 +30,7 @@ const SORT_OPTIONS = [
 // WhatsApp float button
 
 export default function Shop() {
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -181,7 +182,7 @@ const getTitle = () => {
       <Seo
         title={`${getTitle()} | Buy Indoor Plants Online | Rastlina`}
         description={`Browse ${getTitle().toLowerCase()} at Rastlina. Shop ready-to-gift indoor plants with a self-watering pot and soil mix, delivered across India.`}
-        path={`/shop${location.search}`}
+        path={`${location.pathname}${location.search}`}
       />
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
 

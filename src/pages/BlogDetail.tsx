@@ -3,7 +3,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { blogs } from '@/data/blogs';
-import { Seo } from '@/components/seo/Seo';
+import { Seo, SITE_URL_BASE } from '@/components/seo/Seo';
 
 const BlogDetailPage = () => {
   const { id } = useParams();
@@ -35,9 +35,14 @@ const BlogDetailPage = () => {
           '@context': 'https://schema.org',
           '@type': 'BlogPosting',
           headline: blog.title,
-          image: blog.image,
-          datePublished: blog.date,
-          publisher: { '@type': 'Organization', name: 'Rastlina', url: 'https://www.rastlina.com/' },
+          image: new URL(blog.image, SITE_URL_BASE).toString(),
+          datePublished: blog.publishedDate,
+          mainEntityOfPage: `${SITE_URL_BASE}/blog/${blog.id}`,
+          publisher: {
+            '@type': 'Organization', '@id': `${SITE_URL_BASE}/#organization`,
+            name: 'Rastlina Nature Hub Private Limited', url: `${SITE_URL_BASE}/`,
+            logo: { '@type': 'ImageObject', url: `${SITE_URL_BASE}/logo-optimized.webp` },
+          },
         }}
       />
       {/* Hero Image */}
@@ -71,7 +76,7 @@ const BlogDetailPage = () => {
 
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-10 pb-6 border-b border-gray-200">
           <BookOpen className="h-4 w-4" />
-          <span>{blog.date}</span>
+          <time dateTime={blog.publishedDate}>{blog.date}</time>
         </div>
 
         {/* Render HTML Content */}

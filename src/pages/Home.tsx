@@ -28,13 +28,14 @@ const Home = () => {
         schema={{
           '@context': 'https://schema.org',
           '@type': ['Organization', 'OnlineStore'],
+          '@id': 'https://www.rastlina.com/#organization',
           name: 'Rastlina Nature Hub Private Limited',
           legalName: 'Rastlina Nature Hub Private Limited',
           taxID: '36AAPCR7860K1ZK',
           alternateName: 'Rastlina',
           description: 'Ready-to-gift indoor plant sets with healthy plants, self-watering pots and soil mix, delivered across India.',
           url: 'https://www.rastlina.com/',
-          logo: 'https://www.rastlina.com/logo.png',
+          logo: 'https://www.rastlina.com/logo-optimized.webp',
           email: 'info.rastlina@gmail.com',
           telephone: '+91-81438-14466',
           address: {
