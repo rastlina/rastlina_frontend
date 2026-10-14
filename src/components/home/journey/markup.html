@@ -1,0 +1,89 @@
+<div class="reading-progress" aria-hidden="true"><i id="reading-progress"></i></div>
+  <a class="skip-link" href="#room-choices">Choose your space</a>
+  
+  
+    <section id="nursery-story" class="story story--nursery" aria-labelledby="nursery-heading">
+      <div class="chapter-stage">
+        <div class="scene-ambience" aria-hidden="true"></div>
+        <div class="chapter-heading">
+          <p class="eyebrow"><span class="chapter-number">01</span> Rooted in care</p>
+          <h2 id="nursery-heading">Nature.<br><em>Closer to you.</em></h2>
+          <p class="intro-note">A living detail. A beautiful everyday.<br>Follow its journey from our nursery to your space.</p>
+        </div>
+        <div class="film-window" id="nursery-window">
+          <img class="film-poster" src="/journey/assets/nursery-start.webp" alt="Philodendron Oxycardium Red in a cream Rastlina planter inside a nursery" width="1920" height="1080" fetchpriority="high">
+          <video id="nursery-video" class="film-video" muted playsinline disablepictureinpicture disableremoteplayback preload="auto" poster="/journey/assets/nursery-start.webp" aria-label="Nursery planter reveal, controlled by scrolling"></video>
+          <div class="film-shade" aria-hidden="true"></div>
+          <div class="film-caption"><span class="caption-line" aria-hidden="true"></span><span>Philodendron Oxycardium Red<br><small>In its Rastlina self-watering planter</small></span></div>
+          <div class="film-loading" id="nursery-loading" role="status" hidden>Preparing your view…</div>
+        </div>
+        <div class="chapter-controls">
+          <span class="scroll-cue"><span aria-hidden="true">↓</span> Scroll to reveal</span>
+          <span class="manual-cue">Drag to reveal</span>
+          <div class="range-group"><label for="nursery-range">Explore the view</label><input id="nursery-range" type="range" min="0" max="1000" value="0" aria-label="Explore the nursery view" data-start="Inside the planter" data-end="The complete planter"></div>
+          <a class="text-link" href="#room-choices">Choose your space <span aria-hidden="true">↘</span></a>
+        </div>
+        <p id="nursery-error" class="media-error" role="alert" hidden>The view couldn’t load. <button type="button" id="nursery-retry">Try again</button></p>
+      </div>
+    </section>
+
+    <section id="room-choices" class="choices" aria-labelledby="choices-heading">
+      <div class="choices-background" aria-hidden="true"></div>
+      <div class="choices-content">
+        <p class="eyebrow"><span class="chapter-number">02</span> A place for your plant</p>
+        <h2 id="choices-heading">Your world.<br><em>A little greener.</em></h2>
+        <p class="section-note">Three spaces. One living detail. Choose where your story continues.</p>
+        <div class="room-grid">
+          <button class="room-card" type="button" data-room="living-room" aria-pressed="false" aria-controls="room-story">
+            <div class="card-picture"><img src="/journey/assets/living-room-start.webp" alt="Black-and-gold living room with the Rastlina plant on a marble coffee table" width="1920" height="1080" loading="lazy" decoding="async"><span class="card-number" aria-hidden="true">01</span></div>
+            <span class="card-copy"><span><strong>Living Room</strong><small>A warm welcome.</small></span><span class="card-arrow" aria-hidden="true">↗</span></span>
+            <span class="card-selected">Your chosen space</span>
+          </button>
+          <button class="room-card" type="button" data-room="bedroom" aria-pressed="false" aria-controls="room-story">
+            <div class="card-picture"><img src="/journey/assets/bedroom-start.webp" alt="Black-and-gold bedroom with the Rastlina plant on its marble table" width="1920" height="1080" loading="lazy" decoding="async"><span class="card-number" aria-hidden="true">02</span></div>
+            <span class="card-copy"><span><strong>Bedroom</strong><small>A quiet retreat.</small></span><span class="card-arrow" aria-hidden="true">↗</span></span>
+            <span class="card-selected">Your chosen space</span>
+          </button>
+          <button class="room-card" type="button" data-room="office" aria-pressed="false" aria-controls="room-story">
+            <div class="card-picture"><img src="/journey/assets/office-start.webp" alt="Black-and-gold office with the Rastlina plant on a marble desk" width="1920" height="1080" loading="lazy" decoding="async"><span class="card-number" aria-hidden="true">03</span></div>
+            <span class="card-copy"><span><strong>Office</strong><small>Room to focus.</small></span><span class="card-arrow" aria-hidden="true">↗</span></span>
+            <span class="card-selected">Your chosen space</span>
+          </button>
+        </div>
+        <p class="choices-footnote">Natural colour. Considered spaces. Your choice.</p>
+      </div>
+    </section>
+
+    <section id="room-story" class="story story--room" aria-labelledby="room-heading" hidden>
+      <div class="chapter-stage">
+        <div class="scene-ambience" aria-hidden="true"></div>
+        <div class="room-topline"><p class="eyebrow" id="room-eyebrow">Your green corner</p><button type="button" class="text-link" id="change-room">Choose another room <span aria-hidden="true">↖</span></button></div>
+        <div class="room-heading-row">
+          <h2 id="room-heading" class="room-heading" tabindex="-1">A warm welcome.</h2>
+          <div class="room-switcher" role="group" aria-label="Explore another room">
+            <button type="button" data-room="living-room" aria-pressed="false" aria-controls="room-story">Living Room</button>
+            <button type="button" data-room="bedroom" aria-pressed="false" aria-controls="room-story">Bedroom</button>
+            <button type="button" data-room="office" aria-pressed="false" aria-controls="room-story">Office</button>
+          </div>
+        </div>
+        <div class="film-window" id="room-window">
+          <img id="room-poster" class="film-poster" src="/journey/assets/living-room-start.webp" alt="Your selected room" width="1920" height="1080">
+          <video id="room-video" class="film-video" muted playsinline disablepictureinpicture disableremoteplayback preload="none" aria-label="Selected room orbit, controlled by scrolling"></video>
+          <div class="film-shade" aria-hidden="true"></div>
+          <div class="room-label"><span class="caption-line" aria-hidden="true"></span><span id="room-label">Living Room</span><span class="orbit-readout" id="orbit-readout" aria-hidden="true">00 / 100</span></div>
+          <div class="film-loading" id="room-loading" role="status" hidden>Preparing your view…</div>
+        </div>
+        <div class="chapter-controls">
+          <span class="scroll-cue"><span aria-hidden="true">↓</span> Scroll to explore</span>
+          <span class="manual-cue">Drag to explore</span>
+          <div class="range-group"><label for="room-range">Explore the view</label><input id="room-range" type="range" min="0" max="1000" value="0" aria-label="Explore the selected room" data-start="Wide room view" data-end="Closer plant view"></div>
+          <button class="text-link" id="replay-room" type="button">Back to the wide view <span aria-hidden="true">↶</span></button>
+        </div>
+        <div class="room-finish" id="room-finish" aria-live="polite"><span>A small detail.<br>A different feeling.</span><a href="https://www.rastlina.com/product/philodendron-oxycardium-red">Make it yours <span aria-hidden="true">↗</span></a></div>
+        <p id="room-error" class="media-error" role="alert" hidden>The view couldn’t load. <button type="button" id="room-retry">Try again</button></p>
+      </div>
+    </section>
+    <footer class="site-footer"><span class="wordmark">Rastlina<span class="wordmark-dot" aria-hidden="true">.</span></span><p>Bring the feeling home.</p><a href="https://www.rastlina.com/product/philodendron-oxycardium-red">Meet Philodendron Oxycardium Red <span aria-hidden="true">↗</span></a></footer>
+  
+  <p class="sr-only" id="selection-status" role="status" aria-live="polite"></p>
+  <noscript><div class="noscript-note">Choose your space with JavaScript enabled to explore the room videos. <a href="https://www.rastlina.com/product/philodendron-oxycardium-red">Shop this plant</a>.</div></noscript>

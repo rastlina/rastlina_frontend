@@ -4,7 +4,7 @@ import Home from '@/pages/Home';
 
 vi.mock('@/components/seo/Seo', () => ({ Seo: () => null }));
 vi.mock('@/components/home/SocialProof', () => ({ default: () => null }));
-vi.mock('@/components/home/HeroSection', () => ({
+vi.mock('@/components/home/PlantJourney', () => ({
   default: ({ onReady }: { onReady: () => void }) => <button onClick={onReady}>Banner loaded</button>,
 }));
 vi.mock('@/components/home/HomeSections', () => ({ default: () => <section>Plant collections ready</section> }));

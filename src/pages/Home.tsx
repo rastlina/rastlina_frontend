@@ -1,5 +1,5 @@
 // src/pages/Home.tsx
-import HeroSection from '@/components/home/HeroSection';
+import PlantJourney from '@/components/home/PlantJourney';
 import SocialProof from '@/components/home/SocialProof';
 import { lazy, Suspense, startTransition, useCallback, useEffect, useState } from 'react';
 import { Seo } from '@/components/seo/Seo';
@@ -52,7 +52,7 @@ const Home = () => {
         }}
       />
       <h1 className="sr-only">Buy Indoor Plants Online in India</h1>
-      <HeroSection onReady={onHeroReady} />
+      <PlantJourney onReady={onHeroReady} />
       <section className="bg-[#F8F7F4] px-4 py-8 text-center">
         <div className="mx-auto max-w-3xl">
           <h2 className="font-serif text-2xl font-bold text-[#1A3831] md:text-3xl">

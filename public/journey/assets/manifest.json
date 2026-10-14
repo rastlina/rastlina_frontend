@@ -1,0 +1,46 @@
+[
+  {
+    "id": "nursery",
+    "video": "assets/nursery-v4.mp4",
+    "poster": "assets/nursery-start.webp",
+    "endPoster": "assets/nursery-end.webp",
+    "duration": 5.041667,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "bytes": 12188747
+  },
+  {
+    "id": "living-room",
+    "video": "assets/living-room-v4.mp4",
+    "poster": "assets/living-room-start.webp",
+    "endPoster": "assets/living-room-end.webp",
+    "duration": 10.041667,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "bytes": 23547230
+  },
+  {
+    "id": "bedroom",
+    "video": "assets/bedroom-v4.mp4",
+    "poster": "assets/bedroom-start.webp",
+    "endPoster": "assets/bedroom-end.webp",
+    "duration": 10.041667,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "bytes": 19203570
+  },
+  {
+    "id": "office",
+    "video": "assets/office-v4.mp4",
+    "poster": "assets/office-start.webp",
+    "endPoster": "assets/office-end.webp",
+    "duration": 10.041667,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "bytes": 19938162
+  }
+]

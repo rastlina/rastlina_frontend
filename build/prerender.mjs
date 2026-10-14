@@ -15,7 +15,7 @@ const server = await createServer({
 try {
   const { render, renderMetadata, metadataPaths } = await server.ssrLoadModule('/src/entry-server.tsx');
   const { html, helmet } = render();
-  if (!html.includes('Rastlina Banner') || !html.includes('Ready-to-Gift Indoor Plants')) {
+  if (!html.includes('data-plant-journey') || !html.includes('Ready-to-Gift Indoor Plants')) {
     throw new Error('Public homepage prerender is incomplete; refusing to publish it.');
   }
   let template = await readFile('dist/index.html', 'utf8');

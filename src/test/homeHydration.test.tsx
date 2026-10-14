@@ -7,7 +7,6 @@ import { StrictMode, type ReactNode } from 'react';
 import { expect, it, vi } from 'vitest';
 import App from '@/App';
 
-const banner = { id: 1, image: 'https://api.rastlina.com/media/hero_slides/test.png', optimizedImage: '/test.webp', mobileImage: '/test-mobile.webp' };
 vi.mock('virtual:rastlina-hero', () => ({ default: [{ id: 1, image: 'https://api.rastlina.com/media/hero_slides/test.png', optimizedImage: '/test.webp', mobileImage: '/test-mobile.webp' }] }));
 vi.mock('@/services/api', () => ({
   storeService: {
@@ -20,16 +19,18 @@ vi.mock('@/services/api', () => ({
   authService: { getStoredUser: () => null, isLoggedIn: () => false },
 }));
 
-it('preserves the already-visible banner during hydration and activates menu/cart controls', async () => {
+it('preserves the visible nursery poster during hydration and activates menu/cart controls', async () => {
   vi.stubGlobal('scrollTo', vi.fn());
+  const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+  const load = vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
   const HomeRouter = ({ children }: { children: ReactNode }) => <StaticRouter location="/">{children}</StaticRouter>;
   const container = document.createElement('div');
   HelmetProvider.canUseDOM = false;
   container.innerHTML = renderToString(<StrictMode><HelmetProvider context={{}}><App Router={HomeRouter} /></HelmetProvider></StrictMode>);
   HelmetProvider.canUseDOM = true;
   document.body.appendChild(container);
-  const firstImage = screen.getByAltText('Rastlina Banner');
-  expect(firstImage).toHaveAttribute('src', banner.optimizedImage);
+  const firstImage = screen.getByAltText('Philodendron Oxycardium Red in a cream Rastlina planter inside a nursery');
+  expect(firstImage).toHaveAttribute('src', '/journey/assets/nursery-start.webp');
   const onRecoverableError = vi.fn();
   let root: ReturnType<typeof hydrateRoot>;
   try {
@@ -37,7 +38,7 @@ it('preserves the already-visible banner during hydration and activates menu/car
       root = hydrateRoot(container, <StrictMode><HelmetProvider><App /></HelmetProvider></StrictMode>, { onRecoverableError });
     });
     expect(onRecoverableError).not.toHaveBeenCalled();
-    expect(screen.getByAltText('Rastlina Banner')).toBe(firstImage);
+    expect(screen.getByAltText('Philodendron Oxycardium Red in a cream Rastlina planter inside a nursery')).toBe(firstImage);
     fireEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
     expect(screen.getByRole('button', { name: 'Toggle menu' })).toHaveAttribute('aria-expanded', 'true');
     fireEvent.click(screen.getAllByRole('button', { name: 'Open cart' })[0]);
@@ -47,6 +48,8 @@ it('preserves the already-visible banner during hydration and activates menu/car
   } finally {
     await act(async () => root!.unmount());
     container.remove();
+    pause.mockRestore();
+    load.mockRestore();
     vi.unstubAllGlobals();
   }
 });
