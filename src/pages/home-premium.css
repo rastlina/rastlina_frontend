@@ -113,3 +113,19 @@ body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:graysca
 .home-refined .plant-journey .choices { background:#05160e; }
 .home-refined .home-bestsellers .group:hover h3 { color:#30583d; }
 .rastlina-footer .text-accent-gold { color:#c8ac71; }
+
+/* Narrow-screen alignment and tap targets across the shopping sections. */
+@media(max-width:700px) {
+  .luxury-header img[alt="Rastlina"] { max-width:min(29vw,116px); height:auto; max-height:40px; }
+  .home-refined .home-section-heading { flex-wrap:wrap; align-items:flex-start; }
+  .home-refined .home-section-heading>div:first-child { flex:1 1 180px; min-width:0; }
+  .home-refined .home-section-heading>a { flex:none; }
+  .watch-shop-navigation { flex:none; }
+  .watch-shop-navigation button { width:44px; min-width:44px; height:44px; }
+  .watch-shop-footer { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; }
+  .watch-shop-footer>p { max-width:none; }
+  .watch-shop-pagination { grid-column:1/-1; grid-row:2; justify-content:center; flex-wrap:wrap; }
+  .watch-shop-pagination button { min-width:44px; min-height:44px; padding-inline:10px; }
+  .home-refined .home-bestsellers [data-card] .items-baseline { flex-wrap:wrap; row-gap:4px; }
+  .rastlina-footer a[aria-label] { display:inline-flex; min-width:44px; min-height:44px; align-items:center; justify-content:center; }
+}
