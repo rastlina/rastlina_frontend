@@ -50,7 +50,7 @@ export class RoomPlayback {
     this.onFrame(0);
     try {
       this.source = new URL(url, typeof location === 'undefined' ? 'https://example.test/' : location.href).href;
-      Object.assign(this.video, { muted: true, playsInline: true, loop: false, preload: 'auto', src: this.source });
+      Object.assign(this.video, { muted: true, defaultMuted: true, playsInline: true, loop: false, preload: 'auto', src: this.source });
       this.armTimeout();
       this.video.load();
     } catch { this.fail(); }
@@ -97,7 +97,7 @@ export class RoomPlayback {
     this.waitTimer?.unref?.();
   }
   play() {
-    if (!this.isCurrent() || !this.active || !this.ready || this.pendingSeek !== null || this.playPending || this.video.paused === false) return;
+    if (!this.isCurrent() || !this.active || (!this.ready && this.phase !== 'loading') || this.pendingSeek !== null || this.playPending || this.video.paused === false) return;
     const generation = this.generation;
     this.playPending = true;
     try {
@@ -124,6 +124,11 @@ export class RoomPlayback {
     this.phase = this.ready ? 'playing' : 'loading';
     this.onState(true);
     this.frameReady();
+    // Start loading playback on touch-selected rooms even if paused preload is deferred.
+    if (this.phase === 'loading' && this.video.currentTime === 0 && (this.pendingSeek === null || this.pendingSeek === 0)) {
+      this.pendingSeek = null;
+      this.play();
+    }
   }
   setProgress(value) {
     this.pause();

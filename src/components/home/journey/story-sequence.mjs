@@ -55,6 +55,15 @@ export class StorySequence {
     entry.loaded = true;
     entry.scrubber.load(entry.source);
   }
+  trimPlayback(index) {
+    // Autoplay only needs two decoders. Completed clips reload if revisited in scroll mode.
+    this.entries.forEach((entry, position) => {
+      if (!entry.loaded || position === index || position === index + 1) return;
+      entry.scrubber.unload();
+      entry.loaded = entry.ready = entry.failed = false;
+      entry.layer.element.classList.remove('has-video');
+    });
+  }
   setProgress(value) {
     this.progress = clampProgress(value);
     const state = storyFrame(this.progress, this.entries.length);

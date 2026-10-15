@@ -131,7 +131,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     assert.equal(get('nursery-loading').hidden, true);
     assert.equal(get('story-frame-1').classList.contains('has-video'), true);
     assert.equal(get('story-position').textContent, '1 / 5');
-    const chapterSuffix = mobile ? '-mobile' : '';
+    const chapterSuffix = ''; // Dense screens retain the higher-resolution HD story source.
     assert.ok(chapters[0].src.endsWith(`/assets/story-01${chapterSuffix}.mp4`));
 
     const firstSeeks = chapters[0].seeks.length;
@@ -212,7 +212,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
       assert.equal(globalThis.scrollY, 11500, 'Room navigation accounts for the storefront header');
       assert.ok(room.src.endsWith(`/assets/${id}${roomSuffix}.mp4`));
       assert.equal(get('room-poster').src, `assets/${id}-start.webp`);
-      assert.equal(cards.filter(card => card.attributes['aria-pressed'] === 'true').length, 2);
+      assert.equal(cards.filter(card => card.attributes['aria-pressed'] === 'true').length, 3);
       assert.equal(room.plays.length, plays + 1, 'Every selection automatically plays its own film');
       assert.equal(room.currentTime, 0);
       assert.equal(room.paused, false);

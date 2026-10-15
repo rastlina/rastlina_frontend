@@ -25,8 +25,6 @@
 .plant-journey .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .plant-journey .skip-link { position:fixed; left:20px; top:-100px; z-index:100; background:var(--paper); color:var(--ink); padding:16px; }
 .plant-journey .skip-link:focus { top:16px; }
-.plant-journey .reading-progress { position:fixed; inset:0 0 auto; height:2px; z-index:60; pointer-events:none; }
-.plant-journey .reading-progress i { display:block; height:100%; background:var(--gold); transform:scaleX(var(--read-progress,0)); transform-origin:left; }
 
 .plant-journey .story { position:relative; }
 .plant-journey .story--nursery { height:850svh; --scene-poster:url('/journey/assets/story-01-start.webp'); }
@@ -194,7 +192,6 @@
 }
 
 /* The announcement and menu have a permanent 110px slot above the stage. */
-.plant-journey .reading-progress { top:110px; }
 .plant-journey .chapter-stage { top:110px; height:calc(100svh - 110px); min-height:430px; }
 .plant-journey .story-copy-viewport { top:clamp(24px,6svh,64px); bottom:170px; }
 .plant-journey .chapter-controls { bottom:80px; right:calc(var(--gutter) + 70px); }
@@ -252,7 +249,7 @@
 @media(max-width:700px) and (min-height:521px) {
   .plant-journey { --gutter:20px; }
   .plant-journey .chapter-stage {
-    display:block; height:clamp(430px,56svh,540px); min-height:430px;
+    display:block; height:clamp(520px,74svh,760px); min-height:520px;
     padding:0;
   }
   .plant-journey .film-window { position:absolute; inset:0; width:100%; height:100%; }
@@ -273,7 +270,7 @@
   .plant-journey .eyebrow { font-size:8px; letter-spacing:.07em; gap:6px; }
   .plant-journey .chapter-number { width:19px; height:19px; font-size:8px; }
   .plant-journey .chapter-controls {
-    position:absolute; bottom:20px; left:var(--gutter); right:var(--gutter); margin:0;
+    position:absolute; bottom:max(90px,calc(env(safe-area-inset-bottom) + 72px)); left:var(--gutter); right:var(--gutter); margin:0;
     grid-template-columns:1fr auto; gap:0 12px; padding-top:4px;
   }
   .plant-journey .chapter-controls .text-link { min-height:44px; font-size:10px; }
@@ -285,7 +282,35 @@
   .plant-journey .room-switcher button { flex:1; min-height:40px; padding:0 8px; font-size:11px; }
   .plant-journey .room-topline { display:none; }
   .plant-journey .room-heading { top:30%; left:var(--gutter); width:42%; font-size:25px; }
-  .plant-journey .room-finish { bottom:132px; max-width:150px; }
+  .plant-journey .room-finish { bottom:220px; max-width:150px; }
   .plant-journey .room-finish>span { display:none; }
   .plant-journey .room-finish a { padding:10px 12px; min-height:44px; font-size:11px; }
+}
+
+.plant-journey .space-prompt {
+  position:fixed; inset:0; margin:auto; width:min(780px,calc(100% - 32px));
+  max-height:calc(100svh - 32px); overflow:auto; padding:42px;
+  border:1px solid #c8ac7166; border-radius:20px; background:#0b1c12;
+  color:var(--paper); box-shadow:0 30px 100px #0008;
+}
+.plant-journey .space-prompt::backdrop { background:#020b08bd; backdrop-filter:blur(5px); }
+.plant-journey .space-prompt-close { position:absolute; top:8px; right:8px; display:grid; place-items:center; width:44px; height:44px; background:none; border:0; font-size:28px; }
+.plant-journey .space-prompt h2 { font-family:Georgia,serif; font-size:clamp(27px,4vw,43px); line-height:1.12; margin-top:14px; }
+.plant-journey .space-prompt h2 em { font-weight:400; color:var(--gold); }
+.plant-journey #space-prompt-note { margin-top:14px; color:var(--muted); font-size:13px; line-height:1.6; }
+.plant-journey .space-prompt-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:26px; }
+.plant-journey .space-option { display:flex; flex-direction:column; min-width:0; padding:0; overflow:hidden; background:#14281b; border:1px solid #c8ac714d; border-radius:10px; text-align:left; }
+.plant-journey .space-option img { width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; }
+.plant-journey .space-option>span { flex:1; display:flex; align-items:center; justify-content:space-between; gap:4px; padding:16px 12px; font-family:Georgia,serif; font-size:18px; }
+.plant-journey .space-option small { color:var(--gold); }
+@keyframes space-choice-enter { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:none; } }
+@media(prefers-reduced-motion:no-preference) {
+  .plant-journey .space-prompt[open] .space-option { animation:space-choice-enter .55s both; }
+  .plant-journey .space-prompt[open] .space-option:nth-child(2) { animation-delay:.18s; }
+  .plant-journey .space-prompt[open] .space-option:nth-child(3) { animation-delay:.36s; }
+}
+@media(max-width:700px) {
+  .plant-journey .space-prompt { padding:34px 18px 22px; }
+  .plant-journey .space-prompt-options { gap:8px; margin-top:22px; }
+  .plant-journey .space-option>span { padding:14px 7px; font-size:13px; min-height:48px; }
 }

@@ -21,9 +21,9 @@ function fixture(){
   const layers=videos.map(video=>({video,element:{classList:{add(){},remove(){}},style:{setProperty(){}},setAttribute(){}}}));
   const mediaStates=[];
   const sequence=new StorySequence(layers,{Scrubber:VideoScrubber,assetBase:'https://example.test/assets',mobile:false,onState:state=>mediaStates.push(state)});
-  const queue=new Map(),states=[];let id=0,time=0;
-  const auto=new StoryAutoplay(sequence,{requestFrame:cb=>{queue.set(++id,cb);return id;},cancelFrame:key=>queue.delete(key),onState:x=>states.push(x),transitionMs:100});
-  return {videos,sequence,auto,states,queue,mediaStates,
+  const queue=new Map(),states=[],completions=[];let id=0,time=0;
+  const auto=new StoryAutoplay(sequence,{requestFrame:cb=>{queue.set(++id,cb);return id;},cancelFrame:key=>queue.delete(key),onState:x=>states.push(x),onComplete:()=>completions.push(true),transitionMs:100});
+  return {videos,sequence,auto,states,queue,mediaStates,completions,
     async start(){auto.enable(0);auto.setActive(true);videos[0].decode();videos[1].decode();await Promise.resolve();},
     tick(){const entry=queue.entries().next().value;if(entry){queue.delete(entry[0]);time+=20;entry[1](time);}},
     finishTransition(){let n=0;while(queue.size&&n++<40)this.tick();assert.equal(queue.size,0);},
@@ -113,5 +113,38 @@ test('an interrupted startup cannot turn an offscreen pause into a user pause',a
     assert.equal(f.videos[0].autoplay,false);
     f.videos[0].play=Video.prototype.play;f.auto.setActive(true);await Promise.resolve();
     assert.equal(f.videos[0].paused,false);
+  }finally{f.dispose();}
+});
+
+test('all five clips complete with two mobile decoder slots and decode-on-play, then completion fires once',async()=>{
+  const f=fixture();try{
+    for(const video of f.videos) video.play=function(){
+      if(this.readyState<2)queueMicrotask(()=>{
+        if(f.videos.filter(item=>item.readyState>=2).length<2)this.decode();
+      });
+      return Video.prototype.play.call(this);
+    };
+    f.auto.enable(0);f.auto.setActive(true);await Promise.resolve();await Promise.resolve();
+    for(let i=0;i<5;i++){
+      assert.equal(f.auto.index,i);assert.equal(f.videos[i].paused,false);
+      assert.ok(f.videos.filter(item=>item.readyState>=2).length<=2);
+      if(i>0)assert.equal(f.videos[i-1].src,'');
+      assert.equal(f.completions.length,0);
+      f.videos[i].end();await Promise.resolve();await Promise.resolve();
+      f.finishTransition();await Promise.resolve();
+    }
+    assert.equal(f.auto.phase,'complete');assert.equal(f.completions.length,1);
+    f.auto.setActive(false);f.auto.setActive(true);assert.equal(f.completions.length,1);
+  }finally{f.dispose();}
+});
+test('pausing while an incoming decoder is being primed suspends both videos',async()=>{
+  const f=fixture();try{
+    f.auto.enable(0);f.auto.setActive(true);f.videos[0].decode();await Promise.resolve();
+    let reject;
+    f.videos[1].play=function(){this.paused=false;return new Promise((resolve,no)=>{reject=no;});};
+    f.videos[0].end();assert.equal(f.videos[1].paused,false);
+    f.auto.pause();assert.equal(f.videos[1].paused,true);
+    reject(Object.assign(new Error('interrupted'),{name:'AbortError'}));await Promise.resolve();
+    assert.equal(f.auto.userPaused,true);assert.equal(f.queue.size,0);
   }finally{f.dispose();}
 });
