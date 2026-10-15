@@ -1,5 +1,4 @@
 <button class="journey-mode-switch" id="journey-mode-switch" type="button" aria-pressed="false" aria-label="Enable scroll animation"><span aria-hidden="true">↕</span> Scroll animation <small id="journey-mode-state">Off</small></button>
-<div class="reading-progress" aria-hidden="true"><i id="reading-progress"></i></div>
   <a class="skip-link" href="#room-choices">Choose your space</a>
 
 
@@ -110,6 +109,18 @@
       </div>
     </section>
 
+
+  <dialog class="space-prompt" id="space-prompt" aria-labelledby="space-prompt-heading" aria-describedby="space-prompt-note" hidden>
+    <button type="button" id="close-space-prompt" class="space-prompt-close" aria-label="Close space selection">×</button>
+    <p class="eyebrow">From our nursery to your space</p>
+    <h2 id="space-prompt-heading">Please select a space<br><em>for your plant.</em></h2>
+    <p id="space-prompt-note">See how a little green brings your room to life.</p>
+    <div class="space-prompt-options">
+      <button type="button" class="space-option" data-room="living-room" aria-pressed="false" aria-controls="room-story"><img src="/journey/assets/living-room-start.webp" alt="" width="640" height="360" loading="lazy"><span>Living Room <small aria-hidden="true">↗</small></span></button>
+      <button type="button" class="space-option" data-room="bedroom" aria-pressed="false" aria-controls="room-story"><img src="/journey/assets/bedroom-start.webp" alt="" width="640" height="360" loading="lazy"><span>Bedroom <small aria-hidden="true">↗</small></span></button>
+      <button type="button" class="space-option" data-room="office" aria-pressed="false" aria-controls="room-story"><img src="/journey/assets/office-start.webp" alt="" width="640" height="360" loading="lazy"><span>Office <small aria-hidden="true">↗</small></span></button>
+    </div>
+  </dialog>
 
   <p class="sr-only" id="selection-status" role="status" aria-live="polite"></p>
   <noscript><div class="noscript-note">Choose your space with JavaScript enabled to explore the room videos. <a href="https://www.rastlina.com/product/philodendron-oxycardium-red">Shop this plant</a>.</div></noscript>

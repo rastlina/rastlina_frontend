@@ -4,8 +4,8 @@ import { storyFrame } from './story-sequence.mjs';
 // Media-clock playback. Only transitions use animation frames; playing footage
 // is never repeatedly sought. The same sequence drives copy in both modes.
 export class StoryAutoplay {
-  constructor(sequence, { requestFrame = requestAnimationFrame, cancelFrame = cancelAnimationFrame, onState = () => {}, transitionMs = 900 } = {}) {
-    Object.assign(this, { sequence, requestFrame, cancelFrame, onState, transitionMs });
+  constructor(sequence, { requestFrame = requestAnimationFrame, cancelFrame = cancelAnimationFrame, onState = () => {}, onComplete = () => {}, transitionMs = 900 } = {}) {
+    Object.assign(this, { sequence, requestFrame, cancelFrame, onState, onComplete, transitionMs });
     this.index = 0;
     this.generation = 0;
     this.enabled = false;
@@ -50,6 +50,7 @@ export class StoryAutoplay {
     this.phase = state.movie >= 1 && progress < 1 ? 'transition' : 'playing';
     this.elapsed = Math.max(0, (progress * this.sequence.entries.length - state.index - .8) / .2) * this.transitionMs;
     this.index = state.index;
+    this.sequence.trimPlayback(this.index);
     this.sequence.setProgress(progress);
     this.entry.scrubber.playback = true;
     this.onState(true);
@@ -59,6 +60,7 @@ export class StoryAutoplay {
   disable() {
     this.generation++;
     this.playPending = false;
+    this.primePending = false;
     this.enabled = false;
     this.sequence.waitingForNext = false;
     this.stopFrame();
@@ -91,14 +93,52 @@ export class StoryAutoplay {
       });
     } catch { this.playPending = false; this.pause(); }
   }
+  stopPriming() {
+    this.primePending = false;
+    for (const [index, entry] of this.sequence.entries.entries()) {
+      if (index === this.index || !entry.scrubber.playback) continue;
+      entry.layer.video.pause();
+      entry.layer.video.autoplay = false;
+      entry.scrubber.playback = false;
+    }
+  }
+  primeIncoming() {
+    const index = this.index + 1;
+    const entry = this.sequence.entries[index];
+    if (!entry || entry.ready || entry.failed || this.primePending || !this.running) return;
+    const generation = this.generation;
+    const video = entry.layer.video;
+    entry.scrubber.playback = true;
+    video.muted = video.defaultMuted = true;
+    video.playsInline = true;
+    this.primePending = true;
+    const finish = () => {
+      if (generation !== this.generation) return;
+      this.primePending = false;
+      if (this.index !== index) {
+        video.pause();
+        entry.scrubber.playback = false;
+        entry.scrubber.setProgress(0);
+      }
+    };
+    try {
+      Promise.resolve(video.play()).then(finish, error => {
+        if (generation !== this.generation) return;
+        finish();
+        if (error?.name === 'NotAllowedError') { this.pause(); this.blocked = true; }
+        else if (error?.name !== 'AbortError') entry.scrubber.fail();
+      });
+    } catch { finish(); entry.scrubber.fail(); }
+  }
   setActive(active) {
     if (this.active === active) return;
     this.active = active;
-    if (!active) { this.generation++; this.playPending = false; this.entry.layer.video.autoplay = false; this.entry.layer.video.pause(); this.stopFrame(); }
+    if (!active) { this.stopPriming(); this.generation++; this.playPending = false; this.entry.layer.video.autoplay = false; this.entry.layer.video.pause(); this.stopFrame(); }
     else if (this.phase === 'transition') this.animate();
     else this.play();
   }
   pause() {
+    this.stopPriming();
     this.generation++;
     this.playPending = false;
     this.blocked = false;
@@ -130,6 +170,7 @@ export class StoryAutoplay {
     this.sequence.reportState();
     if (this.sequence.waitingForNext) {
       this.sequence.ensure(this.index + 1);
+      this.primeIncoming();
       this.lastTime = null;
       return;
     }
@@ -148,8 +189,10 @@ export class StoryAutoplay {
           this.phase = 'complete';
           this.userPaused = true;
           this.onState(false);
+          this.onComplete();
         } else {
           this.index++;
+          this.sequence.trimPlayback(this.index);
           this.phase = 'playing';
           this.entry.scrubber.playback = true;
           this.playPending = false;

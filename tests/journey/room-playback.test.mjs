@@ -233,3 +233,13 @@ test('dispose cancels a pending replay, releases media and ignores late events',
   assert.equal(f.video.paused, true);
   assert.equal(f.video.plays.length, 1);
 });
+
+test('touch selection starts a room before a mobile browser emits loadeddata',async()=>{
+  const f=fixture();try{
+    f.playback.load('assets/office-mobile-v5.mp4');f.playback.restart();
+    assert.equal(f.video.readyState,0);assert.equal(f.video.plays.length,1);
+    assert.equal(f.video.defaultMuted,true);assert.equal(f.video.playsInline,true);
+    await Promise.resolve();f.video.decoded();
+    assert.equal(f.video.paused,false);assert.equal(f.video.plays.length,1);
+  }finally{f.playback.dispose();}
+});

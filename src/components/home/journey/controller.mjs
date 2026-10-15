@@ -135,6 +135,15 @@ export class VideoScrubber {
     this.video.removeAttribute?.('src');
     this.video.load();
   }
+  unload() {
+    this.clearTimer(this.timeout);
+    this.clearTimer(this.seekTimeout);
+    this.source = '';
+    this.ready = this.failed = this.playback = false;
+    this.video.pause();
+    this.video.removeAttribute?.('src');
+    this.video.load();
+  }
   isCurrentSource() {
     const activeSource = this.video.currentSrc || this.video.src;
     return activeSource === this.source;
@@ -311,7 +320,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     element: byId(`story-frame-${index + 1}`),
     video: byId(index === 0 ? 'nursery-video' : `story-video-${index + 1}`),
   })), {
-    Scrubber: VideoScrubber, assetBase, mobile: mobileMedia,
+    Scrubber: VideoScrubber, assetBase, mobile: mobileMedia && ((globalThis.devicePixelRatio || 1) < 2 || Boolean(connection?.saveData) || /(^|-)2g$|3g/.test(connection?.effectiveType || '')),
     onView: ({ index, chapter, blend }) => {
       if (shownChapter !== index) {
         shownChapter = index;
@@ -356,10 +365,25 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     syncRange(nurseryRange, progress);
   }, { requestFrame });
 
+  const spacePrompt = byId('space-prompt');
+  function closeSpacePrompt() {
+    spacePrompt.close?.();
+    spacePrompt.removeAttribute('open');
+    spacePrompt.hidden = true;
+  }
+  function showSpacePrompt() {
+    if (disposed || !spacePrompt.hidden) return;
+    spacePrompt.hidden = false;
+    if (spacePrompt.showModal) spacePrompt.showModal();
+    else spacePrompt.setAttribute('open', '');
+  }
+  listen(byId('close-space-prompt'), 'click', closeSpacePrompt);
+  listen(spacePrompt, 'close', () => { spacePrompt.hidden = true; });
   const autoStory = new StoryAutoplay(introScrubber, {
     requestFrame,
     cancelFrame: id => { cancelAnimationFrame(id); frames.delete(id); },
     onState: playing => { nurseryPlayButton.textContent = playing ? 'Pause animation' : 'Play animation'; },
+    onComplete: showSpacePrompt,
   });
 
   function measuredProgress(section) {
@@ -384,8 +408,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
       roomPlayback.setActive(!document.hidden && (selecting || (top < window.innerHeight && top + roomSection.offsetHeight > scrollOffset)));
     }
     updateChoices();
-    const total = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    byId('reading-progress').style.setProperty('--read-progress', String(clampProgress(scrollY / total)));
+
   }
   function schedule() {
     if (framePending) return;
@@ -415,6 +438,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     requestFrame(waitForArrival);
   }
   function selectRoom(id) {
+    closeSpacePrompt();
     const selection = roomSelection(id, mobileMedia, assetBase);
     selected = selection;
     roomSection.hidden = false;
@@ -515,6 +539,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   listen(root, 'touchend', recoverAutoplay, { passive: true });
   listen(root, 'pointerup', recoverAutoplay, { passive: true });
   listen(nurseryPlayButton, 'click', () => {
+    closeSpacePrompt();
     if (autoStory.userPaused) autoStory.resume();
     else autoStory.pause();
   });
@@ -588,6 +613,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   syncMode();
   return () => {
     disposed = true;
+    closeSpacePrompt();
     document.body?.classList.remove('has-journey-mode-control');
     arrivalGeneration++;
     removers.forEach(remove => remove());
