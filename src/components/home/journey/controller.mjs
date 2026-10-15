@@ -224,10 +224,10 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     frames.add(id);
     return id;
   }
-  // Full-screen crops need the sharper source on high-density phones.
+  // Choose the phone encode by viewport even on high-density screens.
   const connection = globalThis.navigator?.connection;
-  const mobileMedia = Boolean(connection?.saveData) || /(^|-)2g$/.test(connection?.effectiveType || '') ||
-    (matchMedia('(max-width: 700px)').matches && (globalThis.devicePixelRatio || 1) < 1.5);
+  const mobileMedia = matchMedia('(max-width: 700px)').matches ||
+    Boolean(connection?.saveData) || /(^|-)2g$/.test(connection?.effectiveType || '');
   const introSection = byId('nursery-story');
   const roomSection = byId('room-story');
   const choices = byId('room-choices');
