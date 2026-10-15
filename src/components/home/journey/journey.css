@@ -250,52 +250,42 @@
 .plant-journey .film-caption { bottom:166px; }
 .plant-journey .film-loading { top:18px; }
 @media(max-width:700px) and (min-height:521px) {
-  .plant-journey { --gutter:22px; --mobile-film-height:clamp(280px,48svh,430px); }
+  .plant-journey { --gutter:20px; }
   .plant-journey .chapter-stage {
-    height:auto; min-height:calc(100svh - 110px); display:grid;
-    grid-template-columns:minmax(0,1fr); align-content:start;
-    padding-bottom:82px;
+    display:block; height:clamp(430px,56svh,540px); min-height:430px;
+    padding:0;
   }
+  .plant-journey .film-window { position:absolute; inset:0; width:100%; height:100%; }
   .plant-journey .scene-ambience { display:none; }
-  .plant-journey .story--nursery .film-window {
-    position:relative; inset:auto; grid-row:1;
-    width:100%; height:var(--mobile-film-height);
-  }
   .plant-journey .story--nursery :is(.film-video,.film-poster) { object-position:76% center; }
   .plant-journey #story-frame-3 :is(.film-video,.film-poster) { object-position:65% center; }
   .plant-journey :is(#story-frame-4,#story-frame-5) :is(.film-video,.film-poster) { object-position:66% center; }
-  .plant-journey .film-shade { background:linear-gradient(0deg,#08140e66,transparent 12%); }
+  .plant-journey .film-shade {
+    background:linear-gradient(90deg,#07150ec9, #07150e65 32%,transparent 57%),linear-gradient(0deg,#07150eb0,transparent 25%);
+  }
   .plant-journey .story-copy-viewport {
-    position:relative; grid-row:2; inset:auto; margin:10px var(--gutter) 0;
-    width:auto; height:174px; contain:paint;
+    position:absolute; z-index:5; top:12%; bottom:100px; left:var(--gutter);
+    width:42%; max-width:190px; margin:0; height:auto;
   }
   .plant-journey .story-copy { top:8px; }
-  .plant-journey .story-copy h2 { font-size:29px; line-height:1.12; margin-top:9px; }
-  .plant-journey .intro-note { max-width:100%; font-size:12px; line-height:1.5; margin-top:9px; }
-  .plant-journey .eyebrow { font-size:9px; letter-spacing:.12em; gap:8px; }
-  .plant-journey .chapter-number { width:21px; height:21px; font-size:9px; }
+  .plant-journey .story-copy h2 { font-size:clamp(22px,6vw,28px); line-height:1.14; margin-top:12px; }
+  .plant-journey .intro-note { max-width:165px; font-size:10px; line-height:1.55; margin-top:12px; }
+  .plant-journey .eyebrow { font-size:8px; letter-spacing:.07em; gap:6px; }
+  .plant-journey .chapter-number { width:19px; height:19px; font-size:8px; }
   .plant-journey .chapter-controls {
-    position:relative; grid-row:3; inset:auto; margin:0 var(--gutter);
+    position:absolute; bottom:20px; left:var(--gutter); right:var(--gutter); margin:0;
     grid-template-columns:1fr auto; gap:0 12px; padding-top:4px;
   }
-  .plant-journey .chapter-controls .text-link { min-height:44px; font-size:11px; }
-  .plant-journey .film-loading { top:14px; right:14px; }
+  .plant-journey .chapter-controls .text-link { min-height:44px; font-size:10px; }
+  .plant-journey .film-loading { top:12px; right:12px; }
   .plant-journey .film-caption { display:none; }
-  .plant-journey .media-error { bottom:12px; }
-  .plant-journey .story--room .chapter-stage { display:block; min-height:calc(100svh - 110px); }
-  .plant-journey .story--room .film-window { inset:64px 0 auto; height:var(--mobile-film-height); }
-  .plant-journey .story--room :is(.film-video,.film-poster) { object-position:60% center; }
-  .plant-journey .room-heading-row { position:static; }
-  .plant-journey .room-switcher { top:10px; left:var(--gutter); right:var(--gutter); }
+  .plant-journey .media-error { bottom:82px; }
+  .plant-journey .room-heading-row { position:absolute; inset:0; }
+  .plant-journey .room-switcher { top:12px; left:var(--gutter); right:var(--gutter); }
   .plant-journey .room-switcher button { flex:1; min-height:40px; padding:0 8px; font-size:11px; }
   .plant-journey .room-topline { display:none; }
-  .plant-journey .room-heading {
-    top:calc(80px + var(--mobile-film-height)); left:var(--gutter);
-    width:calc(100% - 44px); font-size:27px;
-  }
-  .plant-journey .story--room .chapter-stage { min-height:calc(var(--mobile-film-height) + 390px); }
-  .plant-journey .story--room .chapter-controls { position:absolute; left:var(--gutter); right:var(--gutter); bottom:82px; margin:0; }
-  .plant-journey .room-finish { bottom:184px; max-width:190px; }
+  .plant-journey .room-heading { top:30%; left:var(--gutter); width:42%; font-size:25px; }
+  .plant-journey .room-finish { bottom:132px; max-width:150px; }
   .plant-journey .room-finish>span { display:none; }
-  .plant-journey .room-finish a { padding:10px 14px; min-height:44px; font-size:12px; }
+  .plant-journey .room-finish a { padding:10px 12px; min-height:44px; font-size:11px; }
 }

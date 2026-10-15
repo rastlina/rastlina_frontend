@@ -21,7 +21,7 @@ export function homeBootstrap(modulePath, fontCss, stylesheetPath = '') {
         const script = document.createElement('script');
         script.type = 'module';
         script.crossOrigin = 'anonymous';
-        script.fetchPriority = urgent ? 'high' : 'low';
+        script.fetchPriority = 'high';
         script.src = ${entry};
         document.head.appendChild(script);
       };
@@ -29,10 +29,8 @@ export function homeBootstrap(modulePath, fontCss, stylesheetPath = '') {
         const sheet = document.createElement('link');
         sheet.rel = 'stylesheet';
         sheet.href = ${stylesheet};
-        sheet.addEventListener('load', startScript, { once: true });
-        sheet.addEventListener('error', startScript, { once: true });
         document.head.appendChild(sheet);
-        setTimeout(startScript, 3000);
+        startScript();
       } else startScript();
     };
     const captureClick = event => {

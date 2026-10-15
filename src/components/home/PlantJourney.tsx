@@ -23,6 +23,6 @@ export default function PlantJourney({ onReady }: { onReady?: () => void }) {
 
   return <>
     <Helmet><link rel="preload" as="image" href="/journey/assets/story-01-start.webp" /></Helmet>
-    <div ref={root} className="plant-journey" data-plant-journey dangerouslySetInnerHTML={{ __html: markup }} />
+    <div ref={root} className="plant-journey is-autoplay" data-plant-journey dangerouslySetInnerHTML={{ __html: markup }} />
   </>;
 }

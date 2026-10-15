@@ -91,3 +91,27 @@ test('a failed incoming clip exposes retry while preserving the outgoing frame',
     assert.equal(f.auto.index,1);assert.equal(f.mediaStates.at(-1).failed,false);
   }finally{f.dispose();}
 });
+
+test('mobile startup requests muted inline playback before loadeddata can be deferred',async()=>{
+  const f=fixture();try{
+    f.auto.enable(0);f.auto.setActive(true);
+    assert.equal(f.videos[0].readyState,0);
+    assert.equal(f.videos[0].plays,1);
+    assert.equal(f.videos[0].muted,true);assert.equal(f.videos[0].defaultMuted,true);
+    assert.equal(f.videos[0].playsInline,true);assert.equal(f.videos[0].autoplay,true);
+    await Promise.resolve();f.videos[0].decode();
+    assert.equal(f.videos[0].plays,1);
+  }finally{f.dispose();}
+});
+test('an interrupted startup cannot turn an offscreen pause into a user pause',async()=>{
+  const f=fixture();try{
+    let reject;
+    f.videos[0].play=()=>new Promise((resolve,no)=>{reject=no;});
+    f.auto.enable(0);f.auto.setActive(true);f.auto.setActive(false);
+    reject(Object.assign(new Error('interrupted'),{name:'AbortError'}));await Promise.resolve();
+    assert.equal(f.auto.userPaused,false);assert.equal(f.auto.playPending,false);
+    assert.equal(f.videos[0].autoplay,false);
+    f.videos[0].play=Video.prototype.play;f.auto.setActive(true);await Promise.resolve();
+    assert.equal(f.videos[0].paused,false);
+  }finally{f.dispose();}
+});

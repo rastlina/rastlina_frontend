@@ -45,7 +45,7 @@ it('starts automatically even when the banner never loads', () => {
   expect(document.head.querySelector('script')).toHaveAttribute('src', '/assets/test-entry.js');
 });
 
-it('loads complete styles after the banner and before interactive app startup', () => {
+it('starts the autoplay app at high priority without waiting for the complete stylesheet', () => {
   vi.useFakeTimers();
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { callback(0); return 1; });
   document.body.innerHTML = '<img alt="Rastlina Banner" src="/banner.avif">';
@@ -54,7 +54,8 @@ it('loads complete styles after the banner and before interactive app startup', 
   document.querySelector('img')!.dispatchEvent(new Event('load'));
   const sheet = document.head.querySelector('link')!;
   expect(sheet).toHaveAttribute('href', '/assets/all.css');
-  expect(document.head.querySelector('script')).toBeNull();
+  expect(document.head.querySelector('script')).toHaveAttribute('src', '/assets/test-entry.js');
+  expect((document.head.querySelector('script') as HTMLScriptElement).fetchPriority).toBe('high');
   sheet.dispatchEvent(new Event('load'));
   expect(document.head.querySelector('script')).toHaveAttribute('src', '/assets/test-entry.js');
   vi.advanceTimersByTime(6000);
