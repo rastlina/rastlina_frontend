@@ -76,9 +76,10 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
   get('room-choices').absoluteTop = 10000 + scrollOffset;
   const media = new Map(), callbacks = new Map();
   let nextFrame = 0, frameTime = 0, dispose;
-  const globals = ['document', 'window', 'matchMedia', 'requestAnimationFrame', 'cancelAnimationFrame', 'scrollY'];
+  const globals = ['document', 'window', 'matchMedia', 'requestAnimationFrame', 'cancelAnimationFrame', 'scrollY', 'devicePixelRatio'];
   const previous = new Map(globals.map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
   try {
+    globalThis.devicePixelRatio = 3; // Retina phones still use the mobile encode.
     globalThis.scrollY = 0;
     globalThis.document = Object.assign(new EventTarget(), {
       getElementById: get,

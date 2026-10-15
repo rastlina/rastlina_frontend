@@ -20,7 +20,10 @@ export class StoryAutoplay {
         video.addEventListener(event, handler);
         this.removers.push(() => video.removeEventListener(event, handler));
       };
-      for (const event of ['loadeddata', 'canplay', 'seeked']) listen(event, () => { if (index === this.index) this.play(); });
+      for (const event of ['loadeddata', 'canplay', 'seeked']) listen(event, () => {
+        if (index === this.index) this.play();
+        if (index === this.index + 1 && this.phase === 'transition') this.animate();
+      });
       listen('timeupdate', () => {
         if (!this.running || index !== this.index || this.phase !== 'playing' || video.seeking) return;
         const last = finalFrameTime(video.duration);
@@ -56,6 +59,7 @@ export class StoryAutoplay {
     this.generation++;
     this.playPending = false;
     this.enabled = false;
+    this.sequence.waitingForNext = false;
     this.stopFrame();
     for (const entry of this.sequence.entries) {
       entry.layer.video.pause();
@@ -108,6 +112,14 @@ export class StoryAutoplay {
   }
   animate() {
     if (!this.running || this.phase !== 'transition' || this.frame !== undefined) return;
+    const incoming = this.sequence.entries[this.index + 1];
+    this.sequence.waitingForNext = Boolean(incoming && !incoming.ready);
+    this.sequence.reportState();
+    if (this.sequence.waitingForNext) {
+      this.sequence.ensure(this.index + 1);
+      this.lastTime = null;
+      return;
+    }
     const tick = time => {
       this.frame = undefined;
       if (!this.running || this.phase !== 'transition') return;

@@ -43,7 +43,7 @@ export class StorySequence {
       const entry = { layer, loaded: false, ready: false, failed: false,
         source: `${assetBase}/${STORY_CHAPTERS[index].id}${mobile ? '-mobile' : ''}.mp4` };
       entry.scrubber = new Scrubber(layer.video, {
-        onReady: () => { entry.ready = true; layer.element.classList.add('has-video'); this.reportState(); },
+        onReady: () => { entry.ready = true; layer.element.classList.add('has-video'); this.render(); this.reportState(); },
         onError: () => { entry.failed = true; layer.element.classList.remove('has-video'); this.reportState(); },
       });
       return entry;
@@ -61,20 +61,27 @@ export class StorySequence {
     this.state = state;
     this.ensure(state.index);
     this.ensure(state.index + 1);
+    this.entries[state.index].scrubber.setProgress(state.movie);
+    this.entries[state.index + 1]?.scrubber.setProgress(0);
+    this.render();
+    this.reportState();
+  }
+  render() {
+    if (!this.state) return;
+    const state = { ...this.state };
+    // Hold the outgoing decoded frame until the incoming decoder is ready.
+    if (!this.entries[state.index + 1]?.ready) state.blend = 0;
     this.entries.forEach((entry, index) => {
       const opacity = index === state.index ? 1 - state.blend : index === state.index + 1 ? state.blend : 0;
       entry.layer.element.style.setProperty('--frame-opacity', String(opacity));
       entry.layer.element.setAttribute('aria-hidden', String(index !== state.index));
     });
-    this.entries[state.index].scrubber.setProgress(state.movie);
-    this.entries[state.index + 1]?.scrubber.setProgress(0);
     this.onView({ ...state, chapter: STORY_CHAPTERS[state.index] });
-    this.reportState();
   }
   reportState() {
     if (!this.state) return;
     const visible = [this.entries[this.state.index]];
-    if (this.state.blend > 0) visible.push(this.entries[this.state.index + 1]);
+    if (this.state.blend > 0 || this.waitingForNext) visible.push(this.entries[this.state.index + 1]);
     this.onState({ failed: visible.some(entry => entry.failed), ready: visible.every(entry => entry.ready) });
   }
   retry() {

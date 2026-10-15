@@ -19,10 +19,11 @@ class Video extends EventTarget {
 function fixture(){
   const videos=Array.from({length:5},()=>new Video());
   const layers=videos.map(video=>({video,element:{classList:{add(){},remove(){}},style:{setProperty(){}},setAttribute(){}}}));
-  const sequence=new StorySequence(layers,{Scrubber:VideoScrubber,assetBase:'https://example.test/assets',mobile:false});
+  const mediaStates=[];
+  const sequence=new StorySequence(layers,{Scrubber:VideoScrubber,assetBase:'https://example.test/assets',mobile:false,onState:state=>mediaStates.push(state)});
   const queue=new Map(),states=[];let id=0,time=0;
   const auto=new StoryAutoplay(sequence,{requestFrame:cb=>{queue.set(++id,cb);return id;},cancelFrame:key=>queue.delete(key),onState:x=>states.push(x),transitionMs:100});
-  return {videos,sequence,auto,states,queue,
+  return {videos,sequence,auto,states,queue,mediaStates,
     async start(){auto.enable(0);auto.setActive(true);videos[0].decode();videos[1].decode();await Promise.resolve();},
     tick(){const entry=queue.entries().next().value;if(entry){queue.delete(entry[0]);time+=20;entry[1](time);}},
     finishTransition(){let n=0;while(queue.size&&n++<40)this.tick();assert.equal(queue.size,0);},
@@ -41,7 +42,7 @@ test('default autoplay uses native playback and advances both the film and copy 
 test('autoplay runs every chapter in sequence and ends with a replay control',async()=>{
   const f=fixture();try{await f.start();for(let i=0;i<5;i++){
     if(f.videos[i].readyState<2)f.videos[i].decode();await Promise.resolve();assert.equal(f.videos[i].paused,false);
-    f.videos[i].end();f.finishTransition();await Promise.resolve();
+    if(f.videos[i+1])f.videos[i+1].decode();f.videos[i].end();f.finishTransition();await Promise.resolve();
   }assert.equal(f.sequence.progress,1);assert.equal(f.auto.phase,'complete');assert.equal(f.states.at(-1),false);
     f.auto.resume();await Promise.resolve();assert.equal(f.sequence.state.index,0);assert.equal(f.videos[0].paused,false);
   }finally{f.dispose();}
@@ -65,5 +66,28 @@ test('blocked autoplay keeps the poster and visible play control, then resumes o
   const f=fixture();try{f.videos[0].blocked=true;await f.start();await Promise.resolve();
     assert.equal(f.auto.userPaused,true);assert.equal(f.states.at(-1),false);assert.equal(f.sequence.progress,0);
     f.videos[0].blocked=false;f.auto.resume();await Promise.resolve();assert.equal(f.videos[0].paused,false);
+  }finally{f.dispose();}
+});
+
+test('a delayed incoming decoder holds the outgoing film and resumes without frame polling',async()=>{
+  const f=fixture();try{
+    f.auto.enable(0);f.auto.setActive(true);f.videos[0].decode();await Promise.resolve();
+    f.videos[0].end();
+    assert.equal(f.queue.size,0);
+    assert.equal(f.auto.index,0);
+    assert.equal(f.sequence.progress,.16);
+    f.videos[1].decode();f.finishTransition();await Promise.resolve();
+    assert.equal(f.auto.index,1);assert.equal(f.videos[1].paused,false);
+  }finally{f.dispose();}
+});
+
+test('a failed incoming clip exposes retry while preserving the outgoing frame',async()=>{
+  const f=fixture();try{
+    f.auto.enable(0);f.auto.setActive(true);f.videos[0].decode();await Promise.resolve();
+    f.videos[0].end();assert.equal(f.mediaStates.at(-1).ready,false);
+    f.videos[1].currentSrc=f.videos[1].src;f.videos[1].dispatchEvent(new Event('error'));
+    assert.equal(f.mediaStates.at(-1).failed,true);assert.equal(f.auto.index,0);
+    f.sequence.retry();f.videos[1].decode();f.finishTransition();await Promise.resolve();
+    assert.equal(f.auto.index,1);assert.equal(f.mediaStates.at(-1).failed,false);
   }finally{f.dispose();}
 });
