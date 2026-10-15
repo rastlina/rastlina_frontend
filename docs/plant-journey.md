@@ -1,10 +1,12 @@
 # Homepage plant journey
 
-The nursery reveal and Living Room, Bedroom and Office scenes were recovered from version 6 of the original Rastlina room review Site. The source and eight desktop/mobile video files are retained locally in the frontend, so the public storefront does not depend on ChatGPT authentication.
+The approved story runs in five chapters: nursery approach, roots, the retained pot-exchange bridge joined to planting, self-watering reveal, and the finished planter. The original sources are recorded in `public/journey/assets/story-manifest.json`. Each chapter includes desktop/mobile video and a first-frame poster. Scrolling controls the pinned sequence in both directions and crossfades the right-hand scene between chapters.
 
-`PlantJourney` renders the original scene markup and mounts its disposable controller after hydration. Styles are scoped to `.plant-journey` to preserve storefront navigation, catalogue and cart styling. The fixed storefront header is accounted for in scene measurements and anchor navigation. Reduced-motion mode uses manual sliders and flat card compositing so room photographs remain visible.
+Living Room, Bedroom and Office retain the original approved desktop/mobile videos recovered from version 6 of the room review Site. Selecting a room starts natural playback, resets to its first decoded frame, waits five seconds, and plays again. Leaving the view suspends playback; switching rooms cancels the previous replay timer. The source and media are retained locally in the frontend, so the public storefront does not depend on ChatGPT authentication.
 
-The repaired video controller calls native timers on `globalThis`, catches synchronous loading failures, and offers retry controls after a failed or stalled load. Only the nursery and the selected room load videos; screens up to 700 CSS pixels and data-saving connections select the original smaller mobile versions.
+`PlantJourney` renders the original scene markup and mounts its disposable controller after hydration. Styles are scoped to `.plant-journey` to preserve storefront navigation, catalogue and cart styling. The fixed storefront header is accounted for in scene measurements and anchor navigation. Page ancestors use horizontal clipping instead of hidden overflow so the stages stick to document scrolling. Reduced-motion mode retains the pinned, directly scroll-controlled video, with no easing, spatial depth or card tilt. Manual sliders remain available, and very short mobile viewports use a stacked layout with manual control.
+
+The repaired video controller calls native timers on `globalThis`, catches synchronous loading failures, and offers retry controls after a failed or stalled load. The current and next story chapters are loaded on demand, along with the selected room; screens up to 700 CSS pixels and data-saving connections select the smaller mobile versions.
 
 Validation:
 
