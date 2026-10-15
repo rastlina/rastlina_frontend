@@ -1,29 +1,26 @@
+import { useEffect, useRef } from 'react';
 import CreativeCategories from './CreativeCategories';
-import ShopByFeeling from './ShopByFeeling';
 import BestSellers from './BestSellers';
 import WatchAndShopSection from './WatchAndShopSection';
-import NewArrivals from './NewArrivals';
-import SelfWateringSection from './SelfWateringSection';
-import WhyChooseUs from './WhyChooseUs';
-import OffersSection from './OffersSection';
-import CombosSection from './CombosSection';
-import Testimonials from './Testimonials';
 import Blogs from './Blogs';
-import GrowingSimple from './GrowingSimple';
 
 export default function HomeSections() {
-  return <>
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !root.current) return;
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) if (entry.isIntersecting) {
+        entry.target.setAttribute('data-revealed', 'true');
+        observer.unobserve(entry.target);
+      }
+    }, { threshold: 0.06 });
+    root.current.querySelectorAll(':scope > section').forEach(section => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={root} className="home-collections">
     <CreativeCategories />
-    <ShopByFeeling />
-    <BestSellers />
     <WatchAndShopSection />
-    <NewArrivals />
-    <SelfWateringSection />
-    <WhyChooseUs />
-    <OffersSection />
-    <CombosSection />
-    <Testimonials />
+    <BestSellers />
     <Blogs />
-    <GrowingSimple />
-  </>;
+  </div>;
 }

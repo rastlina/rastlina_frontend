@@ -13,6 +13,9 @@ interface ProductSliderProps {
   viewAllHref: string;
   bgColor?: string;
   loading?: boolean;
+  sectionClassName?: string;
+  eyebrow?: string;
+  subtitle?: string;
 }
 
 // Skeleton card
@@ -36,6 +39,9 @@ export const ProductSlider = ({
   viewAllHref,
   bgColor = 'bg-white',
   loading = false,
+  sectionClassName = '',
+  eyebrow,
+  subtitle,
 }: ProductSliderProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -93,14 +99,18 @@ export const ProductSlider = ({
   if (!loading && products.length === 0) return null;
 
   return (
-    <section className={`py-12 ${bgColor}`}>
+    <section className={`py-12 ${bgColor} ${sectionClassName}`}>
       <div className="container-custom">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 px-1">
+        <div className="home-section-heading flex items-center justify-between mb-6 px-1">
+          <div>
+          {eyebrow && <p className="home-section-label">{eyebrow}</p>}
           {title && <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
             {title}
           </h2>}
+          {subtitle && <p className="home-section-note">{subtitle}</p>}
+          </div>
 
           <Link
             to={viewAllHref}

@@ -1,0 +1,115 @@
+/* Dark only above the shopping sections. Original catalogue colours are retained. */
+body:not(.rastlina-light-shop) .luxury-header{color-scheme:dark;background:#0a130e;border-bottom:1px solid #d1b77d29;color:#f3eee3}
+body:not(.rastlina-light-shop) .luxury-header :is(header,.bg-white,.bg-gray-50,.bg-gray-100,.bg-green-50){background-color:#0e1b13}
+body:not(.rastlina-light-shop) .luxury-header [class~="bg-[#1A3831]"]{background-color:#172a1b}
+body:not(.rastlina-light-shop) .luxury-header [class~="bg-[#1A3831]/5"]{background-color:#1a2b1f}
+body:not(.rastlina-light-shop) .luxury-header :is(.text-gray-900,.text-gray-800,.text-gray-700,[class~="text-[#1A3831]"]){color:#eeeade}
+body:not(.rastlina-light-shop) .luxury-header :is(.text-gray-600,.text-gray-500,.text-gray-400){color:#b4bdac}
+body:not(.rastlina-light-shop) .luxury-header [class~="text-[#667D00]"]{color:#d1b77d}
+body:not(.rastlina-light-shop) .luxury-header :is(.border-gray-100,.border-gray-200){border-color:#d1b77d2b}
+body:not(.rastlina-light-shop) .luxury-header :is(input,select){background:#17251b;color:#f3eee3;border-color:#d1b77d40}
+body:not(.rastlina-light-shop) .luxury-header input::placeholder{color:#aab5a3}
+body:not(.rastlina-light-shop) .luxury-header :is(button,a):hover{color:#dfc997}
+body:not(.rastlina-light-shop) .luxury-header :is(.hover\:bg-green-50,.hover\:bg-gray-50):hover{background:#213321}
+body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:grayscale(1) invert(1) sepia(.65) saturate(.8) brightness(1.4);mix-blend-mode:screen}
+.luxury-header button:focus-visible,.luxury-header a:focus-visible{outline:2px solid #b89b5b;outline-offset:3px}
+@keyframes luxury-enter{from{transform:translateY(16px)}to{transform:translateY(0)}}
+@media(prefers-reduced-motion:no-preference){.home-collections>section[data-revealed="true"]>.container-custom{animation:luxury-enter .5s cubic-bezier(.2,.7,.2,1) both}}
+@media(max-width:700px){
+  .luxury-header button[aria-label]{min-width:44px;min-height:44px}
+  .luxury-header .overflow-y-auto{overscroll-behavior:contain;max-height:calc(100svh - 110px)!important}
+  .luxury-header input{font-size:16px}
+  .home-collections .overflow-x-auto{overscroll-behavior-x:contain;scroll-padding-inline:4px;-webkit-overflow-scrolling:touch}
+}
+@media(prefers-reduced-motion:reduce){.home-collections *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* One botanical palette: forest anchors, warm cream, restrained gold details. */
+.home-refined { --brand-forest:#05160e; --brand-cream:#fbf8ef; --brand-gold:#c8ac71; --brand-ink:#18392a; --brand-muted:#65725e; background:var(--brand-cream); }
+.home-refined .home-collections>section { background:var(--brand-cream); padding:76px 0; }
+.home-refined .home-collections .container-custom { max-width:1440px; padding-inline:5vw; }
+.home-refined .home-section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:36px; padding:0; }
+.home-refined .home-section-label { display:flex; gap:12px; align-items:center; margin-bottom:17px; font-family:Inter,Arial,sans-serif; font-size:10px; font-weight:500; line-height:1.5; letter-spacing:.18em; text-transform:uppercase; color:#75613b; }
+.home-refined .home-section-label>span { letter-spacing:0; padding-right:12px; border-right:1px solid #b49c6750; }
+.home-refined .home-collections h2 { font-family:'Playfair Display Variable',Georgia,serif; font-size:clamp(34px,3.7vw,52px); font-weight:400; letter-spacing:-.035em; line-height:1.15; color:var(--brand-ink); }
+.home-refined .home-section-note { margin-top:15px; font-size:14px; line-height:1.75; color:var(--brand-muted); }
+.home-refined .home-categories { border-bottom:1px solid #d7d0ba70; }
+.home-refined .home-categories h2 { margin-bottom:34px; }
+.home-refined .home-categories .aspect-square { border-color:#fffdf7; border-width:6px; box-shadow:0 12px 24px -15px #15382270; }
+.home-refined .home-categories h3 { color:var(--brand-ink); font-size:18px; font-weight:400; line-height:1.4; }
+.home-refined .home-categories a>span { display:block; margin-top:7px; font-size:12px; color:var(--brand-muted); }
+.home-refined .home-bestsellers { border-bottom:1px solid #d7d0ba70; }
+.home-refined .home-bestsellers .home-section-heading>a { display:inline-flex; align-items:center; justify-content:center; min-height:44px; background:var(--brand-forest); color:#f7f2e7; padding:12px 22px; border:1px solid #c8ac7140; font-size:11px; letter-spacing:.08em; }
+.home-refined .home-bestsellers [data-card]>.group { background:#fffdf8; border:1px solid #dfd9c5; border-radius:16px; box-shadow:0 14px 28px -22px #18392a70; }
+.home-refined .home-bestsellers [data-card] h3 { font-weight:500; font-size:16px; line-height:1.45; color:var(--brand-ink); }
+.home-refined .home-journal h3 { color:var(--brand-ink); font-size:23px; font-weight:400; line-height:1.35; }
+.home-refined .home-journal .aspect-\[3\/2\] { border-radius:16px; }
+.home-refined .home-journal .text-gray-600 { color:var(--brand-muted); line-height:1.75; }
+.home-refined .home-journal [class~="text-accent-earth"] { color:#75613b; font-size:12px; font-weight:500; letter-spacing:.05em; }
+.home-refined :is(a,button):focus-visible { outline:2px solid var(--brand-gold); outline-offset:4px; }
+
+.home-refined .home-collections>.home-watch-shop { background:#05160e; color:#f7f2e7; border-top:1px solid #c8ac7140; border-bottom:1px solid #c8ac7140; }
+.home-refined .home-watch-shop h2 { color:#f7f2e7; }
+.home-refined .home-watch-shop .home-section-label { color:#d8bd84; }
+.home-refined .home-watch-shop .home-section-note { color:#b8c4b3; }
+.watch-shop-navigation { display:flex; gap:10px; }
+.watch-shop-navigation button { display:grid; place-items:center; width:46px; height:46px; border:1px solid #d3bb824d; border-radius:50%; background:transparent; color:#e5cf9e; transition:background .2s; }
+.watch-shop-navigation button:hover:not(:disabled) { background:#d3bb821f; }
+.watch-shop-navigation button:disabled { opacity:.3; }
+.watch-shop-rail { position:relative; display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x proximity; scrollbar-width:none; overscroll-behavior-x:contain; padding:5px 2px 26px; -webkit-overflow-scrolling:touch; }
+.watch-shop-rail::-webkit-scrollbar { display:none; }
+.watch-shop-card,.watch-shop-skeleton { flex:0 0 calc((100% - 66px)/4); min-width:0; scroll-snap-align:center; }
+.watch-shop-card { position:relative; overflow:hidden; border:1px solid #c8ac7140; border-radius:18px; background:#fbf8ef; box-shadow:0 18px 30px -20px #000c; transition:border-color .2s,box-shadow .2s; }
+.watch-shop-card[data-active=true] { border-color:#d8bd84; box-shadow:0 0 0 1px #d8bd8433,0 20px 32px -20px #000d; }
+.watch-shop-media { position:relative; overflow:hidden; }
+.watch-shop-media-link { position:absolute; inset:0; z-index:10; }
+.watch-shop-film-label { position:absolute; left:14px; top:16px; z-index:20; pointer-events:none; display:flex; align-items:center; gap:7px; color:#f7f2e7; background:#05160edb; border:1px solid #d8bd8440; border-radius:18px; padding:7px 10px; font-size:9px; letter-spacing:.09em; text-transform:uppercase; }
+.watch-video-toggle { position:absolute; z-index:30; top:12px; right:12px; display:grid; place-items:center; width:44px; height:44px; border:1px solid #f7f2e766; border-radius:50%; background:#05160ee6; color:#fff6de; cursor:pointer; }
+.watch-video-toggle:focus-visible { outline:2px solid #e0c487; outline-offset:3px; }
+.watch-video-status { position:absolute; z-index:20; bottom:15px; left:12px; right:12px; color:#fff; background:#05160ee8; padding:9px; text-align:center; border-radius:5px; font-size:11px; }
+.watch-shop-copy { display:block; position:relative; min-height:142px; padding:21px 21px 22px; color:#18392a; }
+.watch-shop-number { display:block; margin-bottom:11px; font-size:9px; line-height:1; letter-spacing:.12em; color:#7b6944; }
+.watch-shop-card h3 { min-height:53px; font-family:'Playfair Display Variable',Georgia,serif; font-size:21px; line-height:1.3; font-weight:400; letter-spacing:-.02em; }
+.watch-shop-cta { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:17px; border-top:1px solid #d9d2bd; padding-top:13px; font-size:11px; font-weight:500; letter-spacing:.025em; }
+.watch-shop-skeleton { aspect-ratio:9/21; background:#ffffff0c; border-radius:18px; }
+.watch-shop-footer { display:flex; align-items:center; justify-content:space-between; gap:20px; border-top:1px solid #c8ac7133; padding-top:18px; color:#b8c4b3; font-size:11px; }
+.watch-shop-pagination { display:flex; align-items:center; gap:3px; }
+.watch-shop-pagination button { display:grid; place-items:center; min-width:34px; min-height:34px; padding:10px 7px; background:transparent; border:0; }
+.watch-shop-pagination span { display:block; width:16px; height:2px; background:#a4b49e55; transition:background .2s; }
+.watch-shop-pagination button[aria-pressed=true] span { background:#d8bd84; }
+.watch-shop-count { font-variant-numeric:tabular-nums; color:#d8bd84; font-size:10px; }
+.watch-shop-empty { color:#b8c4b3; line-height:1.8; }
+.watch-shop-empty a { color:#e5cf9e; text-decoration:underline; }
+.rastlina-footer { background:#05160e; }
+@media(max-width:1000px) { .watch-shop-card,.watch-shop-skeleton { flex-basis:calc((100% - 44px)/3); } }
+@media(max-width:700px) {
+  .home-refined .home-collections>section { padding:46px 0; }
+  .home-refined .home-collections .container-custom { padding-inline:22px; }
+  .home-refined .home-section-heading { gap:16px; margin-bottom:27px; }
+  .home-refined .home-section-label { font-size:9px; margin-bottom:15px; }
+  .home-refined .home-collections h2 { font-size:34px; }
+  .home-refined .home-section-note { font-size:13px; margin-top:12px; }
+  .home-refined .home-categories h2 { margin-bottom:26px; }
+  .home-refined .home-categories .grid { grid-auto-columns:160px; gap:19px; }
+  .home-refined .home-categories h3 { font-size:17px; }
+  .home-refined .home-bestsellers .home-section-heading>a { padding:10px 16px; white-space:nowrap; font-size:10px; }
+  .home-refined .home-bestsellers .home-section-heading .home-section-note { max-width:210px; }
+  .home-refined .home-bestsellers [data-card] { width:clamp(185px,57vw,240px); }
+  .home-refined .home-journal .grid { gap:35px; }
+  .home-refined .home-journal h3 { font-size:24px; }
+  .watch-shop-heading { align-items:flex-end!important; }
+  .watch-shop-navigation { gap:6px; }
+  .watch-shop-navigation button { width:40px; height:44px; }
+  .watch-shop-rail { gap:18px; margin-right:-22px; padding-right:22px; }
+  .watch-shop-card,.watch-shop-skeleton { flex-basis:min(74vw,290px); }
+  .watch-shop-copy { min-height:145px; padding:19px; }
+  .watch-shop-card h3 { font-size:22px; }
+  .watch-shop-footer { gap:12px; }
+  .watch-shop-footer>p { max-width:110px; line-height:1.5; font-size:10px; }
+  .watch-shop-pagination { gap:0; }
+  .watch-shop-pagination button { min-width:28px; padding-inline:5px; }
+}
+@media(prefers-reduced-motion:reduce) { .watch-shop-card,.watch-shop-pagination span { transition:none; } }
+.home-refined .plant-journey { --ink:#05160e; --paper:#fbf8ef; --gold:#c8ac71; }
+.home-refined .plant-journey .choices { background:#05160e; }
+.home-refined .home-bestsellers .group:hover h3 { color:#30583d; }
+.rastlina-footer .text-accent-gold { color:#c8ac71; }

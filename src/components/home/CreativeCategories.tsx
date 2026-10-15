@@ -18,8 +18,9 @@ const CreativeCategories = () => {
   const categories = data.featured_categories;
 
   return (
-    <section className="bg-[#FBF8EF] py-8 md:py-10">
+    <section className="home-categories bg-[#FBF8EF] py-8 md:py-10">
       <div className="container-custom">
+        <p className="home-section-label"><span aria-hidden="true">01</span> The collection</p>
         <h2 className="mb-6 font-serif text-xl font-bold text-[#1A3831] md:text-2xl">
           Explore by Category
         </h2>
