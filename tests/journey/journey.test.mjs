@@ -22,6 +22,7 @@ class Element extends EventTarget {
     };
     this.style = { setProperty: (name, value) => { this.style[name] = value; } };
   }
+  append(child) { this.textContent += child.textContent; }
   setAttribute(name, value) { this.attributes[name] = String(value); }
   removeAttribute(name) { delete this.attributes[name]; if (name === 'src') this.src = ''; }
   getBoundingClientRect() { return { top: (this.absoluteTop || 0) - globalThis.scrollY }; }
@@ -81,6 +82,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     globalThis.scrollY = 0;
     globalThis.document = Object.assign(new EventTarget(), {
       getElementById: get,
+      createElement: tag => new Element(tag),
       querySelectorAll: selector => { assert.equal(selector, '[data-room]'); return cards; },
       documentElement: Object.assign(new Element('html'), { scrollHeight: 15000 }), activeElement: null, hidden: false,
     });
@@ -117,7 +119,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     const scrollStory = progress => scroll(9000 * (0.01 + 0.84 * progress));
     const near = (actual, expected, message) => assert.ok(Math.abs(Number(actual) - expected) < 0.002, `${message}: ${actual} should be ${expected}`);
 
-    dispose = mountJourney(document, { scrollOffset });
+    dispose = mountJourney(document, { scrollOffset, autoplay: false });
     drain();
     assert.equal(document.documentElement.classList.contains('manual-mode'), false, 'Reduced motion retains the pinned story');
     assert.deepEqual(chapters.map(video => video.loads.length), [1, 1, 0, 0, 0], 'Only the current and next chapter preload');
@@ -140,6 +142,17 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     near(get('story-frame-2').style['--frame-opacity'], 0.5, 'Next frame appears in the crossfade');
     assert.equal(chapters[0].currentTime, 10);
     assert.equal(chapters[1].currentTime, 0, 'The incoming chapter begins on its wide frame');
+    if (!reducedMotion) {
+      const currentY = parseFloat(get('story-copy-current').style['--text-y']);
+      const nextY = parseFloat(get('story-copy-next').style['--text-y']);
+      assert.ok(currentY < 0, 'The current title travels upward with document scrolling');
+      assert.ok(nextY > 0, 'The next title enters from below');
+      assert.equal(get('story-copy-next').style.visibility, 'visible');
+    } else {
+      assert.equal(get('story-copy-current').style['--text-y'], '0px');
+      assert.equal(get('story-copy-next').style.visibility, 'hidden', 'Reduced motion keeps one stationary readable title');
+    }
+
 
     const labels = ['Rooted in care', 'Room to grow', 'Made for your everyday', 'Care from within', 'Ready for your space'];
     for (let index = 0; index < chapters.length; index++) {
@@ -149,6 +162,19 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
       assert.equal(chapters[index].currentTime, 5, `Chapter ${index + 1} follows scroll progress`);
       assert.equal(get(`story-frame-${index + 1}`).attributes['aria-hidden'], 'false');
       assert.ok(chapters[index].src.endsWith(`/assets/story-0${index + 1}${chapterSuffix}.mp4`));
+      assert.equal(parseFloat(get('story-copy-current').style['--text-y']), 0, 'Each title rests in full view for reading');
+      if (!reducedMotion && index < chapters.length - 1) {
+        await scrollStory((index + 0.91) / 5);
+        const outgoingY = parseFloat(get('story-copy-current').style['--text-y']);
+        const enteringY = parseFloat(get('story-copy-next').style['--text-y']);
+        assert.ok(outgoingY < 0 && enteringY > 0, `Chapter ${index + 1} has a vertical text handoff`);
+        const arrivingTitle = get('next-story-heading').innerHTML;
+        await scrollStory((index + 1.001) / 5);
+        assert.equal(get('nursery-heading').innerHTML, arrivingTitle, 'The entering title becomes current at its resting position');
+        await scrollStory((index + 0.91) / 5);
+        near(parseFloat(get('story-copy-current').style['--text-y']), outgoingY, 'Reverse scroll restores exactly the same title position');
+      }
+
     }
     await scrollStory(1);
     assert.equal(chapters[4].currentTime, 10, 'The full journey reaches the final planter frame');
@@ -175,7 +201,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     assert.equal(get('story-position').textContent, '1 / 5', 'Scrolling retakes control after using the slider');
 
     const roomSuffix = mobile ? '-mobile-v5' : '-v4';
-    for (const [id, heading] of [['bedroom', 'A quiet retreat.'], ['office', 'Room to focus.'], ['living-room', 'A warm welcome.']]) {
+    for (const [id, heading] of [['bedroom', 'Rest easy. Breathe green.'], ['office', 'Fresh thinking. Naturally.'], ['living-room', 'Your space. More alive.']]) {
       const choice = cards.find(card => card.dataset.room === id && (id === 'office' ? !card.classList.contains('room-card') : card.classList.contains('room-card')));
       const plays = room.plays.length;
       await click(choice);

@@ -1,12 +1,13 @@
+import { StoryAutoplay } from './story-autoplay.mjs';
 import { RoomPlayback } from './room-playback.mjs';
-import { StorySequence, STORY_CHAPTERS, storyProgress } from './story-sequence.mjs';
+import { StorySequence, STORY_CHAPTERS, storyProgress, copyTransition } from './story-sequence.mjs';
 import { clampProgress, finalFrameTime } from './media.mjs';
 export { clampProgress, finalFrameTime } from './media.mjs';
 
 export const ROOMS = Object.freeze({
-  'living-room': { name: 'Living Room', heading: 'A warm welcome.', note: 'A little green, in your living room.' },
-  bedroom: { name: 'Bedroom', heading: 'A quiet retreat.', note: 'A little green, beside your everyday moments.' },
-  office: { name: 'Office', heading: 'Room to focus.', note: 'A little green, at your desk.' },
+  'living-room': { name: 'Living Room', heading: 'Your space. More alive.', note: 'A little green, in your living room.' },
+  bedroom: { name: 'Bedroom', heading: 'Rest easy. Breathe green.', note: 'A little green, beside your everyday moments.' },
+  office: { name: 'Office', heading: 'Fresh thinking. Naturally.', note: 'A little green, at your desk.' },
 });
 
 export function sectionProgress(top, sectionHeight, stageHeight) {
@@ -123,7 +124,7 @@ export class VideoScrubber {
     this.listen('error', () => {
       if (this.source && this.isCurrentSource()) this.fail();
     });
-    this.listen('play', () => video.pause());
+    this.listen('play', () => { if (!this.playback) video.pause(); });
   }
   dispose() {
     this.clearTimer(this.timeout);
@@ -184,7 +185,7 @@ export class VideoScrubber {
   }
   flush() {
     const video = this.video;
-    if (this.failed || !this.source || !this.isCurrentSource() || video.readyState < 1 || video.seeking) return;
+    if (this.playback || this.failed || !this.source || !this.isCurrentSource() || video.readyState < 1 || video.seeking) return;
     const last = finalFrameTime(video.duration, this.fps);
     const target = Math.round(this.progress * last * this.fps) / this.fps;
     if (Math.abs(video.currentTime - target) < 0.5 / this.fps) return;
@@ -205,7 +206,7 @@ export function roomSelection(id, mobile = false, assetBase = 'assets') {
   return { id, ...room, video: `${assetBase}/${id}${mobile ? "-mobile-v5" : "-v4"}.mp4`, poster: `${assetBase}/${id}-start.webp` };
 }
 
-export function mountJourney(root = document, { assetBase = 'assets', scrollOffset = 0 } = {}) {
+export function mountJourney(root = document, { assetBase = 'assets', scrollOffset = 0, autoplay = true } = {}) {
   const byId = id => root.getElementById ? root.getElementById(id) : root.querySelector(`#${id}`);
   const surface = root.documentElement || root;
   let disposed = false;
@@ -223,7 +224,10 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     frames.add(id);
     return id;
   }
-  const mobileMedia = matchMedia('(max-width: 700px)').matches || Boolean(globalThis.navigator?.connection?.saveData);
+  // Full-screen crops need the sharper source on high-density phones.
+  const connection = globalThis.navigator?.connection;
+  const mobileMedia = Boolean(connection?.saveData) || /(^|-)2g$/.test(connection?.effectiveType || '') ||
+    (matchMedia('(max-width: 700px)').matches && (globalThis.devicePixelRatio || 1) < 1.5);
   const introSection = byId('nursery-story');
   const roomSection = byId('room-story');
   const choices = byId('room-choices');
@@ -235,6 +239,12 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   const cards = [...root.querySelectorAll('[data-room]')];
   const roomCards = cards.filter(card => card.classList.contains('room-card'));
   let selected = null;
+  let storyMode = autoplay ? 'auto' : 'scroll';
+  let scrollAnimationEnabled = false;
+  const modeButton = byId('journey-mode-switch');
+  const nurseryPlayButton = byId('nursery-playback');
+  surface.classList.toggle('is-autoplay', storyMode === 'auto');
+  surface.classList.toggle('is-scroll-mode', storyMode === 'scroll');
   let framePending = false;
   let introManual = false;
   let scrollIntent = false;
@@ -291,6 +301,12 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   }
 
   let shownChapter = -1;
+  const currentCopy = byId('story-copy-current');
+  const nextCopy = byId('story-copy-next');
+  let copyTravel = 320;
+  function measureCopy() {
+    copyTravel = Math.max(currentCopy.offsetHeight, nextCopy.offsetHeight, 160) + 32;
+  }
   const introScrubber = new StorySequence(STORY_CHAPTERS.map((_, index) => ({
     element: byId(`story-frame-${index + 1}`),
     video: byId(index === 0 ? 'nursery-video' : `story-video-${index + 1}`),
@@ -304,9 +320,18 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
         byId('story-eyebrow').textContent = chapter.label;
         byId('story-number').textContent = String(index + 1).padStart(2, '0');
         byId('story-position').textContent = `${index + 1} / ${STORY_CHAPTERS.length}`;
+        const next = STORY_CHAPTERS[Math.min(index + 1, STORY_CHAPTERS.length - 1)];
+        byId('next-story-heading').innerHTML = next.title;
+        byId('next-story-note').innerHTML = next.note;
+        byId('next-story-eyebrow').textContent = next.label;
+        byId('next-story-number').textContent = String(Math.min(index + 2, STORY_CHAPTERS.length)).padStart(2, '0');
         introSection.style.setProperty('--scene-poster', `url("${assetBase}/${chapter.id}-start.webp")`);
+        measureCopy();
       }
-      introSection.style.setProperty('--copy-opacity', String(1 - blend));
+      const motion = copyTransition(blend, copyTravel, reduceEffects());
+      currentCopy.style.setProperty('--text-y', `${motion.currentY}px`);
+      nextCopy.style.setProperty('--text-y', `${motion.nextY}px`);
+      nextCopy.style.visibility = motion.nextVisible ? 'visible' : 'hidden';
     },
     onState: ({ ready, failed }) => {
       byId('nursery-window').setAttribute('aria-busy', String(!ready && !failed));
@@ -320,7 +345,8 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     onFrame: progress => {
       syncRange(roomRange, progress);
       updateRoomFinish(progress);
-      applyDepth(roomSection, progress, 0);
+      // Keep the overlay legible throughout the room film.
+      applyDepth(roomSection, 0, 0);
     },
     onState: playing => { byId('room-playback').textContent = playing ? 'Pause animation' : 'Play animation'; },
   });
@@ -330,18 +356,30 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     syncRange(nurseryRange, progress);
   }, { requestFrame });
 
+  const autoStory = new StoryAutoplay(introScrubber, {
+    requestFrame,
+    cancelFrame: id => { cancelAnimationFrame(id); frames.delete(id); },
+    onState: playing => { nurseryPlayButton.textContent = playing ? 'Pause animation' : 'Play animation'; },
+  });
+
   function measuredProgress(section) {
     return sectionProgress(section.getBoundingClientRect().top - scrollOffset, section.offsetHeight, section.querySelector('.chapter-stage').offsetHeight);
   }
   function renderScroll() {
     framePending = false;
     const introPosition = measuredProgress(introSection);
-    if (!manualMode() && !introManual) {
+    if (storyMode === 'scroll' && !manualMode() && !introManual) {
       const progress = storyProgress(introPosition);
       introMotion.setTarget(progress, reducedMotion.matches);
     }
+    const introRect = introSection.getBoundingClientRect();
+    autoStory.setActive(!document.hidden && introRect.top < window.innerHeight && introRect.top + introSection.offsetHeight > scrollOffset);
+    const journeyRect = surface.getBoundingClientRect?.();
+    modeButton.hidden = Boolean(journeyRect && (journeyRect.bottom < scrollOffset || journeyRect.top > window.innerHeight));
+    document.body?.classList.toggle('has-journey-mode-control', !modeButton.hidden);
     if (selected) {
-      applyDepth(roomSection, roomPlayback.progress, 0);
+      if (scrollAnimationEnabled) roomPlayback.setProgress(cinematicProgress(measuredProgress(roomSection)));
+      applyDepth(roomSection, 0, 0);
       const top = roomSection.getBoundingClientRect().top;
       roomPlayback.setActive(!document.hidden && (selecting || (top < window.innerHeight && top + roomSection.offsetHeight > scrollOffset)));
     }
@@ -363,6 +401,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     selecting = true;
     roomPlayback.setActive(true);
     roomPlayback.restart();
+    if (scrollAnimationEnabled) roomPlayback.pause();
     goTo(roomSection);
     // Keep playback active while navigating to the chosen room.
     const started = performance.now();
@@ -388,7 +427,12 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     byId('room-poster').alt = `Rastlina plant in your ${selection.name.toLowerCase()}`;
     byId('room-video').poster = selection.poster;
     byId('room-video').setAttribute('aria-label', `${selection.name} camera orbit, plays automatically with a five-second pause between plays`);
-    byId('room-heading').textContent = selection.heading;
+    const heading = byId('room-heading');
+    const [lead, ...rest] = selection.heading.split('. ');
+    heading.textContent = `${lead}. `;
+    const accent = document.createElement('em');
+    accent.textContent = rest.join('. ');
+    heading.append(accent);
     byId('room-eyebrow').textContent = selection.note;
     byId('room-label').textContent = selection.name;
     roomRange.setAttribute('aria-label', `Explore the ${selection.name.toLowerCase()} view`);
@@ -414,16 +458,59 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     if (scrollIntent) introManual = false;
     schedule();
   }, { passive: true });
-  listen(window, 'resize', schedule, { passive: true });
+  function refreshCopyLayout() {
+    measureCopy();
+    introScrubber.setProgress(introScrubber.progress);
+    schedule();
+  }
+  listen(window, 'resize', refreshCopyLayout, { passive: true });
+  const copyObserver = globalThis.ResizeObserver ? new ResizeObserver(refreshCopyLayout) : null;
+  copyObserver?.observe(currentCopy);
+  copyObserver?.observe(nextCopy);
+  removers.push(() => copyObserver?.disconnect());
   listen(reducedMotion, 'change', syncMode);
   listen(compactViewport, 'change', syncMode);
   listen(window, 'pageshow', schedule);
   listen(document, 'visibilitychange', schedule);
   listen(window, 'pagehide', () => {
     introMotion.reset(introScrubber.progress);
+    autoStory.setActive(false);
     roomPlayback.setActive(false);
   });
 
+  listen(modeButton, 'click', () => {
+    const roomTop = selected ? roomSection.getBoundingClientRect().top : Infinity;
+    const inRoom = selected && roomTop < window.innerHeight && roomTop + roomSection.offsetHeight > scrollOffset;
+    const progress = introScrubber.progress;
+    autoStory.disable();
+    scrollAnimationEnabled = !scrollAnimationEnabled;
+    storyMode = scrollAnimationEnabled ? 'scroll' : 'auto';
+    surface.classList.toggle('is-autoplay', storyMode === 'auto');
+    surface.classList.toggle('is-scroll-mode', scrollAnimationEnabled);
+    surface.classList.toggle('is-room-scroll', scrollAnimationEnabled);
+    modeButton.setAttribute('aria-pressed', String(scrollAnimationEnabled));
+    modeButton.setAttribute('aria-label', scrollAnimationEnabled ? 'Disable scroll animation and play automatically' : 'Enable scroll animation');
+    byId('journey-mode-state').textContent = scrollAnimationEnabled ? 'On' : 'Off';
+    introManual = false;
+    introMotion.reset(progress);
+    if (storyMode === 'auto') autoStory.enable(progress >= 1 ? 0 : progress);
+    if (inRoom) {
+      goTo(roomSection);
+      if (scrollAnimationEnabled) roomPlayback.setProgress(0);
+      else roomPlayback.resume();
+    } else if (storyMode === 'scroll') {
+      const travel = Math.max(1, introSection.offsetHeight - introSection.querySelector('.chapter-stage').offsetHeight);
+      const top = introSection.getBoundingClientRect().top + scrollY - scrollOffset;
+      window.scrollTo({ top: top + travel * (.01 + .84 * progress), behavior: 'auto' });
+    } else {
+      goTo(introSection);
+    }
+    schedule();
+  });
+  listen(nurseryPlayButton, 'click', () => {
+    if (autoStory.userPaused) autoStory.resume();
+    else autoStory.pause();
+  });
   listen(nurseryRange, 'input', () => {
     scrollIntent = false;
     introManual = true;
@@ -475,6 +562,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   listen(byId('replay-room'), 'click', goToWideView);
   listen(byId('nursery-retry'), 'click', () => {
     introScrubber.retry();
+    if (storyMode === 'auto') autoStory.resume();
   });
   listen(byId('room-retry'), 'click', () => {
     if (!selected) return;
@@ -487,17 +575,20 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   byId('nursery-loading').hidden = false;
   byId('nursery-window').setAttribute('aria-busy', 'true');
   introScrubber.setProgress(0);
+  if (autoplay) autoStory.enable(0);
   syncRange(nurseryRange, 0);
   syncRange(roomRange, 0);
   syncMode();
   return () => {
     disposed = true;
+    document.body?.classList.remove('has-journey-mode-control');
     arrivalGeneration++;
     removers.forEach(remove => remove());
     frames.forEach(id => cancelAnimationFrame(id));
     introMotion.reset();
+    autoStory.dispose();
     introScrubber.dispose();
     roomPlayback.dispose();
-    surface.classList.remove('manual-mode');
+    surface.classList.remove('manual-mode', 'is-autoplay', 'is-scroll-mode', 'is-room-scroll');
   };
 }

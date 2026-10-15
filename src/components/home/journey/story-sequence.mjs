@@ -1,12 +1,22 @@
 import { clampProgress } from './media.mjs';
 
 export const STORY_CHAPTERS = Object.freeze([
-  { id: 'story-01', label: 'Rooted in care', title: 'Nature.<br><em>Closer to you.</em>', note: 'A living detail. A beautiful everyday.<br>Follow its journey from our nursery to your space.' },
-  { id: 'story-02', label: 'Room to grow', title: 'Strong roots.<br><em>A fresh beginning.</em>', note: 'From its nursery pot, a new chapter begins.' },
-  { id: 'story-03', label: 'Made for your everyday', title: 'A thoughtful home.<br><em>Ready to grow.</em>', note: 'The nursery pot makes way for a Rastlina planter. The plant settles gently into place.' },
-  { id: 'story-04', label: 'Care from within', title: 'Water below.<br><em>Life above.</em>', note: 'Look inside the self-watering planter, from its reservoir to the roots.' },
-  { id: 'story-05', label: 'Ready for your space', title: 'A living detail.<br><em>Made for you.</em>', note: 'Your plant, in its complete Rastlina planter. Choose where the story continues.' },
+  { id: 'story-01', label: 'Rooted in care', title: 'Nature.<br><em>Closer to you.</em>', note: 'From our nursery to your everyday.<br>A little nature, thoughtfully grown.' },
+  { id: 'story-02', label: 'Room to grow', title: 'Strong roots.<br><em>New beginnings.</em>', note: 'A healthy beginning, ready for its next home.' },
+  { id: 'story-03', label: 'Made for your everyday', title: 'A better home.<br><em>For your plant.</em>', note: 'From the nursery pot into a thoughtfully designed Rastlina planter.' },
+  { id: 'story-04', label: 'Care from within', title: 'Water below.<br><em>Life above.</em>', note: 'A reservoir below. Growing roots above.<br>Discover care from within.' },
+  { id: 'story-05', label: 'Ready for your space', title: 'Small detail.<br><em>Big feeling.</em>', note: 'A living companion for your favourite corner.<br>Choose your space below.' },
 ]);
+
+// The outgoing and incoming copies share one scroll position. Their separation
+// stays constant, so they cannot overlap or pop at a chapter boundary.
+export function copyTransition(blend, travel, reducedMotion = false) {
+  const t = clampProgress(blend);
+  const distance = Math.max(0, Number(travel) || 0);
+  return reducedMotion
+    ? { currentY: 0, nextY: distance, nextVisible: false }
+    : { currentY: -t * distance, nextY: (1 - t) * distance, nextVisible: t > 0 };
+}
 
 export function storyProgress(scrollProgress) {
   // Complete the last film before the overlapping room choices enter view.

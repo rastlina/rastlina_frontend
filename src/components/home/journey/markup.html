@@ -1,3 +1,4 @@
+<button class="journey-mode-switch" id="journey-mode-switch" type="button" aria-pressed="false" aria-label="Enable scroll animation"><span aria-hidden="true">↕</span> Scroll animation <small id="journey-mode-state">Off</small></button>
 <div class="reading-progress" aria-hidden="true"><i id="reading-progress"></i></div>
   <a class="skip-link" href="#room-choices">Choose your space</a>
 
@@ -5,10 +6,17 @@
     <section id="nursery-story" class="story story--nursery" aria-labelledby="nursery-heading">
       <div class="chapter-stage">
         <div class="scene-ambience" aria-hidden="true"></div>
-        <div class="chapter-heading">
-          <p class="eyebrow"><span class="chapter-number" id="story-number">01</span> <span id="story-eyebrow">Rooted in care</span></p>
-          <h2 id="nursery-heading">Nature.<br><em>Closer to you.</em></h2>
-          <p class="intro-note" id="story-note">A living detail. A beautiful everyday.<br>Follow its journey from our nursery to your space.</p>
+        <div class="chapter-heading story-copy-viewport" id="story-copy-viewport">
+          <div class="story-copy" id="story-copy-current">
+            <p class="eyebrow"><span class="chapter-number" id="story-number">01</span> <span id="story-eyebrow">Rooted in care</span></p>
+            <h2 id="nursery-heading">Nature.<br><em>Closer to you.</em></h2>
+            <p class="intro-note" id="story-note">From our nursery to your everyday.<br>A little nature, thoughtfully grown.</p>
+          </div>
+          <div class="story-copy story-copy--next" id="story-copy-next" aria-hidden="true" style="visibility:hidden">
+            <p class="eyebrow"><span class="chapter-number" id="next-story-number">02</span> <span id="next-story-eyebrow">Room to grow</span></p>
+            <h2 id="next-story-heading">Strong roots.<br><em>New beginnings.</em></h2>
+            <p class="intro-note" id="next-story-note">A healthy beginning, ready for its next home.</p>
+          </div>
         </div>
         <div class="film-window" id="nursery-window">
           <div class="story-frame" id="story-frame-1" style="--frame-opacity:1">
@@ -36,6 +44,7 @@
           <div class="film-loading" id="nursery-loading" role="status" hidden>Preparing your view…</div>
         </div>
         <div class="chapter-controls">
+          <button id="nursery-playback" class="text-link" type="button">Pause animation</button>
           <span class="scroll-cue"><span aria-hidden="true">↓</span> Scroll to explore <small id="story-position">1 / 5</small></span>
           <span class="manual-cue">Drag to reveal</span>
           <div class="range-group"><label for="nursery-range">Explore the story</label><input id="nursery-range" type="range" min="0" max="1000" value="0" aria-label="Explore the nursery story" data-start="At the nursery" data-end="The complete planter"></div>
@@ -50,7 +59,7 @@
       <div class="choices-content">
         <p class="eyebrow"><span class="chapter-number">06</span> A place for your plant</p>
         <h2 id="choices-heading">Your world.<br><em>A little greener.</em></h2>
-        <p class="section-note">Three spaces. One living detail. Choose where your story continues.</p>
+        <p class="section-note">A quiet bedroom. A welcoming living room. A little room to think. Find the place that feels like you.</p>
         <div class="room-grid">
           <button class="room-card" type="button" data-room="living-room" aria-pressed="false" aria-controls="room-story">
             <div class="card-picture"><img src="/journey/assets/living-room-start.webp" alt="Black-and-gold living room with the Rastlina plant on a marble coffee table" width="1920" height="1080" loading="lazy" decoding="async"><span class="card-number" aria-hidden="true">01</span></div>
@@ -68,7 +77,7 @@
             <span class="card-selected">Your chosen space</span>
           </button>
         </div>
-        <p class="choices-footnote">Natural colour. Considered spaces. Your choice.</p>
+        <p class="choices-footnote">One living detail. A space that feels more like you.</p>
       </div>
     </section>
 
@@ -77,7 +86,7 @@
         <div class="scene-ambience" aria-hidden="true"></div>
         <div class="room-topline"><p class="eyebrow" id="room-eyebrow">Your green corner</p><button type="button" class="text-link" id="change-room">Choose another room <span aria-hidden="true">↖</span></button></div>
         <div class="room-heading-row">
-          <h2 id="room-heading" class="room-heading" tabindex="-1">A warm welcome.</h2>
+          <h2 id="room-heading" class="room-heading" tabindex="-1">Your space. <em>More alive.</em></h2>
           <div class="room-switcher" role="group" aria-label="Explore another room">
             <button type="button" data-room="living-room" aria-pressed="false" aria-controls="room-story">Living Room</button>
             <button type="button" data-room="bedroom" aria-pressed="false" aria-controls="room-story">Bedroom</button>
@@ -100,7 +109,7 @@
         <p id="room-error" class="media-error" role="alert" hidden>The view couldn’t load. <button type="button" id="room-retry">Try again</button></p>
       </div>
     </section>
-    <footer class="site-footer"><span class="wordmark">Rastlina<span class="wordmark-dot" aria-hidden="true">.</span></span><p>Bring the feeling home.</p><a href="https://www.rastlina.com/product/philodendron-oxycardium-red">Meet Philodendron Oxycardium Red <span aria-hidden="true">↗</span></a></footer>
+
 
   <p class="sr-only" id="selection-status" role="status" aria-live="polite"></p>
   <noscript><div class="noscript-note">Choose your space with JavaScript enabled to explore the room videos. <a href="https://www.rastlina.com/product/philodendron-oxycardium-red">Shop this plant</a>.</div></noscript>

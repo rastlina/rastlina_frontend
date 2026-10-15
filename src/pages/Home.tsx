@@ -1,12 +1,32 @@
 // src/pages/Home.tsx
 import PlantJourney from '@/components/home/PlantJourney';
-import SocialProof from '@/components/home/SocialProof';
+import './home-premium.css';
 import { lazy, Suspense, startTransition, useCallback, useEffect, useState } from 'react';
 import { Seo } from '@/components/seo/Seo';
 
 const HomeSections = lazy(() => import('@/components/home/HomeSections'));
 
 const Home = () => {
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      const journey = document.querySelector('[data-plant-journey]');
+      document.body.classList.toggle('rastlina-light-shop', Boolean(journey && journey.getBoundingClientRect().bottom <= 112));
+    };
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => { frame = 0; update(); });
+    };
+    update();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      cancelAnimationFrame(frame);
+      document.body.classList.remove('rastlina-light-shop');
+    };
+  }, []);
   const [sectionsReady, setSectionsReady] = useState(false);
   const showSections = useCallback(() => {
     startTransition(() => setSectionsReady(true));
@@ -21,7 +41,7 @@ const Home = () => {
     return () => window.clearTimeout(timeout);
   }, [showSections]);
   return (
-    <main className="home-content w-full overflow-x-clip pt-[110px]">
+    <main className="home-content home-refined w-full overflow-x-clip pt-[110px]">
       <Seo
         title="Buy Indoor Plants Online in India | Rastlina"
         description="Shop ready-to-gift indoor plants online at Rastlina. Each set includes a healthy plant, self-watering pot and soil mix, with doorstep delivery across India."
@@ -53,17 +73,6 @@ const Home = () => {
       />
       <h1 className="sr-only">Buy Indoor Plants Online in India</h1>
       <PlantJourney onReady={onHeroReady} />
-      <section className="bg-[#F8F7F4] px-4 py-8 text-center">
-        <div className="mx-auto max-w-3xl">
-          <h2 className="font-serif text-2xl font-bold text-[#1A3831] md:text-3xl">
-            Ready-to-Gift Indoor Plants for Every Occasion
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[#4A5A51] md:text-base">
-            Every Rastlina set is thoughtfully prepared with a healthy indoor plant, self-watering pot and soil mix—ready to gift and easy to enjoy.
-          </p>
-        </div>
-      </section>
-      <SocialProof />
       {sectionsReady ? (
         <Suspense fallback={<div className="min-h-[1200px]" aria-label="Loading plant collections" />}>
           <HomeSections />

@@ -21,7 +21,7 @@ const footerLinks = [
 
 export const Footer = () => {
   return (
-    <footer className="bg-primary text-white border-t border-white/10 pt-12 pb-6">
+    <footer className="rastlina-footer text-white border-t border-white/10 pt-12 pb-6" style={{ backgroundColor: '#05160E' }}>
       <div className="container-custom">
 
         {/* Main Grid */}

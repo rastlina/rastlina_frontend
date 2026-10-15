@@ -11,8 +11,8 @@ const WhatsAppButton = () => {
       href={`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`}
       target="_blank"
       rel="noopener noreferrer"
-      // Replaced bg-[#556B2F] and hover:bg-[#3d4d21] with bg-primary and hover:bg-primary/90
-      className={`fixed ${isProductPage ? 'bottom-36 sm:bottom-6' : 'bottom-6'} right-4 z-50 flex items-center justify-center rounded-full bg-primary p-3.5 text-white shadow-lg transition-transform hover:scale-110 sm:right-6`}
+      className={`fixed ${isProductPage ? 'bottom-36 sm:bottom-6' : 'bottom-6'} right-4 z-50 flex items-center justify-center rounded-full bg-[#05160E] hover:bg-[#0B2A1B] p-3.5 text-white shadow-lg transition-transform hover:scale-110 sm:right-6`}
+      style={{ backgroundColor: '#05160E' }}
       aria-label="Chat on WhatsApp"
     >
       <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">

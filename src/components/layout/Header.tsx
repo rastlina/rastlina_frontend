@@ -2,7 +2,7 @@
 // Dynamic navbar — all data from /api/store/navbar/
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   ShoppingBag, Menu, X, ChevronDown, ChevronRight,
   Briefcase, Search, User, Leaf, Tag,
@@ -288,6 +288,7 @@ const SimpleDropdown = ({ categories, mainSlug, closeMenu }: {
 
 // ─── Main Header ──────────────────────────────────────────────────────────────
 export const Header = () => {
+  const { pathname } = useLocation();
   const [navData, setNavData] = useState<NavbarData | null>(null);
   
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -369,12 +370,12 @@ const extraNavItems = [
 ];
 
   return (
-    <div className="fixed top-0 left-0 w-full z-50 bg-white">
+    <div className={`fixed top-0 left-0 w-full z-50 bg-white ${pathname === "/" ? "luxury-header" : ""}`}>
       {/* Announcement bar */}
 <div
   className={[
     "transition-all duration-300 overflow-hidden",
-    isScrolled
+    isScrolled && pathname !== "/"
       ? "max-h-0 opacity-0 -translate-y-full"
       : "max-h-[38px] opacity-100 translate-y-0"
   ].join(" ")}
@@ -439,7 +440,7 @@ const extraNavItems = [
   spaces={featuredSpaces}
   sizes={plantSizes}
   closeMenu={() => setActiveDropdown(null)}
-  isScrolled={isScrolled}
+  isScrolled={isScrolled && pathname !== "/"}
 />
         )}
       </>

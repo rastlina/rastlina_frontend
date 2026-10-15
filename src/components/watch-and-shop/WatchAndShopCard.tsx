@@ -1,65 +1,29 @@
-// src/components/watch-and-shop/WatchAndShopCard.tsx
-// Single card for the Watch & Shop homepage section.
-// Clicking the card opens its linked product page.
-// Video autoplays when visible (handled by WatchAndShopVideo IntersectionObserver).
-
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Play } from 'lucide-react';
+import { ArrowUpRight, Play } from 'lucide-react';
 import { WatchAndShopVideo } from './WatchAndShopVideo';
 import type { WatchAndShopItem } from '@/hooks/useWatchAndShop';
 
 interface WatchAndShopCardProps {
   item: WatchAndShopItem;
   index?: number;
+  active?: boolean;
+  onActivate?: () => void;
 }
-
-export const WatchAndShopCard = memo(({ item }: WatchAndShopCardProps) => {
-  return (
-    <div
-      // Fixed width: creates the snap-scrolling effect
-      className="flex-shrink-0 w-[220px] sm:w-[240px] md:w-[260px] snap-start"
-    >
-      <Link
-        to={item.product_slug ? `/product/${encodeURIComponent(item.product_slug)}` : `/watch-shop/${encodeURIComponent(item.slug)}`}
-        className="block group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
-        aria-label={`Watch & Shop: ${item.title}`}
-      >
-        {/* Video — fills the card in 9:16 portrait ratio */}
-        <WatchAndShopVideo
-          videoUrl={item.video_url}
-          thumbnail={item.thumbnail}
-          productName={item.title}
-          mode="card"
-        />
-
-        {/* Gradient overlay — bottom to top */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none rounded-2xl" />
-
-        {/* "Watch & Shop" pill — top left */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-2.5 py-1 pointer-events-none">
-          <Play className="h-2.5 w-2.5 text-white fill-white" />
-          <span className="text-[9px] font-bold text-white uppercase tracking-widest">
-            Watch & Shop
-          </span>
-        </div>
-
-        {/* Bottom content: title + CTA */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
-          <p className="text-white font-serif font-bold text-sm leading-snug line-clamp-2 mb-3 drop-shadow-sm">
-            {item.title}
-          </p>
-
-          {/* Shop CTA — purely visual (the whole card is a link) */}
-          <div className="flex items-center gap-1.5 bg-white text-[#1A3831] rounded-full px-3 py-1.5 w-fit text-[10px] font-extrabold uppercase tracking-widest shadow-sm group-hover:bg-[#1A3831] group-hover:text-white transition-colors duration-300">
-            <ShoppingBag className="h-3 w-3" />
-            Shop Now
-          </div>
-        </div>
-      </Link>
+export const WatchAndShopCard = memo(({ item, index = 0, active = true, onActivate }: WatchAndShopCardProps) => {
+  const href = item.product_slug ? `/product/${encodeURIComponent(item.product_slug)}` : `/watch-shop/${encodeURIComponent(item.slug)}`;
+  return <article className="watch-shop-card" data-active={active} onPointerEnter={event => { if (event.pointerType === 'mouse') onActivate?.(); }} onFocus={onActivate}>
+    <div className="watch-shop-media">
+      <WatchAndShopVideo videoUrl={item.video_url} thumbnail={item.thumbnail} productName={item.title}
+        mode="card" autoplay={active} onRequestPlay={onActivate} />
+      <Link to={href} className="watch-shop-media-link" aria-label={`Shop ${item.title}`} />
+      <span className="watch-shop-film-label"><Play aria-hidden="true" size={11} /> In motion</span>
     </div>
-  );
+    <Link to={href} className="watch-shop-copy" aria-label={`Watch & Shop: ${item.title}`}>
+      <span className="watch-shop-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+      <h3>{item.title}</h3>
+      <span className="watch-shop-cta">Meet this plant <ArrowUpRight aria-hidden="true" size={19} /></span>
+    </Link>
+  </article>;
 });
-
 WatchAndShopCard.displayName = 'WatchAndShopCard';
-

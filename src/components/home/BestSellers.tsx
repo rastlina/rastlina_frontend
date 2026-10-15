@@ -8,6 +8,9 @@ const BestSellers = () => {
   return (
     <ProductSlider
       title="Best Sellers"
+      sectionClassName="home-bestsellers"
+      eyebrow="03 / The favourites"
+      subtitle="Good company, chosen again and again."
       products={data.best_sellers}
       viewAllHref="/shop?is_best_seller=true"
       bgColor="bg-white"
