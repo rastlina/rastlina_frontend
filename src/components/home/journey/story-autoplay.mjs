@@ -11,6 +11,7 @@ export class StoryAutoplay {
     this.enabled = false;
     this.active = false;
     this.userPaused = false;
+    this.blocked = false;
     this.phase = 'playing';
     this.elapsed = 0;
     this.removers = [];
@@ -62,6 +63,7 @@ export class StoryAutoplay {
     this.sequence.waitingForNext = false;
     this.stopFrame();
     for (const entry of this.sequence.entries) {
+      entry.layer.video.autoplay = false;
       entry.layer.video.pause();
       entry.scrubber.playback = false;
     }
@@ -71,32 +73,43 @@ export class StoryAutoplay {
     const entry = this.entry;
     const video = entry.layer.video;
     entry.scrubber.playback = true;
-    if (entry.failed || video.readyState < 2 || video.seeking || !video.paused) return;
+    if (entry.failed || !entry.loaded || video.seeking || !video.paused) return;
+    video.muted = video.defaultMuted = true;
+    video.playsInline = true;
+    video.autoplay = true;
     const index = this.index;
     const generation = this.generation;
     this.playPending = true;
     try {
-      Promise.resolve(video.play()).then(() => { if (generation === this.generation) this.playPending = false; }, () => {
+      Promise.resolve(video.play()).then(() => { if (generation === this.generation) this.playPending = false; }, error => {
         if (generation !== this.generation) return;
         this.playPending = false;
-        if (this.enabled && this.index === index) this.pause();
+        if (this.enabled && this.active && this.index === index) {
+          this.pause();
+          this.blocked = error?.name === 'NotAllowedError';
+        }
       });
     } catch { this.playPending = false; this.pause(); }
   }
   setActive(active) {
     if (this.active === active) return;
     this.active = active;
-    if (!active) { this.entry.layer.video.pause(); this.stopFrame(); }
+    if (!active) { this.generation++; this.playPending = false; this.entry.layer.video.autoplay = false; this.entry.layer.video.pause(); this.stopFrame(); }
     else if (this.phase === 'transition') this.animate();
     else this.play();
   }
   pause() {
+    this.generation++;
+    this.playPending = false;
+    this.blocked = false;
+    this.entry.layer.video.autoplay = false;
     this.userPaused = true;
     this.entry.layer.video.pause();
     this.stopFrame();
     this.onState(false);
   }
   resume() {
+    this.blocked = false;
     if (this.phase === 'complete') this.enable(0);
     else {
       this.userPaused = false;
@@ -129,6 +142,7 @@ export class StoryAutoplay {
       this.sequence.setProgress((this.index + .8 + .2 * t) / this.sequence.entries.length);
       if (t < 1) this.frame = this.requestFrame(tick);
       else {
+        this.entry.layer.video.autoplay = false;
         this.entry.scrubber.playback = false;
         if (this.index === this.sequence.entries.length - 1) {
           this.phase = 'complete';

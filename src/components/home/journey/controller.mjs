@@ -148,7 +148,7 @@ export class VideoScrubber {
     try {
       this.source = new URL(url, typeof location === 'undefined' ? 'https://example.test/' : location.href).href;
       this.video.pause();
-      this.video.muted = true;
+      this.video.muted = this.video.defaultMuted = true;
       this.video.playsInline = true;
       this.video.preload = 'auto';
       this.timeout = this.setTimer(() => {
@@ -507,6 +507,13 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     }
     schedule();
   });
+  // A browser-policy block may be retried on a real touch, never after a user pause.
+  const recoverAutoplay = event => {
+    if (event.target?.closest?.('button, input, a')) return;
+    if (storyMode === 'auto' && autoStory.blocked && autoStory.active) autoStory.resume();
+  };
+  listen(root, 'touchend', recoverAutoplay, { passive: true });
+  listen(root, 'pointerup', recoverAutoplay, { passive: true });
   listen(nurseryPlayButton, 'click', () => {
     if (autoStory.userPaused) autoStory.resume();
     else autoStory.pause();
