@@ -21,7 +21,7 @@ const Home = () => {
     return () => window.clearTimeout(timeout);
   }, [showSections]);
   return (
-    <main className="home-content w-full overflow-x-hidden pt-[110px]">
+    <main className="home-content w-full overflow-x-clip pt-[110px]">
       <Seo
         title="Buy Indoor Plants Online in India | Rastlina"
         description="Shop ready-to-gift indoor plants online at Rastlina. Each set includes a healthy plant, self-watering pot and soil mix, with doorstep delivery across India."

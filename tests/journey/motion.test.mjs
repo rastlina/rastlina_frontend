@@ -30,6 +30,22 @@ test('switching rooms or taking manual control cancels old queued movement', () 
   assert.equal(s.values.length,count);
   s.motion.setTarget(0.4); s.untilIdle(); assert.equal(s.values.at(-1),0.4);
 });
+test('direct scroll tracking applies the exact target and cancels pending easing', () => {
+  const s = simulation(60);
+  s.motion.setTarget(1);
+  s.tick();
+  s.motion.setTarget(0.5, true);
+  assert.equal(s.values.at(-1), 0.5);
+  const count = s.values.length;
+  s.untilIdle();
+  assert.equal(s.values.length, count, 'Old easing must not move the film after a direct update');
+  s.motion.setTarget(0, true);
+  assert.equal(s.values.at(-1), 0);
+  assert.equal(s.queue.length, 0);
+  s.motion.setTarget(1);
+  s.untilIdle();
+  assert.equal(s.values.at(-1), 1, 'Easing can resume after a preference change');
+});
 test('motion response is consistent across refresh rates', () => {
   const positions = [60,120].map(hz => { const s = simulation(hz); s.motion.setTarget(1); for(let i=0;i<hz/10;i++)s.tick(); return s.values.at(-1); });
   assert.ok(Math.abs(positions[0]-positions[1])<0.035);

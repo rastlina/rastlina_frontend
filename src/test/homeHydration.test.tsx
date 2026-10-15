@@ -29,8 +29,8 @@ it('preserves the visible nursery poster during hydration and activates menu/car
   container.innerHTML = renderToString(<StrictMode><HelmetProvider context={{}}><App Router={HomeRouter} /></HelmetProvider></StrictMode>);
   HelmetProvider.canUseDOM = true;
   document.body.appendChild(container);
-  const firstImage = screen.getByAltText('Philodendron Oxycardium Red in a cream Rastlina planter inside a nursery');
-  expect(firstImage).toHaveAttribute('src', '/journey/assets/nursery-start.webp');
+  const firstImage = screen.getByAltText('Philodendron Oxycardium Red growing in the nursery');
+  expect(firstImage).toHaveAttribute('src', '/journey/assets/story-01-start.webp');
   const onRecoverableError = vi.fn();
   let root: ReturnType<typeof hydrateRoot>;
   try {
@@ -38,7 +38,7 @@ it('preserves the visible nursery poster during hydration and activates menu/car
       root = hydrateRoot(container, <StrictMode><HelmetProvider><App /></HelmetProvider></StrictMode>, { onRecoverableError });
     });
     expect(onRecoverableError).not.toHaveBeenCalled();
-    expect(screen.getByAltText('Philodendron Oxycardium Red in a cream Rastlina planter inside a nursery')).toBe(firstImage);
+    expect(screen.getByAltText('Philodendron Oxycardium Red growing in the nursery')).toBe(firstImage);
     fireEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
     expect(screen.getByRole('button', { name: 'Toggle menu' })).toHaveAttribute('aria-expanded', 'true');
     fireEvent.click(screen.getAllByRole('button', { name: 'Open cart' })[0]);

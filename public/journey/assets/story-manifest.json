@@ -1,0 +1,53 @@
+[
+  {
+    "id": "story-01",
+    "sources": [
+      "hf_20261013_064858_93687687-11f7-45e4-9d19-afc7a6a4bb68.mp4"
+    ],
+    "duration": 5.04,
+    "video": "story-01.mp4",
+    "mobile": "story-01-mobile.mp4",
+    "poster": "story-01-start.webp"
+  },
+  {
+    "id": "story-02",
+    "sources": [
+      "hf_20261013_074825_93463ccf-4c9c-4420-a760-ce6872ffb68f.mp4"
+    ],
+    "duration": 5.04,
+    "video": "story-02.mp4",
+    "mobile": "story-02-mobile.mp4",
+    "poster": "story-02-start.webp"
+  },
+  {
+    "id": "story-03",
+    "sources": [
+      "hf_20261013_105214_b7384646-00a1-4715-9644-a46f5992186e.mp4",
+      "hf_20261013_103058_7d00bba5-4cdf-431a-b4b1-82cf88f89bfb.mp4"
+    ],
+    "duration": 12.08,
+    "video": "story-03.mp4",
+    "mobile": "story-03-mobile.mp4",
+    "poster": "story-03-start.webp"
+  },
+  {
+    "id": "story-04",
+    "sources": [
+      "Rastlina-Clip4-Upward-Water-Arrows.mp4"
+    ],
+    "duration": 10.04,
+    "video": "story-04.mp4",
+    "mobile": "story-04-mobile.mp4",
+    "poster": "story-04-start.webp"
+  },
+  {
+    "id": "story-05",
+    "sources": [
+      "hf_20261013_130755_3da51d46-bfd2-4f30-ad14-bf34b7012745.mp4"
+    ],
+    "duration": 5.04,
+    "video": "story-05.mp4",
+    "mobile": "story-05-mobile.mp4",
+    "poster": "story-05-start.webp"
+  }
+]

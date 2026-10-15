@@ -132,14 +132,9 @@
   .text-dark-olive { color: #556B2F; }
 }
 @layer base {
-  /* ... existing code ... */
   html, body {
-    overflow-x: hidden; /* Prevents horizontal scrolling */
-  }
-}
-@layer base {
-  html, body {
-    overflow-x: hidden; /* Fixes horizontal scroll/alignment issues */
+    /* Clip horizontal overflow without capturing the journey's sticky stages. */
+    overflow-x: clip;
     width: 100%;
     margin: 0;
     padding: 0;

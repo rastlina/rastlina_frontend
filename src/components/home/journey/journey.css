@@ -38,3 +38,29 @@
 .plant-journey.manual-mode .room-card { transform-style:flat; }
 .plant-journey #nursery-story, .plant-journey #room-choices, .plant-journey #room-story { scroll-margin-top:var(--journey-header-offset); }
 @media(prefers-reduced-motion:reduce) { .plant-journey .room-card { transform-style:flat; } }
+
+/* Room films play in place; the nursery alone needs a long scroll runway. */
+.plant-journey .story--room { height:auto; }
+.plant-journey .story--room .chapter-stage { position:relative; top:auto; }
+.plant-journey .chapter-controls > #room-playback { justify-self:start; }
+
+/* Five restored chapters share one pinned stage. Only the right-hand scene
+   crossfades; document scrolling remains the timeline in either direction. */
+.plant-journey .story--nursery { height:1000svh; --scene-poster:url('/journey/assets/story-01-start.webp'); }
+.plant-journey .story-frame { position:absolute; inset:0; opacity:var(--frame-opacity,0); pointer-events:none; }
+.plant-journey .story--nursery .film-window { inset:8% 4% 12% 29%; }
+.plant-journey .story--nursery .chapter-heading { width:27%; top:25%; }
+.plant-journey .story--nursery .chapter-heading h2 { font-size:clamp(42px,4.4vw,78px); }
+.plant-journey .story--nursery .film-caption { left:0; bottom:1%; }
+.plant-journey #story-position { color:var(--gold); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.plant-journey.manual-mode .story-frame { inset:0; }
+.plant-journey.manual-mode .story--nursery .chapter-heading { width:100%; }
+.plant-journey.manual-mode .story--nursery .film-window { inset:auto; }
+@media(max-width:620px) {
+  .plant-journey .story--nursery .film-window { inset:0; }
+  .plant-journey .story--nursery .chapter-heading { top:25px; width:calc(100% - 44px); }
+  .plant-journey .story--nursery .chapter-heading h2 { font-size:clamp(36px,10.8vw,53px); }
+  .plant-journey .story--nursery .intro-note { max-width:320px; margin-top:16px; }
+  .plant-journey .story--nursery .film-caption { left:var(--gutter); bottom:135px; }
+  .plant-journey .scroll-cue { gap:8px; }
+}

@@ -125,6 +125,10 @@ test('manual mode removes all depth motion while keeping headings and cards read
   assert.deepEqual(sceneDepth(1, 1, true, true), { copyOpacity: 1, copyY: 0, copyZ: 0, sceneZ: 0, ambienceY: 0 });
   assert.deepEqual(choiceDepth(900, 1000, 2, true), { y: 0, z: 0, turn: 0, opacity: 1 });
 });
+test('reduced motion clears the heading without moving any scene elements', () => {
+  assert.deepEqual(sceneDepth(1, 1, true, false, true), { copyOpacity: 0, copyY: 0, copyZ: 0, sceneZ: 0, ambienceY: 0 });
+  assert.equal(sceneDepth(0, 0, false, false, true).copyOpacity, 1);
+});
 
 test('ready and completion callbacks wait for the requested frame to finish seeking', () => {
   const video = new Video();
