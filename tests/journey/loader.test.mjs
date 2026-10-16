@@ -96,3 +96,21 @@ test('missing media and stalled initial loads fail once and release their timers
     assert.equal(timers.size, 0);
   }
 });
+
+test('speculative preload has no deadline until the chapter is needed', () => {
+  const video = new Video();
+  const timers = new Map(); let next = 0, errors = 0;
+  const scrubber = new VideoScrubber(video, {
+    onError: () => errors++,
+    setTimer: callback => { timers.set(++next, callback); return next; },
+    clearTimer: id => timers.delete(id),
+  });
+  try {
+    scrubber.load('assets/story-04-mobile.mp4', { prefetch: true });
+    assert.equal(timers.size, 0, 'A deferred mobile preload cannot expire before demand');
+    assert.equal(scrubber.failed, false);
+    scrubber.watchLoad();scrubber.watchLoad();
+    assert.equal(timers.size, 1, 'Demand arms one bounded deadline');
+    [...timers.values()][0]();assert.equal(errors, 1);assert.equal(scrubber.failed, true);
+  } finally { scrubber.dispose(); }
+});

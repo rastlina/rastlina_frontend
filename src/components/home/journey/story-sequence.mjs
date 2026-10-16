@@ -44,16 +44,20 @@ export class StorySequence {
         source: `${assetBase}/${STORY_CHAPTERS[index].id}${mobile ? '-mobile' : ''}.mp4` };
       entry.scrubber = new Scrubber(layer.video, {
         onReady: () => { entry.ready = true; layer.element.classList.add('has-video'); this.render(); this.reportState(); },
-        onError: () => { entry.failed = true; layer.element.classList.remove('has-video'); this.reportState(); },
+        onError: () => { entry.failed = true; entry.ready = false; layer.element.classList.remove('has-video'); this.reportState(); },
       });
       return entry;
     });
   }
-  ensure(index) {
+  ensure(index, prefetch = false) {
     const entry = this.entries[index];
-    if (!entry || entry.loaded) return;
+    if (!entry) return;
+    if (entry.loaded) {
+      if (!prefetch) entry.scrubber.watchLoad?.();
+      return;
+    }
     entry.loaded = true;
-    entry.scrubber.load(entry.source);
+    entry.scrubber.load(entry.source, { prefetch });
   }
   trimPlayback(index) {
     // Autoplay only needs two decoders. Completed clips reload if revisited in scroll mode.
@@ -69,7 +73,7 @@ export class StorySequence {
     const state = storyFrame(this.progress, this.entries.length);
     this.state = state;
     this.ensure(state.index);
-    this.ensure(state.index + 1);
+    this.ensure(state.index + 1, true);
     this.entries[state.index].scrubber.setProgress(state.movie);
     this.entries[state.index + 1]?.scrubber.setProgress(0);
     this.render();
@@ -91,7 +95,15 @@ export class StorySequence {
     if (!this.state) return;
     const visible = [this.entries[this.state.index]];
     if (this.state.blend > 0 || this.waitingForNext) visible.push(this.entries[this.state.index + 1]);
-    this.onState({ failed: visible.some(entry => entry.failed), ready: visible.every(entry => entry.ready) });
+    this.onState({ failed: visible.some(entry => entry?.failed), ready: visible.every(entry => !entry || entry.ready) });
+  }
+  reload(index) {
+    const entry = this.entries[index];
+    if (!entry) return;
+    entry.failed = entry.ready = false;
+    entry.scrubber.playback = false;
+    entry.scrubber.load(entry.source);
+    this.setProgress(this.progress);
   }
   retry() {
     const current = this.state?.index ?? 0;

@@ -148,7 +148,14 @@ export class VideoScrubber {
     const activeSource = this.video.currentSrc || this.video.src;
     return activeSource === this.source;
   }
-  load(url) {
+  watchLoad() {
+    if (this.ready || this.failed || this.timeout != null) return;
+    this.timeout = this.setTimer(() => {
+      if (!this.ready) this.fail();
+    }, this.timeoutMs);
+    this.timeout?.unref?.();
+  }
+  load(url, { prefetch = false } = {}) {
     this.clearTimer(this.timeout);
     this.clearTimer(this.seekTimeout);
     this.progress = 0;
@@ -160,10 +167,8 @@ export class VideoScrubber {
       this.video.muted = this.video.defaultMuted = true;
       this.video.playsInline = true;
       this.video.preload = 'auto';
-      this.timeout = this.setTimer(() => {
-        if (!this.ready) this.fail();
-      }, this.timeoutMs);
-      this.timeout?.unref?.();
+      this.timeout = null;
+      if (!prefetch) this.watchLoad();
       this.video.src = this.source;
       this.video.load();
     } catch {
@@ -320,7 +325,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     element: byId(`story-frame-${index + 1}`),
     video: byId(index === 0 ? 'nursery-video' : `story-video-${index + 1}`),
   })), {
-    Scrubber: VideoScrubber, assetBase, mobile: mobileMedia && ((globalThis.devicePixelRatio || 1) < 2 || Boolean(connection?.saveData) || /(^|-)2g$|3g/.test(connection?.effectiveType || '')),
+    Scrubber: VideoScrubber, assetBase, mobile: mobileMedia,
     onView: ({ index, chapter, blend }) => {
       if (shownChapter !== index) {
         shownChapter = index;
