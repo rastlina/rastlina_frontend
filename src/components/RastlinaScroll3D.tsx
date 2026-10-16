@@ -1,314 +1,397 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
-
-interface SpaceConfig {
-  id: string;
-  badge: string;
-  name: string;
-  tagline: string;
-  videoSrc: string;
-  lightColor: number;
-  lightIntensity: number;
+declare global {
+  interface Window {
+    THREE: any;
+    gsap: any;
+    ScrollTrigger: any;
+  }
 }
 
-const SPACES: SpaceConfig[] = [
+interface ProductItem {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  mrp: number;
+  badge: string;
+  url: string;
+  desc: string;
+}
+
+const RASTLINA_PRODUCTS: ProductItem[] = [
   {
-    id: 'living_room',
-    badge: '01',
-    name: 'Living Room',
-    tagline: 'A warm welcome.',
-    videoSrc: '/living_room_scroll.mp4',
-    lightColor: 0xfacc15,
-    lightIntensity: 2.4
+    id: 'philo-red',
+    name: 'Philodendron Oxycardium Red',
+    category: 'Philodendron • Bestseller',
+    price: 329,
+    mrp: 599,
+    badge: '45% OFF',
+    url: 'https://www.rastlina.com/',
+    desc: 'Heart-shaped bronze-red leaves in a Rastlina self-watering planter.'
   },
   {
-    id: 'bedroom',
-    badge: '02',
-    name: 'Bedroom',
-    tagline: 'A quiet retreat.',
-    videoSrc: '/bedroom_scroll.mp4',
-    lightColor: 0xfbbf24,
-    lightIntensity: 1.5
+    id: 'calathea-makoyana',
+    name: 'Calathea Makoyana (Peacock Plant)',
+    category: 'Calathea • Fresh Arrival',
+    price: 499,
+    mrp: 699,
+    badge: '29% OFF',
+    url: 'https://www.rastlina.com/',
+    desc: 'Intricate feathered leaf venation that folds prayer-like at night.'
   },
   {
-    id: 'office',
-    badge: '03',
-    name: 'Office',
-    tagline: 'Room to focus.',
-    videoSrc: '/office_scroll.mp4',
-    lightColor: 0xe0f2fe,
-    lightIntensity: 2.3
+    id: 'combo-trio',
+    name: 'Sleeping Pothos + Cryptanthus + Silver Sword (Set of 3)',
+    category: 'Combos of 3 • Bestseller',
+    price: 649,
+    mrp: 1199,
+    badge: '46% OFF',
+    url: 'https://www.rastlina.com/',
+    desc: 'Curated trio with self-watering pots and custom aerated potting mix.'
+  },
+  {
+    id: 'black-ficus',
+    name: 'Black Ficus Burgundy - Rubber Plant',
+    category: 'Exotic Beauties',
+    price: 299,
+    mrp: 499,
+    badge: '40% OFF',
+    url: 'https://www.rastlina.com/shop?category=exotic-beauties',
+    desc: 'Deep glossy burgundy foliage that thrives in indoor living rooms.'
   }
 ];
 
-interface Props {
-  onAddToCart?: (productId: string) => void;
-}
-
-export default function RastlinaScroll3D({ onAddToCart }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export const RastlinaScroll3D: React.FC = () => {
+  const mountRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [activeSpace, setActiveSpace] = useState<'living' | 'bedroom' | 'office'>('living');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [toastText, setToastText] = useState<string | null>(null);
+  const [cart, setCart] = useState<{ [id: string]: number }>({ 'philo-red': 1, 'combo-trio': 1 });
 
-  const [activeSpace, setActiveSpace] = useState<string>('living_room');
-  const [scrollPct, setScrollPct] = useState<number>(0);
-  const [showSpaceModal, setShowSpaceModal] = useState<boolean>(false);
-
-  const warmLightRef = useRef<THREE.PointLight | null>(null);
-  const keyLightRef = useRef<THREE.DirectionalLight | null>(null);
-
-  useEffect(() => {
-    if (!canvasRef.current || !containerRef.current) return;
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    // 1. Three.js Scene Setup
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x051309, 0.035);
-
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 120);
-    camera.position.set(0, 0, 14);
-
-    const renderer = new THREE.WebGLRenderer({
-      canvas: canvasRef.current,
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance'
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x051309, 0.25);
-
-    const ambientLight = new THREE.AmbientLight(0x1e3a29, 1.25);
-    scene.add(ambientLight);
-
-    const keyLight = new THREE.DirectionalLight(0xd9f99d, 2.2);
-    keyLight.position.set(6, 10, 8);
-    scene.add(keyLight);
-    keyLightRef.current = keyLight;
-
-    const warmLight = new THREE.PointLight(0xfacc15, 2.6, 18);
-    warmLight.position.set(0, 0.5, 2);
-    scene.add(warmLight);
-    warmLightRef.current = warmLight;
-
-    // Ambient floating botanical spores
-    const pCount = 350;
-    const pGeom = new THREE.BufferGeometry();
-    const pCoords = new Float32Array(pCount * 3);
-    for (let i = 0; i < pCount; i++) {
-      pCoords[i * 3] = (Math.random() - 0.5) * 24;
-      pCoords[i * 3 + 1] = -Math.random() * 82 + 8;
-      pCoords[i * 3 + 2] = (Math.random() - 0.5) * 14;
-    }
-    pGeom.setAttribute('position', new THREE.BufferAttribute(pCoords, 3));
-    const pMat = new THREE.PointsMaterial({
-      size: 0.35,
-      color: 0xa3e635,
-      transparent: true,
-      opacity: 0.7,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    const particles = new THREE.Points(pGeom, pMat);
-    scene.add(particles);
-
-    // 2. Mobile-safe Single-Decoder Scrubbing
-    const trigger = ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 0.1,
-      onUpdate: (self) => {
-        const p = self.progress;
-        setScrollPct(Math.round(p * 100));
-
-        const vid = videoRef.current;
-        if (vid && vid.duration && !isNaN(vid.duration)) {
-          vid.currentTime = (p * 3.5) % vid.duration;
-        }
-
-        camera.position.y = -p * 76;
-
-        if (p > 0.82 && !sessionStorage.getItem('space_modal_shown')) {
-          sessionStorage.setItem('space_modal_shown', 'true');
-          setShowSpaceModal(true);
-        }
-      }
-    });
-
-    let rafId: number;
-    const render = (time: number) => {
-      particles.rotation.y = time * 0.00004;
-      renderer.render(scene, camera);
-      rafId = requestAnimationFrame(render);
-    };
-    render(0);
-
-    const onResize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener('resize', onResize);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', onResize);
-      trigger.kill();
-      renderer.dispose();
-    };
-  }, []);
-
-  const handleSpaceChange = (spaceId: string) => {
-    setActiveSpace(spaceId);
-    const space = SPACES.find((s) => s.id === spaceId);
-    if (!space) return;
-
-    if (videoRef.current) {
-      videoRef.current.style.opacity = '0';
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.src = space.videoSrc;
-          videoRef.current.load();
-          videoRef.current.currentTime = 0;
-          videoRef.current.play().catch(() => {});
-          videoRef.current.style.opacity = '0.85';
-        }
-      }, 200);
-    }
-
-    if (warmLightRef.current && keyLightRef.current) {
-      warmLightRef.current.color.setHex(space.lightColor);
-      keyLightRef.current.intensity = space.lightIntensity;
+  const spaces = {
+    living: {
+      name: 'Living Room Sanctuary',
+      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-sun-light-falling-on-a-plant-in-a-living-room-42880-large.mp4',
+      badge: 'Natural Indirect Sunlight',
+      desc: 'Ideal for Philodendron, Monsteras, and statement floor foliage.'
+    },
+    bedroom: {
+      name: 'Peaceful Bedroom Zen',
+      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-plant-leaves-under-the-morning-sun-43362-large.mp4',
+      badge: 'Filtered Ambient Soft Glow',
+      desc: 'Optimized for high-oxygen overnight release (Snake plants & Peace Lilies).'
+    },
+    office: {
+      name: 'Executive Workdesk Focus',
+      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-close-up-of-green-leaves-42999-large.mp4',
+      badge: 'Indoor LED / Desktop Light',
+      desc: 'Curated compact self-watering planters that boost mood and focus.'
     }
   };
 
-  const currentSpace = SPACES.find((s) => s.id === activeSpace) || SPACES[0];
+  const showToast = (msg: string) => {
+    setToastText(msg);
+    setTimeout(() => setToastText(null), 3000);
+  };
+
+  const addToCart = (id: string, name: string) => {
+    setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+    showToast(`Added ${name} to your Rastlina basket!`);
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadScript = (src: string): Promise<void> => {
+      return new Promise((resolve) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+          resolve();
+          return;
+        }
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = () => resolve();
+        document.body.appendChild(s);
+      });
+    };
+
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js').then(() => {
+      if (!isMounted || !mountRef.current || !window.THREE) return;
+
+      const THREE = window.THREE;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.z = 8;
+
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      mountRef.current.appendChild(renderer.domElement);
+
+      const particleCount = 200;
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 16;
+        positions[i + 1] = (Math.random() - 0.5) * 20;
+        positions[i + 2] = (Math.random() - 0.5) * 8;
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 32;
+      canvas.height = 32;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+        grad.addColorStop(0, 'rgba(190, 242, 100, 1)');
+        grad.addColorStop(0.5, 'rgba(163, 230, 53, 0.5)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 32, 32);
+      }
+      const pTex = new THREE.CanvasTexture(canvas);
+
+      const material = new THREE.PointsMaterial({
+        size: 0.35,
+        map: pTex,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const points = new THREE.Points(geometry, material);
+      scene.add(points);
+
+      let animId: number;
+      const animate = () => {
+        animId = requestAnimationFrame(animate);
+        points.rotation.y += 0.0012;
+        points.rotation.x += 0.0006;
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      const handleResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      };
+      window.addEventListener('resize', handleResize);
+
+      return () => {
+        cancelAnimationFrame(animId);
+        window.removeEventListener('resize', handleResize);
+        if (mountRef.current && renderer.domElement) {
+          mountRef.current.removeChild(renderer.domElement);
+        }
+      };
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const vid = videoRef.current;
+      if (!vid || !vid.duration || isNaN(vid.duration)) return;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (maxScroll <= 0) return;
+      const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+      vid.currentTime = progress * vid.duration;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const totalCartCount = Object.values(cart).reduce((a, b) => a + b, 0);
 
   return (
-    <div ref={containerRef} className="relative w-full min-h-[600vh] bg-[#051309] text-white">
-      {/* Reused Single Video Decoder */}
+    <div className="relative min-h-[350vh] bg-[#051309] text-white font-sans selection:bg-lime-400 selection:text-black">
       <video
         ref={videoRef}
-        src={currentSpace.videoSrc}
-        className="fixed inset-0 w-screen h-screen object-cover z-0 opacity-85 pointer-events-none transition-opacity duration-300"
+        key={spaces[activeSpace].videoUrl}
+        src={spaces[activeSpace].videoUrl}
         muted
         playsInline
         preload="auto"
+        className="fixed inset-0 w-full h-full object-cover z-0 opacity-45 pointer-events-none"
       />
 
-      {/* 3D WebGL Canvas */}
-      <canvas ref={canvasRef} className="fixed inset-0 w-screen h-screen z-10 pointer-events-none" />
+      <div ref={mountRef} className="fixed inset-0 z-10 pointer-events-none" />
+      <div className="fixed inset-0 z-10 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,transparent_40%,rgba(5,19,9,0.85)_100%)]" />
 
-      {/* Top Floating Space Dock */}
-      <div className="fixed top-5 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-lime-400/30 rounded-full px-3.5 py-1.5 shadow-2xl">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 mr-1 hidden sm:inline">
-          Active Space:
-        </span>
-        {SPACES.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => handleSpaceChange(s.id)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
-              activeSpace === s.id
-                ? 'bg-lime-400 text-emerald-950 shadow-md font-bold'
-                : 'text-emerald-100/70 hover:text-white'
-            }`}
-          >
-            {s.name}
-          </button>
-        ))}
-      </div>
+      <header className="fixed top-0 left-0 right-0 z-30 px-6 py-4 flex items-center justify-between backdrop-blur-md bg-black/40 border-b border-lime-400/20">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🌿</span>
+          <div>
+            <h1 className="font-bold tracking-wider text-sm uppercase text-white leading-none">RASTLINA 3D</h1>
+            <span className="text-[10px] text-lime-300/80 tracking-widest uppercase">Plants. Revolutionized.</span>
+          </div>
+        </div>
 
-      {/* Floating Trigger Pill */}
-      <button
-        onClick={() => setShowSpaceModal(true)}
-        className="fixed bottom-6 left-6 z-40 px-4 py-2 rounded-full bg-black/70 backdrop-blur-md border border-amber-400/40 hover:border-amber-400 text-amber-200 text-xs font-semibold flex items-center gap-2 shadow-2xl hover:scale-105 transition"
-      >
-        <span className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
-        <span>🏡 Select Space to Place Plant</span>
-      </button>
-
-      {/* Scroll HUD */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-30 font-mono text-xs text-lime-300 pointer-events-none">
-        {scrollPct.toString().padStart(2, '0')}%
-      </div>
-
-      {/* Space Selection Modal */}
-      {showSpaceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
-          <div
-            className="relative w-full max-w-4xl rounded-3xl p-6 sm:p-10 border border-amber-400/30 shadow-[0_0_80px_rgba(10,30,16,0.9)] overflow-hidden"
-            style={{ background: 'radial-gradient(circle at 50% 0%, #0d2818 0%, #051309 75%)' }}
-          >
+        <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
+          {(['living', 'bedroom', 'office'] as const).map((key) => (
             <button
-              onClick={() => setShowSpaceModal(false)}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-bold"
+              key={key}
+              onClick={() => setActiveSpace(key)}
+              className={`px-3.5 py-1 rounded-full text-xs font-semibold capitalize transition ${
+                activeSpace === key
+                  ? 'bg-lime-400 text-emerald-950 shadow-md shadow-lime-400/20'
+                  : 'text-emerald-100/70 hover:text-white'
+              }`}
             >
-              ✕
+              {key === 'living' ? '🛋️ Living' : key === 'bedroom' ? '🛏️ Bedroom' : '💼 Office'}
             </button>
+          ))}
+        </div>
 
-            <div className="mb-6">
-              <div className="inline-flex items-center gap-2 mb-2">
-                <span className="w-6 h-6 rounded-full border border-amber-400/60 text-amber-300 text-xs font-bold flex items-center justify-center font-mono">
-                  06
-                </span>
-                <span className="text-xs uppercase tracking-widest text-amber-300/90 font-semibold">
-                  A PLACE FOR YOUR PLANT
-                </span>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="relative px-4 py-1.5 rounded-full text-xs font-bold bg-lime-400 text-emerald-950 hover:bg-lime-300 transition"
+        >
+          Basket ({totalCartCount})
+        </button>
+      </header>
+
+      <main className="relative z-20 pt-36 px-6 max-w-4xl mx-auto space-y-72">
+        <section className="text-center">
+          <span className="px-3 py-1 rounded-full text-xs uppercase tracking-widest text-lime-300 bg-lime-400/10 border border-lime-400/30">
+            Interactive 3D Living Experience
+          </span>
+          <h2 className="mt-6 text-5xl sm:text-7xl font-extrabold uppercase tracking-tight text-white leading-tight">
+            PLANTS.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-300 via-emerald-400 to-amber-300">
+              REVOLUTIONIZED.
+            </span>
+          </h2>
+          <p className="mt-6 text-emerald-100/80 max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
+            Scroll vertically to scrub through natural light cycles in your {spaces[activeSpace].name}.
+          </p>
+          <div className="mt-8 inline-block animate-bounce text-lime-400 text-sm font-semibold">
+            ↓ Scroll Down to Explore
+          </div>
+        </section>
+
+        <section className="p-8 rounded-2xl backdrop-blur-xl bg-black/60 border border-lime-400/30">
+          <span className="text-xs font-semibold text-amber-300 uppercase tracking-widest block mb-2">
+            Engineered For Indoor Spaces
+          </span>
+          <h3 className="text-3xl font-bold text-white mb-4">
+            Rastlina Self-Watering Sub-Irrigation
+          </h3>
+          <p className="text-emerald-100/80 text-sm leading-relaxed mb-4">
+            Every set arrives with a hand-acclimatized plant, self-watering sub-irrigation pot, and custom aerated potting mix—delivering up to 14 days of hydration autonomy.
+          </p>
+          <div className="inline-flex items-center gap-2 text-xs text-lime-300 bg-lime-400/10 px-3 py-1.5 rounded-lg border border-lime-400/20">
+            <span>✓ {spaces[activeSpace].badge}</span>
+            <span>•</span>
+            <span>Zero Root Rot</span>
+          </div>
+        </section>
+
+        <section className="p-8 rounded-2xl backdrop-blur-xl bg-black/60 border border-lime-400/30 text-center">
+          <span className="text-xs font-semibold text-lime-300 uppercase tracking-widest block mb-2">
+            Top 1% Indoor Cultivars
+          </span>
+          <h3 className="text-3xl font-bold text-white mb-6">
+            Hand-Acclimatized In Hyderabad
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+            {RASTLINA_PRODUCTS.map((p) => (
+              <div key={p.id} className="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-center text-xs text-lime-300 font-semibold mb-1">
+                    <span>{p.category}</span>
+                    <span className="bg-lime-400/20 px-2 py-0.5 rounded text-[10px]">{p.badge}</span>
+                  </div>
+                  <h4 className="font-bold text-base text-white">{p.name}</h4>
+                  <p className="text-xs text-emerald-100/70 mt-1">{p.desc}</p>
+                </div>
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
+                  <span className="text-lg font-bold text-lime-300">₹{p.price}</span>
+                  <button
+                    onClick={() => addToCart(p.id, p.name)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-lime-400 text-emerald-950 hover:bg-lime-300 transition"
+                  >
+                    + Add to Basket
+                  </button>
+                </div>
               </div>
-              <h2 className="text-3xl sm:text-5xl font-bold tracking-wide text-white">
-                Your world. <br />
-                <span className="italic font-serif text-amber-200 font-normal">A little greener.</span>
-              </h2>
-            </div>
+            ))}
+          </div>
+        </section>
+      </main>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              {SPACES.map((s) => (
+      <div className="fixed bottom-6 left-6 z-30">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-lime-400 text-emerald-950 shadow-xl hover:bg-lime-300 transition flex items-center gap-2"
+        >
+          <span>🏡 Select Space to Place Plant</span>
+        </button>
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="w-full max-w-xl p-6 rounded-2xl bg-[#091b10] border border-lime-400/40 shadow-2xl">
+            <div className="flex justify-between items-center pb-3 border-b border-white/10">
+              <h3 className="text-lg font-bold text-white">Choose Your Room &amp; Botanicals</h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mt-4 space-y-3">
+              {(['living', 'bedroom', 'office'] as const).map((key) => (
                 <div
-                  key={s.id}
+                  key={key}
                   onClick={() => {
-                    handleSpaceChange(s.id);
-                    setShowSpaceModal(false);
+                    setActiveSpace(key);
+                    showToast(`Active room switched to ${spaces[key].name}`);
                   }}
-                  className={`p-4 rounded-2xl border cursor-pointer transition hover:-translate-y-1 ${
-                    activeSpace === s.id
-                      ? 'border-amber-400 bg-amber-400/10 ring-2 ring-amber-400/30'
-                      : 'border-white/15 bg-black/40 hover:border-amber-400/60'
+                  className={`p-3.5 rounded-xl border cursor-pointer transition ${
+                    activeSpace === key
+                      ? 'border-lime-400 bg-lime-400/15'
+                      : 'border-white/10 bg-white/5 hover:bg-white/10'
                   }`}
                 >
-                  <span className="text-xs font-mono text-amber-300 font-bold block mb-1">
-                    {s.badge}
-                  </span>
-                  <h3 className="text-lg font-bold text-white">{s.name}</h3>
-                  <p className="text-xs text-emerald-200/70 mt-1">{s.tagline}</p>
+                  <div className="font-bold text-sm text-white">{spaces[key].name}</div>
+                  <div className="text-xs text-lime-300 mt-0.5">{spaces[key].badge}</div>
+                  <div className="text-xs text-emerald-100/70 mt-1">{spaces[key].desc}</div>
                 </div>
               ))}
             </div>
-
-            <div className="flex items-center justify-between pt-4 border-t border-white/15 text-xs text-emerald-200/80">
-              <span>Active: {currentSpace.name}</span>
-              <button
-                onClick={() => {
-                  onAddToCart?.('philo-red');
-                  setShowSpaceModal(false);
-                }}
-                className="px-5 py-2 rounded-xl bg-lime-400 text-emerald-950 font-bold uppercase tracking-wider hover:bg-lime-300 transition"
+            <div className="mt-6 flex justify-between items-center pt-3 border-t border-white/10">
+              <span className="text-xs text-emerald-200">
+                Basket: <strong>{totalCartCount} items</strong>
+              </span>
+              <a
+                href="https://www.rastlina.com/shop"
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-lime-400 text-emerald-950 hover:bg-lime-300 transition"
               >
-                Add Plant For {currentSpace.name} (₹329)
-              </button>
+                Proceed to Rastlina Shop ↗
+              </a>
             </div>
           </div>
         </div>
       )}
+
+      {toastText && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-lime-400 text-emerald-950 text-xs font-bold shadow-2xl animate-fade-in">
+          {toastText}
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default RastlinaScroll3D;
