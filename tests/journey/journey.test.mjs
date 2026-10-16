@@ -131,7 +131,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     assert.equal(get('nursery-loading').hidden, true);
     assert.equal(get('story-frame-1').classList.contains('has-video'), true);
     assert.equal(get('story-position').textContent, '1 / 5');
-    const chapterSuffix = ''; // Dense screens retain the higher-resolution HD story source.
+    const chapterSuffix = mobile ? '-mobile' : ''; // High-DPR phones still use the mobile decoder budget.
     assert.ok(chapters[0].src.endsWith(`/assets/story-01${chapterSuffix}.mp4`));
 
     const firstSeeks = chapters[0].seeks.length;

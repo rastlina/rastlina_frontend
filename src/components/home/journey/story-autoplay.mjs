@@ -4,8 +4,9 @@ import { storyFrame } from './story-sequence.mjs';
 // Media-clock playback. Only transitions use animation frames; playing footage
 // is never repeatedly sought. The same sequence drives copy in both modes.
 export class StoryAutoplay {
-  constructor(sequence, { requestFrame = requestAnimationFrame, cancelFrame = cancelAnimationFrame, onState = () => {}, onComplete = () => {}, transitionMs = 900 } = {}) {
-    Object.assign(this, { sequence, requestFrame, cancelFrame, onState, onComplete, transitionMs });
+  constructor(sequence, { requestFrame = requestAnimationFrame, cancelFrame = cancelAnimationFrame, onState = () => {}, onComplete = () => {}, transitionMs = 900, stallMs = 15000, setTimer = (callback, delay) => globalThis.setTimeout(callback, delay), clearTimer = id => globalThis.clearTimeout(id) } = {}) {
+    Object.assign(this, { sequence, requestFrame, cancelFrame, onState, onComplete, transitionMs, stallMs, setTimer, clearTimer });
+    this.recoveries = new Map();
     this.index = 0;
     this.generation = 0;
     this.enabled = false;
@@ -27,11 +28,16 @@ export class StoryAutoplay {
       });
       listen('timeupdate', () => {
         if (!this.running || index !== this.index || this.phase !== 'playing' || video.seeking) return;
+        if (video.currentTime !== this.lastMediaTime) {
+          this.lastMediaTime = video.currentTime;
+          this.watchPlayback(index, true);
+        }
         const last = finalFrameTime(video.duration);
         if (last) sequence.setProgress((index + .8 * clampProgress(video.currentTime / last)) / sequence.entries.length);
       });
       listen('ended', () => {
         if (!this.running || index !== this.index) return;
+        this.clearWatchdog();
         this.phase = 'transition';
         this.elapsed = 0;
         this.lastTime = null;
@@ -45,6 +51,8 @@ export class StoryAutoplay {
   enable(progress = this.sequence.progress) {
     this.disable();
     this.enabled = true;
+    this.recoveries.clear();
+    this.restoreIndex = undefined;
     this.userPaused = false;
     const state = storyFrame(progress, this.sequence.entries.length);
     this.phase = state.movie >= 1 && progress < 1 ? 'transition' : 'playing';
@@ -58,6 +66,7 @@ export class StoryAutoplay {
     else this.play();
   }
   disable() {
+    this.clearWatchdog();
     this.generation++;
     this.playPending = false;
     this.primePending = false;
@@ -70,10 +79,47 @@ export class StoryAutoplay {
       entry.scrubber.playback = false;
     }
   }
+  clearWatchdog() {
+    if (this.watchdog !== undefined) this.clearTimer(this.watchdog);
+    this.watchdog = undefined;
+  }
+  watchPlayback(index, reset = false) {
+    if (reset) this.clearWatchdog();
+    if (!this.running || this.watchdog !== undefined) return;
+    this.watchdog = this.setTimer(() => {
+      this.watchdog = undefined;
+      if (!this.running) return;
+      const entry = this.sequence.entries[index];
+      if (!entry || entry.failed) return;
+      if ((this.recoveries.get(index) || 0) >= 1) {
+        entry.scrubber.fail();
+        this.pause();
+        return;
+      }
+      this.recoveries.set(index, 1);
+      // A stalled network/decoder gets one fresh source load, preserving the
+      // chapter position. A second stall exposes Retry instead of looping.
+      this.generation++;
+      this.playPending = this.primePending = false;
+      if (this.phase === 'playing') this.restoreIndex = index;
+      this.sequence.reload(index);
+      if (this.phase === 'transition') this.animate();
+      else this.play();
+    }, this.stallMs);
+    this.watchdog?.unref?.();
+  }
   play() {
     if (!this.running || this.phase !== 'playing' || this.playPending) return;
+    this.watchPlayback(this.index);
     const entry = this.entry;
     const video = entry.layer.video;
+    if (this.restoreIndex === this.index) {
+      if (video.readyState < 1) return;
+      entry.scrubber.playback = false;
+      entry.scrubber.flush();
+      if (video.seeking) return;
+      this.restoreIndex = undefined;
+    }
     entry.scrubber.playback = true;
     if (entry.failed || !entry.loaded || video.seeking || !video.paused) return;
     video.muted = video.defaultMuted = true;
@@ -86,6 +132,9 @@ export class StoryAutoplay {
       Promise.resolve(video.play()).then(() => { if (generation === this.generation) this.playPending = false; }, error => {
         if (generation !== this.generation) return;
         this.playPending = false;
+        // A browser may interrupt play while metadata or a seek settles.
+        // Keep autoplay armed so the next readiness event can retry.
+        if (error?.name === 'AbortError') return;
         if (this.enabled && this.active && this.index === index) {
           this.pause();
           this.blocked = error?.name === 'NotAllowedError';
@@ -133,11 +182,12 @@ export class StoryAutoplay {
   setActive(active) {
     if (this.active === active) return;
     this.active = active;
-    if (!active) { this.stopPriming(); this.generation++; this.playPending = false; this.entry.layer.video.autoplay = false; this.entry.layer.video.pause(); this.stopFrame(); }
+    if (!active) { this.clearWatchdog(); this.stopPriming(); this.generation++; this.playPending = false; this.entry.layer.video.autoplay = false; this.entry.layer.video.pause(); this.stopFrame(); }
     else if (this.phase === 'transition') this.animate();
     else this.play();
   }
   pause() {
+    this.clearWatchdog();
     this.stopPriming();
     this.generation++;
     this.playPending = false;
@@ -149,6 +199,7 @@ export class StoryAutoplay {
     this.onState(false);
   }
   resume() {
+    this.recoveries.clear();
     this.blocked = false;
     if (this.phase === 'complete') this.enable(0);
     else {
@@ -169,17 +220,25 @@ export class StoryAutoplay {
     this.sequence.waitingForNext = Boolean(incoming && !incoming.ready);
     this.sequence.reportState();
     if (this.sequence.waitingForNext) {
+      this.watchPlayback(this.index + 1);
       this.sequence.ensure(this.index + 1);
       this.primeIncoming();
       this.lastTime = null;
       return;
     }
+    this.clearWatchdog();
     const tick = time => {
       this.frame = undefined;
       if (!this.running || this.phase !== 'transition') return;
       if (this.lastTime !== null) this.elapsed += Math.max(0, Math.min(64, time - this.lastTime));
       this.lastTime = time;
       const t = Math.min(1, this.elapsed / this.transitionMs);
+      // setProgress at a chapter boundary preloads the following chapter.
+      // Release the completed decoder first: loading before trimming briefly
+      // allocates three decoders and can strand a mobile preload.
+      if (t === 1 && this.index + 1 < this.sequence.entries.length) {
+        this.sequence.trimPlayback(this.index + 1);
+      }
       this.sequence.setProgress((this.index + .8 + .2 * t) / this.sequence.entries.length);
       if (t < 1) this.frame = this.requestFrame(tick);
       else {
