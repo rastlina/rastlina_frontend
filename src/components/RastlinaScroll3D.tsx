@@ -1,25 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-declare global {
-  interface Window {
-    THREE: any;
-    gsap: any;
-    ScrollTrigger: any;
-  }
-}
-
-interface ProductItem {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  mrp: number;
-  badge: string;
-  url: string;
-  desc: string;
-}
-
-const RASTLINA_PRODUCTS: ProductItem[] = [
+// Live Rastlina product data matching www.rastlina.com
+const RASTLINA_PRODUCTS = [
   {
     id: 'philo-red',
     name: 'Philodendron Oxycardium Red',
@@ -27,8 +9,7 @@ const RASTLINA_PRODUCTS: ProductItem[] = [
     price: 329,
     mrp: 599,
     badge: '45% OFF',
-    url: 'https://www.rastlina.com/',
-    desc: 'Heart-shaped bronze-red leaves in a Rastlina self-watering planter.'
+    desc: 'Heart-shaped bronze-red new leaves in a Rastlina self-watering planter.'
   },
   {
     id: 'calathea-makoyana',
@@ -37,7 +18,6 @@ const RASTLINA_PRODUCTS: ProductItem[] = [
     price: 499,
     mrp: 699,
     badge: '29% OFF',
-    url: 'https://www.rastlina.com/',
     desc: 'Intricate feathered leaf venation that folds prayer-like at night.'
   },
   {
@@ -47,7 +27,6 @@ const RASTLINA_PRODUCTS: ProductItem[] = [
     price: 649,
     mrp: 1199,
     badge: '46% OFF',
-    url: 'https://www.rastlina.com/',
     desc: 'Curated trio with self-watering pots and custom aerated potting mix.'
   },
   {
@@ -57,341 +36,678 @@ const RASTLINA_PRODUCTS: ProductItem[] = [
     price: 299,
     mrp: 499,
     badge: '40% OFF',
-    url: 'https://www.rastlina.com/shop?category=exotic-beauties',
     desc: 'Deep glossy burgundy foliage that thrives in indoor living rooms.'
   }
 ];
 
-export const RastlinaScroll3D: React.FC = () => {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [activeSpace, setActiveSpace] = useState<'living' | 'bedroom' | 'office'>('living');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [toastText, setToastText] = useState<string | null>(null);
-  const [cart, setCart] = useState<{ [id: string]: number }>({ 'philo-red': 1, 'combo-trio': 1 });
+const CHAPTER_NAMES = [
+  '01 • PLANTS REVOLUTIONIZED',
+  '02 • GENETIC CONSTELLATION',
+  '03 • SELF-WATERING GROWTH',
+  '04 • NURSERY TEST MATRIX',
+  '05 • TOP 1% SELECTION',
+  '06 • INFINITE NATURE LOOP'
+];
 
-  const spaces = {
-    living: {
-      name: 'Living Room Sanctuary',
-      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-sun-light-falling-on-a-plant-in-a-living-room-42880-large.mp4',
-      badge: 'Natural Indirect Sunlight',
-      desc: 'Ideal for Philodendron, Monsteras, and statement floor foliage.'
-    },
-    bedroom: {
-      name: 'Peaceful Bedroom Zen',
-      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-plant-leaves-under-the-morning-sun-43362-large.mp4',
-      badge: 'Filtered Ambient Soft Glow',
-      desc: 'Optimized for high-oxygen overnight release (Snake plants & Peace Lilies).'
-    },
-    office: {
-      name: 'Executive Workdesk Focus',
-      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-close-up-of-green-leaves-42999-large.mp4',
-      badge: 'Indoor LED / Desktop Light',
-      desc: 'Curated compact self-watering planters that boost mood and focus.'
-    }
-  };
+export default function RastlinaScroll3D() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [cartItems, setCartItems] = useState([
+    { id: 'philo-red', qty: 1 },
+    { id: 'calathea-makoyana', qty: 1 }
+  ]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [activeChapter, setActiveChapter] = useState(0);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(false);
+  const [lightMode, setLightMode] = useState<'morning' | 'indoor' | 'night'>('morning');
+  const [gridFilter, setGridFilter] = useState<'all' | 'air' | 'exotic'>('all');
 
   const showToast = (msg: string) => {
-    setToastText(msg);
-    setTimeout(() => setToastText(null), 3000);
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const addToCart = (id: string, name: string) => {
-    setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
-    showToast(`Added ${name} to your Rastlina basket!`);
-  };
-
-  useEffect(() => {
-    let isMounted = true;
-    const loadScript = (src: string): Promise<void> => {
-      return new Promise((resolve) => {
-        if (document.querySelector(`script[src="${src}"]`)) {
-          resolve();
-          return;
-        }
-        const s = document.createElement('script');
-        s.src = src;
-        s.async = true;
-        s.onload = () => resolve();
-        document.body.appendChild(s);
-      });
-    };
-
-    loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js').then(() => {
-      if (!isMounted || !mountRef.current || !window.THREE) return;
-
-      const THREE = window.THREE;
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.z = 8;
-
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      mountRef.current.appendChild(renderer.domElement);
-
-      const particleCount = 200;
-      const geometry = new THREE.BufferGeometry();
-      const positions = new Float32Array(particleCount * 3);
-      for (let i = 0; i < particleCount * 3; i += 3) {
-        positions[i] = (Math.random() - 0.5) * 16;
-        positions[i + 1] = (Math.random() - 0.5) * 20;
-        positions[i + 2] = (Math.random() - 0.5) * 8;
+  const addToCart = (productId: string) => {
+    setCartItems(prev => {
+      const existing = prev.find(i => i.id === productId);
+      if (existing) {
+        return prev.map(i => i.id === productId ? { ...i, qty: i.qty + 1 } : i);
       }
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-      const canvas = document.createElement('canvas');
-      canvas.width = 32;
-      canvas.height = 32;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-        grad.addColorStop(0, 'rgba(190, 242, 100, 1)');
-        grad.addColorStop(0.5, 'rgba(163, 230, 53, 0.5)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 32, 32);
-      }
-      const pTex = new THREE.CanvasTexture(canvas);
-
-      const material = new THREE.PointsMaterial({
-        size: 0.35,
-        map: pTex,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-      const points = new THREE.Points(geometry, material);
-      scene.add(points);
-
-      let animId: number;
-      const animate = () => {
-        animId = requestAnimationFrame(animate);
-        points.rotation.y += 0.0012;
-        points.rotation.x += 0.0006;
-        renderer.render(scene, camera);
-      };
-      animate();
-
-      const handleResize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      };
-      window.addEventListener('resize', handleResize);
-
-      return () => {
-        cancelAnimationFrame(animId);
-        window.removeEventListener('resize', handleResize);
-        if (mountRef.current && renderer.domElement) {
-          mountRef.current.removeChild(renderer.domElement);
-        }
-      };
+      return [...prev, { id: productId, qty: 1 }];
     });
+    const p = RASTLINA_PRODUCTS.find(x => x.id === productId);
+    showToast(`Added ${p?.name || 'plant'} to your basket!`);
+  };
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const updateCartQty = (id: string, delta: number) => {
+    setCartItems(prev => {
+      return prev
+        .map(i => (i.id === id ? { ...i, qty: i.qty + delta } : i))
+        .filter(i => i.qty > 0);
+    });
+  };
 
+  const scrollToChapter = (ratio: number) => {
+    setIsAutoScrolling(false);
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: maxScroll * ratio, behavior: 'smooth' });
+  };
+
+  // Scroll handler & Video Scrubbing
   useEffect(() => {
     const handleScroll = () => {
-      const vid = videoRef.current;
-      if (!vid || !vid.duration || isNaN(vid.duration)) return;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (maxScroll <= 0) return;
-      const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
-      vid.currentTime = progress * vid.duration;
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const currentScroll = window.scrollY;
+      const progress = Math.min(1, Math.max(0, currentScroll / maxScroll));
+      setScrollProgress(progress);
+
+      const chap = Math.min(5, Math.floor(progress * 6));
+      setActiveChapter(chap);
+
+      // Scrub the background video smoothly in sync with scroll
+      if (videoRef.current && videoRef.current.duration) {
+        videoRef.current.currentTime = progress * videoRef.current.duration;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const totalCartCount = Object.values(cart).reduce((a, b) => a + b, 0);
+  // Auto-scroll loop
+  useEffect(() => {
+    if (!isAutoScrolling) return;
+    let animId: number;
+    const step = () => {
+      window.scrollBy(0, 3.5);
+      animId = requestAnimationFrame(step);
+    };
+    animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [isAutoScrolling]);
+
+  // High-performance GPU Canvas 3D Graphics Engine
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+    let mouseX = 0;
+    let mouseY = 0;
+
+    const onResize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    const onMouseMove = (e: MouseEvent) => {
+      mouseX = (e.clientX / width) * 2 - 1;
+      mouseY = (e.clientY / height) * 2 - 1;
+    };
+
+    window.addEventListener('resize', onResize);
+    window.addEventListener('mousemove', onMouseMove);
+
+    const nodeCount = 38;
+    const nodes = Array.from({ length: nodeCount }).map(() => ({
+      x: (Math.random() - 0.5) * width * 0.75,
+      y: (Math.random() - 0.5) * height * 0.75,
+      radius: Math.random() * 2.8 + 1.8,
+      phase: Math.random() * Math.PI * 2
+    }));
+
+    const sporeCount = 140;
+    const spores = Array.from({ length: sporeCount }).map(() => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 2.2 + 0.8,
+      speedY: Math.random() * 0.45 + 0.15,
+      opacity: Math.random() * 0.7 + 0.3
+    }));
+
+    let t = 0;
+    const render = () => {
+      t += 0.02;
+      ctx.clearRect(0, 0, width, height);
+
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+
+      // 1. Draw glowing ambient spores
+      for (const s of spores) {
+        s.y -= s.speedY;
+        if (s.y < 0) s.y = height;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(163, 230, 53, ${s.opacity * 0.6})`;
+        ctx.shadowColor = '#a3e635';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+      }
+
+      // 2. 3D Constellation Network (Chapter 02)
+      const constellationAlpha = Math.max(0, 1 - Math.abs(progress - 0.25) * 4);
+      if (constellationAlpha > 0.05) {
+        ctx.save();
+        ctx.translate(width / 2 + mouseX * 25, height / 2 + mouseY * 25);
+        ctx.shadowColor = '#bef264';
+        ctx.shadowBlur = 12;
+
+        ctx.strokeStyle = `rgba(132, 204, 22, ${constellationAlpha * 0.4})`;
+        ctx.lineWidth = 1.2;
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x;
+            const dy = nodes[i].y - nodes[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 140) {
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        for (const n of nodes) {
+          const pulse = Math.sin(t * 2 + n.phase) * 1.2;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.radius + pulse, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(190, 242, 100, ${constellationAlpha * 0.95})`;
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // 3. Central 3D Golden Core Specimen with peeling husk leaves
+      const coreAlpha = Math.max(0, 1 - progress * 3.5);
+      if (coreAlpha > 0.05) {
+        ctx.save();
+        ctx.translate(width / 2 + mouseX * 20, height / 2 + mouseY * 15);
+        const rotY = t * 0.4 + mouseX * 0.4;
+
+        const grad = ctx.createRadialGradient(0, 0, 10, 0, 0, 130);
+        grad.addColorStop(0, `rgba(253, 224, 71, ${coreAlpha * 0.9})`);
+        grad.addColorStop(0.35, `rgba(234, 179, 8, ${coreAlpha * 0.75})`);
+        grad.addColorStop(0.7, `rgba(163, 230, 53, ${coreAlpha * 0.35})`);
+        grad.addColorStop(1, 'rgba(5, 19, 9, 0)');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 130, 0, Math.PI * 2);
+        ctx.fill();
+
+        const huskCount = 12;
+        const peel = Math.min(1, progress * 4.5);
+        ctx.shadowColor = '#a3e635';
+        ctx.shadowBlur = 15;
+
+        for (let i = 0; i < huskCount; i++) {
+          const angle = (i / huskCount) * Math.PI * 2 + rotY;
+          const leafX = Math.cos(angle) * (45 + peel * 70);
+          const leafY = Math.sin(angle) * (20 + peel * 40);
+          const leafLen = 95 + (i % 2) * 25;
+
+          ctx.save();
+          ctx.translate(leafX, leafY);
+          ctx.rotate(angle + Math.PI / 2 + peel * 0.4);
+
+          ctx.beginPath();
+          ctx.ellipse(0, -leafLen / 2, 14, leafLen / 2, 0, 0, Math.PI * 2);
+          ctx.fillStyle = i % 2 === 0 ? `rgba(22, 163, 74, ${coreAlpha * 0.85})` : `rgba(101, 163, 13, ${coreAlpha * 0.85})`;
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    animId = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('mousemove', onMouseMove);
+    };
+  }, []);
+
+  const cartTotal = cartItems.reduce((acc, i) => {
+    const p = RASTLINA_PRODUCTS.find(prod => prod.id === i.id);
+    return acc + (p ? p.price * i.qty : 0);
+  }, 0);
 
   return (
-    <div className="relative min-h-[350vh] bg-[#051309] text-white font-sans selection:bg-lime-400 selection:text-black">
+    <div className="relative bg-[#051309] text-[#f8fafc] font-sans overflow-x-hidden select-none">
+      {/* 1. SCROLL-SCRUBBED BOTANICAL VIDEO BACKGROUND */}
       <video
         ref={videoRef}
-        key={spaces[activeSpace].videoUrl}
-        src={spaces[activeSpace].videoUrl}
+        className="fixed inset-0 w-screen h-screen object-cover opacity-60 pointer-events-none z-0 filter brightness-90 contrast-110"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
         muted
         playsInline
         preload="auto"
-        className="fixed inset-0 w-full h-full object-cover z-0 opacity-45 pointer-events-none"
       />
 
-      <div ref={mountRef} className="fixed inset-0 z-10 pointer-events-none" />
-      <div className="fixed inset-0 z-10 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,transparent_40%,rgba(5,19,9,0.85)_100%)]" />
+      {/* 2. 3D HARDWARE-ACCELERATED CANVAS PARTICLES & BOTANICALS */}
+      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[1]" />
 
-      <header className="fixed top-0 left-0 right-0 z-30 px-6 py-4 flex items-center justify-between backdrop-blur-md bg-black/40 border-b border-lime-400/20">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🌿</span>
-          <div>
-            <h1 className="font-bold tracking-wider text-sm uppercase text-white leading-none">RASTLINA 3D</h1>
-            <span className="text-[10px] text-lime-300/80 tracking-widest uppercase">Plants. Revolutionized.</span>
+      {/* 3. ATMOSPHERIC VIGNETTE OVERLAY */}
+      <div
+        className="fixed inset-0 pointer-events-none z-[2]"
+        style={{
+          background: 'radial-gradient(circle at 50% 50%, transparent 35%, rgba(2, 12, 6, 0.78) 100%)'
+        }}
+      />
+
+      {/* 4. TOP FIXED NAVIGATION HEADER */}
+      <header className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between bg-[rgba(6,24,14,0.72)] backdrop-blur-md border-b border-lime-400/25">
+        <button onClick={() => scrollToChapter(0)} className="flex items-center gap-2.5 text-left group focus:outline-none">
+          <div className="w-9 h-9 rounded-full bg-lime-400/15 border border-lime-400/50 flex items-center justify-center text-lime-300 font-bold text-lg group-hover:scale-105 transition">
+            🌿
           </div>
-        </div>
+          <div>
+            <span className="font-bold text-lg sm:text-xl tracking-wider text-white block leading-none font-mono">RASTLINA</span>
+            <span className="text-[10px] uppercase tracking-widest text-lime-300/80 block">Nature Hub • Hyderabad</span>
+          </div>
+        </button>
 
-        <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
-          {(['living', 'bedroom', 'office'] as const).map((key) => (
+        {/* Chapter Jump Pills */}
+        <nav className="hidden lg:flex items-center gap-1 bg-black/40 border border-lime-400/20 rounded-full px-2 py-1">
+          {['01. Hero', '02. Genetics', '03. Self-Watering', '04. Nursery Grid', '05. Top 1%', '06. Loop'].map((title, idx) => (
             <button
-              key={key}
-              onClick={() => setActiveSpace(key)}
-              className={`px-3.5 py-1 rounded-full text-xs font-semibold capitalize transition ${
-                activeSpace === key
-                  ? 'bg-lime-400 text-emerald-950 shadow-md shadow-lime-400/20'
+              key={idx}
+              onClick={() => scrollToChapter(idx * 0.2)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                activeChapter === idx
+                  ? 'text-lime-200 bg-lime-400/25 border border-lime-400/40 shadow-sm shadow-lime-400/30'
                   : 'text-emerald-100/70 hover:text-white'
               }`}
             >
-              {key === 'living' ? '🛋️ Living' : key === 'bedroom' ? '🛏️ Bedroom' : '💼 Office'}
+              {title}
             </button>
           ))}
-        </div>
+        </nav>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="relative px-4 py-1.5 rounded-full text-xs font-bold bg-lime-400 text-emerald-950 hover:bg-lime-300 transition"
-        >
-          Basket ({totalCartCount})
-        </button>
+        {/* Action Controls */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsAutoScrolling(!isAutoScrolling)}
+            className="px-3 py-1.5 rounded-full text-xs font-semibold bg-lime-400/15 hover:bg-lime-400/30 text-lime-200 border border-lime-400/40 transition flex items-center gap-1.5"
+          >
+            <span>{isAutoScrolling ? '⏸ Pause' : '▶ Auto-Scroll'}</span>
+          </button>
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="relative px-3.5 py-1.5 rounded-full text-xs font-semibold bg-lime-400 text-emerald-950 hover:bg-lime-300 transition flex items-center gap-1.5"
+          >
+            <span>Shop</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-emerald-950 text-lime-300 text-[11px] font-bold">
+              {cartItems.reduce((sum, i) => sum + i.qty, 0)}
+            </span>
+          </button>
+        </div>
       </header>
 
-      <main className="relative z-20 pt-36 px-6 max-w-4xl mx-auto space-y-72">
-        <section className="text-center">
-          <span className="px-3 py-1 rounded-full text-xs uppercase tracking-widest text-lime-300 bg-lime-400/10 border border-lime-400/30">
-            Interactive 3D Living Experience
-          </span>
-          <h2 className="mt-6 text-5xl sm:text-7xl font-extrabold uppercase tracking-tight text-white leading-tight">
-            PLANTS.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-300 via-emerald-400 to-amber-300">
-              REVOLUTIONIZED.
+      {/* 5. VERTICAL SCROLL HUD PROGRESS BAR */}
+      <div className="fixed right-4 sm:right-7 top-1/2 -translate-y-1/2 z-30 hidden sm:flex flex-col items-center gap-2 pointer-events-none">
+        <span className="font-mono text-xs text-lime-300 tracking-widest">
+          {String(Math.round(scrollProgress * 100)).padStart(2, '0')}%
+        </span>
+        <div className="w-1.5 h-44 bg-white/10 rounded-full overflow-hidden relative">
+          <div
+            className="w-full bg-gradient-to-b from-lime-300 to-emerald-400 rounded-full transition-all duration-75"
+            style={{ height: `${Math.max(4, scrollProgress * 100)}%` }}
+          />
+        </div>
+        <span className="text-[10px] uppercase tracking-widest text-emerald-200/70 [writing-mode:vertical-rl] rotate-180 mt-2 font-mono">
+          {CHAPTER_NAMES[activeChapter]}
+        </span>
+      </div>
+
+      {/* 6. MAIN SCROLLABLE CHAPTER CONTENT */}
+      <main className="relative z-10">
+        {/* CHAPTER 1: HERO */}
+        <section className="min-h-[120vh] w-full flex items-center justify-center text-center px-4 pt-32 pb-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-lime-400/10 border border-lime-400/30 text-lime-300 text-xs uppercase tracking-widest mb-6">
+              <span>Rastlina Interactive 3D Experience</span>
+              <span>•</span>
+              <span>Scroll to Explore Living Botanicals</span>
+            </div>
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-lime-300 via-white to-emerald-300 drop-shadow-[0_0_35px_rgba(163,230,53,0.35)]">
+              PLANTS. REVOLUTIONIZED.
+            </h1>
+            <p className="mt-6 max-w-xl mx-auto text-sm sm:text-base text-emerald-100/85 font-light leading-relaxed">
+              Rooted in confidence, growing with you. Scroll through the living science behind every handpicked indoor plant, self-watering planter, and custom soil mix crafted in Hyderabad.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button
+                onClick={() => scrollToChapter(0.2)}
+                className="px-6 py-3 rounded-full bg-lime-400 text-emerald-950 font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-lime-300 transition shadow-lg shadow-lime-400/20"
+              >
+                Begin The Scroll Journey ↓
+              </button>
+              <button
+                onClick={() => scrollToChapter(0.8)}
+                className="px-6 py-3 rounded-full bg-[rgba(6,24,14,0.62)] backdrop-blur-md border border-lime-400/30 text-lime-200 font-semibold text-xs sm:text-sm uppercase tracking-wider hover:bg-white/10 transition"
+              >
+                Explore Bestsellers (₹299+)
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* CHAPTER 2: CELLULAR FOUNDATION & CONSTELLATION */}
+        <section className="min-h-screen w-full flex items-center justify-start px-4 sm:px-12 py-24">
+          <div className="max-w-xl bg-[rgba(6,24,14,0.68)] backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-lime-400/25 shadow-2xl">
+            <span className="text-xs font-semibold uppercase tracking-widest text-amber-300 block mb-2 font-mono">
+              Chapter 02 • Soil Microbiome & Cellular Genetics
             </span>
-          </h2>
-          <p className="mt-6 text-emerald-100/80 max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
-            Scroll vertically to scrub through natural light cycles in your {spaces[activeSpace].name}.
-          </p>
-          <div className="mt-8 inline-block animate-bounce text-lime-400 text-sm font-semibold">
-            ↓ Scroll Down to Explore
+            <h2 className="text-3xl sm:text-5xl font-extrabold uppercase mb-4 text-white">
+              FIRST, A SOLID FOUNDATION.
+            </h2>
+            <p className="text-sm sm:text-base text-emerald-100/85 leading-relaxed mb-6">
+              Just like the glowing cellular constellation network, our cultivation starts at the microscopic level. We map aeration, cocopeat moisture retention, perlite drainage, and organic bio-nutrients across 40+ indoor species—from <strong className="text-lime-300">Calathea Roseopicta</strong> to <strong className="text-lime-300">Philodendron Oxycardium Red</strong>.
+            </p>
+            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-lime-400/20 text-center">
+              <div>
+                <span className="font-mono text-2xl sm:text-3xl font-bold text-lime-300 block">18+</span>
+                <span className="text-[11px] text-emerald-200/75 uppercase">Soil Bio-Nodes</span>
+              </div>
+              <div>
+                <span className="font-mono text-2xl sm:text-3xl font-bold text-amber-300 block">3.2x</span>
+                <span className="text-[11px] text-emerald-200/75 uppercase">Oxygenation</span>
+              </div>
+              <div>
+                <span className="font-mono text-2xl sm:text-3xl font-bold text-emerald-300 block">100%</span>
+                <span className="text-[11px] text-emerald-200/75 uppercase">Pest-Free Media</span>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="p-8 rounded-2xl backdrop-blur-xl bg-black/60 border border-lime-400/30">
-          <span className="text-xs font-semibold text-amber-300 uppercase tracking-widest block mb-2">
-            Engineered For Indoor Spaces
-          </span>
-          <h3 className="text-3xl font-bold text-white mb-4">
-            Rastlina Self-Watering Sub-Irrigation
-          </h3>
-          <p className="text-emerald-100/80 text-sm leading-relaxed mb-4">
-            Every set arrives with a hand-acclimatized plant, self-watering sub-irrigation pot, and custom aerated potting mix—delivering up to 14 days of hydration autonomy.
-          </p>
-          <div className="inline-flex items-center gap-2 text-xs text-lime-300 bg-lime-400/10 px-3 py-1.5 rounded-lg border border-lime-400/20">
-            <span>✓ {spaces[activeSpace].badge}</span>
-            <span>•</span>
-            <span>Zero Root Rot</span>
+        {/* CHAPTER 3: SELF-WATERING PLANTER ENGINEERING */}
+        <section className="min-h-screen w-full flex items-center justify-end px-4 sm:px-12 py-24">
+          <div className="max-w-xl bg-[rgba(6,24,14,0.68)] backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-lime-400/25 shadow-2xl">
+            <span className="text-xs font-semibold uppercase tracking-widest text-lime-300 block mb-2 font-mono">
+              Chapter 03 • Self-Watering Planter Engineering
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold uppercase mb-4 text-white">
+              WE TAKE IT TO YOUR SPACE.
+            </h2>
+            <p className="text-sm sm:text-base text-emerald-100/85 leading-relaxed mb-5">
+              Roots extend downward into the <strong className="text-lime-300">Rastlina Sub-Irrigation Reservoir</strong> while foliage unfurls upward into natural ambient room lighting. Test our interactive room-light simulator below:
+            </p>
+
+            {/* Room Light Simulator */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-xs text-emerald-200/80 mr-1">Simulate Room Light:</span>
+              <button
+                onClick={() => { setLightMode('morning'); showToast('☀️ Simulated Morning Balcony Sunlight'); }}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+                  lightMode === 'morning' ? 'bg-amber-400 text-emerald-950 font-bold' : 'bg-white/10 text-emerald-100'
+                }`}
+              >
+                Morning Sun
+              </button>
+              <button
+                onClick={() => { setLightMode('indoor'); showToast('🛋️ Simulated Living Room Indirect Light'); }}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+                  lightMode === 'indoor' ? 'bg-lime-400 text-emerald-950 font-bold' : 'bg-white/10 text-emerald-100'
+                }`}
+              >
+                Living Room
+              </button>
+              <button
+                onClick={() => { setLightMode('night'); showToast('🌙 Simulated Evening Ambient Glow'); }}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+                  lightMode === 'night' ? 'bg-sky-400 text-emerald-950 font-bold' : 'bg-white/10 text-emerald-100'
+                }`}
+              >
+                Evening Glow
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-emerald-950/70 border border-lime-400/25 flex items-center justify-between text-xs">
+              <span>💧 Sub-Irrigation Autonomy: <strong>Up to 10–14 Days</strong></span>
+              <span className="text-lime-300 font-bold">Zero Root Rot</span>
+            </div>
           </div>
         </section>
 
-        <section className="p-8 rounded-2xl backdrop-blur-xl bg-black/60 border border-lime-400/30 text-center">
-          <span className="text-xs font-semibold text-lime-300 uppercase tracking-widest block mb-2">
-            Top 1% Indoor Cultivars
-          </span>
-          <h3 className="text-3xl font-bold text-white mb-6">
-            Hand-Acclimatized In Hyderabad
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-            {RASTLINA_PRODUCTS.map((p) => (
-              <div key={p.id} className="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-center text-xs text-lime-300 font-semibold mb-1">
-                    <span>{p.category}</span>
-                    <span className="bg-lime-400/20 px-2 py-0.5 rounded text-[10px]">{p.badge}</span>
-                  </div>
-                  <h4 className="font-bold text-base text-white">{p.name}</h4>
-                  <p className="text-xs text-emerald-100/70 mt-1">{p.desc}</p>
-                </div>
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
-                  <span className="text-lg font-bold text-lime-300">₹{p.price}</span>
-                  <button
-                    onClick={() => addToCart(p.id, p.name)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-lime-400 text-emerald-950 hover:bg-lime-300 transition"
-                  >
-                    + Add to Basket
-                  </button>
+        {/* CHAPTER 4: ACCLIMATIZATION NURSERY MATRIX */}
+        <section className="min-h-screen w-full flex items-center justify-start px-4 sm:px-12 py-24">
+          <div className="max-w-xl bg-[rgba(6,24,14,0.68)] backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-lime-400/25 shadow-2xl">
+            <span className="text-xs font-semibold uppercase tracking-widest text-lime-300 block mb-2 font-mono">
+              Chapter 04 • Acclimatization Testing Matrix
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold uppercase mb-4 text-white">
+              TESTING, TESTING AND MORE TESTING.
+            </h2>
+            <p className="text-sm sm:text-base text-emerald-100/85 leading-relaxed mb-5">
+              Before any plant is delivered to a home, thousands of nursery specimens undergo multi-week indoor humidity, low-light stress, and leaf-vitality checks at our Hyderabad greenhouse hub.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => { setGridFilter('all'); showToast('Displaying all 400 test plots'); }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  gridFilter === 'all' ? 'bg-lime-400 text-emerald-950' : 'bg-white/10 text-emerald-100'
+                }`}
+              >
+                All 400 Test Plots
+              </button>
+              <button
+                onClick={() => { setGridFilter('air'); showToast('Filtered: Air-Purifying Plants'); }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  gridFilter === 'air' ? 'bg-lime-400 text-emerald-950' : 'bg-white/10 text-emerald-100'
+                }`}
+              >
+                Air-Purifying Pass
+              </button>
+              <button
+                onClick={() => { setGridFilter('exotic'); showToast('Filtered: Exotic Beauties Pass'); }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  gridFilter === 'exotic' ? 'bg-lime-400 text-emerald-950' : 'bg-white/10 text-emerald-100'
+                }`}
+              >
+                Exotic Beauties Pass
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* CHAPTER 5: ONLY THE FINEST 1% MAKE IT (LIVE CATALOG) */}
+        <section className="min-h-screen w-full flex items-center justify-center px-4 sm:px-8 py-24">
+          <div className="max-w-6xl w-full mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div className="lg:col-span-5 bg-[rgba(6,24,14,0.68)] backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-lime-400/25">
+                <span className="text-xs font-semibold uppercase tracking-widest text-amber-300 block mb-2 font-mono">
+                  Chapter 05 • The Golden Standard
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-extrabold uppercase mb-4 text-white">
+                  ONLY THE FINEST 1% MAKE IT HOME.
+                </h2>
+                <p className="text-sm sm:text-base text-emerald-100/85 leading-relaxed mb-5">
+                  Every Rastlina set arrives ready to gift with a vibrant, healthy plant, self-watering pot, and custom nutrient-rich soil mix—backed by <strong className="text-lime-300">1,000+ Happy Homes</strong> and a <strong className="text-lime-300">4.8/5 rating</strong> across India.
+                </p>
+                <div className="text-xs text-emerald-200/80 space-y-2">
+                  <div>✓ Handpicked from Kondapur, Hyderabad Greenhouses</div>
+                  <div>✓ Protected 7-Day Transit Health Guarantee</div>
                 </div>
               </div>
-            ))}
+
+              {/* Live Rastlina Product Cards */}
+              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {RASTLINA_PRODUCTS.map(product => {
+                  const inCart = cartItems.find(i => i.id === product.id);
+                  return (
+                    <div
+                      key={product.id}
+                      className="bg-[rgba(6,24,14,0.68)] backdrop-blur-md p-4 rounded-xl border border-lime-400/20 hover:border-lime-400/60 transition flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className="text-[10px] uppercase tracking-wider text-lime-300 font-semibold">
+                            {product.category}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-lime-400/20 text-lime-300 text-[10px] font-bold">
+                            {product.badge}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-lg text-white leading-snug">{product.name}</h3>
+                        <p className="text-xs text-emerald-100/75 mt-1 mb-3">{product.desc}</p>
+                      </div>
+                      <div className="flex items-center justify-between pt-2.5 border-t border-white/10">
+                        <div>
+                          <span className="font-mono text-xl font-bold text-lime-300">₹{product.price}</span>
+                          <span className="text-xs text-emerald-200/50 line-through ml-1 font-mono">₹{product.mrp}</span>
+                        </div>
+                        <button
+                          onClick={() => addToCart(product.id)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                            inCart
+                              ? 'bg-emerald-700 text-white'
+                              : 'bg-lime-400 text-emerald-950 hover:bg-lime-300'
+                          }`}
+                        >
+                          {inCart ? `In Basket (${inCart.qty}) +` : '+ Add to Basket'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CHAPTER 6: INFINITE NATURE LOOP FOOTER */}
+        <section className="min-h-[90vh] w-full flex items-center justify-center text-center px-4 py-20">
+          <div className="max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-400/15 border border-lime-400/30 text-lime-300 text-xs uppercase tracking-widest mb-6">
+              <span>♻ Cycle of Nature • Infinite Scroll Loop</span>
+            </div>
+
+            <nav className="flex flex-col items-center space-y-4 mb-8">
+              <button
+                onClick={() => showToast('🌿 Code LAUNCH40 applied — Flat 40% Off!')}
+                className="text-lg sm:text-2xl font-bold tracking-wider text-emerald-100 hover:text-lime-300 transition uppercase"
+              >
+                SIGN UP FOR GREEN OFFERS (FLAT 40% LAUNCH)
+              </button>
+              <button
+                onClick={() => showToast('📞 Plant Stylist Desk (Hyderabad): +91 81438 14466')}
+                className="text-lg sm:text-2xl font-bold tracking-wider text-emerald-100 hover:text-lime-300 transition uppercase"
+              >
+                CONTACT A PLANT STYLIST • HYDERABAD
+              </button>
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="text-lg sm:text-2xl font-bold tracking-wider text-emerald-100 hover:text-lime-300 transition uppercase"
+              >
+                EXPLORE COMBOS &amp; SELF-WATERING BUNDLES
+              </button>
+              <a
+                href="https://www.rastlina.com"
+                className="text-lg sm:text-2xl font-bold tracking-wider text-lime-300 hover:text-lime-200 transition uppercase"
+              >
+                VISIT RASTLINA STOREFRONT ↗
+              </a>
+            </nav>
+
+            <button
+              onClick={() => scrollToChapter(0)}
+              className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-lime-200 text-xs font-semibold transition"
+            >
+              ↑ Return to Top of Story
+            </button>
+
+            <p className="mt-8 text-[11px] text-emerald-200/60 font-mono">
+              © 2026 Rastlina Nature Hub Private Limited • Lake View Towers, Kondapur, Hyderabad 500084
+            </p>
           </div>
         </section>
       </main>
 
-      <div className="fixed bottom-6 left-6 z-30">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-lime-400 text-emerald-950 shadow-xl hover:bg-lime-300 transition flex items-center gap-2"
-        >
-          <span>🏡 Select Space to Place Plant</span>
-        </button>
-      </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-xl p-6 rounded-2xl bg-[#091b10] border border-lime-400/40 shadow-2xl">
-            <div className="flex justify-between items-center pb-3 border-b border-white/10">
-              <h3 className="text-lg font-bold text-white">Choose Your Room &amp; Botanicals</h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
-              >
-                ✕
-              </button>
+      {/* 7. SLIDING CART DRAWER */}
+      <div
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-md bg-[rgba(6,24,14,0.92)] backdrop-blur-xl border-l border-lime-400/30 p-6 transform transition-transform duration-300 flex flex-col justify-between ${
+          isCartOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div>
+          <div className="flex items-center justify-between pb-4 border-b border-lime-400/20">
+            <div>
+              <h3 className="font-bold text-2xl text-white">Your Rastlina Basket</h3>
+              <p className="text-xs text-lime-300">Flat 40–50% Launch Offers Applied</p>
             </div>
-            <div className="mt-4 space-y-3">
-              {(['living', 'bedroom', 'office'] as const).map((key) => (
-                <div
-                  key={key}
-                  onClick={() => {
-                    setActiveSpace(key);
-                    showToast(`Active room switched to ${spaces[key].name}`);
-                  }}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition ${
-                    activeSpace === key
-                      ? 'border-lime-400 bg-lime-400/15'
-                      : 'border-white/10 bg-white/5 hover:bg-white/10'
-                  }`}
-                >
-                  <div className="font-bold text-sm text-white">{spaces[key].name}</div>
-                  <div className="text-xs text-lime-300 mt-0.5">{spaces[key].badge}</div>
-                  <div className="text-xs text-emerald-100/70 mt-1">{spaces[key].desc}</div>
+            <button
+              onClick={() => setIsCartOpen(false)}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="mt-4 space-y-3 max-h-[55vh] overflow-y-auto pr-1">
+            {cartItems.map(item => {
+              const p = RASTLINA_PRODUCTS.find(prod => prod.id === item.id);
+              if (!p) return null;
+              return (
+                <div key={item.id} className="p-3 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs font-semibold text-white">{p.name}</div>
+                    <div className="text-[11px] text-lime-300 font-mono">
+                      ₹{p.price} × {item.qty} = ₹{p.price * item.qty}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => updateCartQty(item.id, -1)}
+                      className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-xs font-bold"
+                    >
+                      −
+                    </button>
+                    <span className="text-xs px-1 font-mono">{item.qty}</span>
+                    <button
+                      onClick={() => updateCartQty(item.id, 1)}
+                      className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-xs font-bold"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-between items-center pt-3 border-t border-white/10">
-              <span className="text-xs text-emerald-200">
-                Basket: <strong>{totalCartCount} items</strong>
-              </span>
-              <a
-                href="https://www.rastlina.com/shop"
-                target="_blank"
-                rel="noreferrer"
-                className="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-lime-400 text-emerald-950 hover:bg-lime-300 transition"
-              >
-                Proceed to Rastlina Shop ↗
-              </a>
-            </div>
+              );
+            })}
           </div>
         </div>
-      )}
 
-      {toastText && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-lime-400 text-emerald-950 text-xs font-bold shadow-2xl animate-fade-in">
-          {toastText}
+        <div className="pt-4 border-t border-lime-400/20 space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-emerald-100/80">Subtotal (Self-Watering Pot &amp; Soil Mix)</span>
+            <span className="font-mono text-xl font-bold text-lime-300">₹{cartTotal}</span>
+          </div>
+          <a
+            href="https://www.rastlina.com/shop?category=exotic-beauties"
+            className="block w-full text-center py-3 rounded-xl bg-lime-400 text-emerald-950 font-bold text-xs uppercase tracking-wider hover:bg-lime-300 transition"
+          >
+            Proceed to Checkout on Rastlina.com ↗
+          </a>
+        </div>
+      </div>
+
+      {/* 8. INTERACTIVE TOAST ALERT */}
+      {toastMessage && (
+        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-lime-400 text-emerald-950 font-bold text-xs shadow-xl animate-fade-in">
+          {toastMessage}
         </div>
       )}
     </div>
   );
-};
-
-export default RastlinaScroll3D;
+}
