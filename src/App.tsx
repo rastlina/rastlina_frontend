@@ -1,5 +1,4 @@
 import RastlinaScroll3D from './components/RastlinaScroll3D';
-import RastlinaScroll3D from './components/RastlinaScroll3D';
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
