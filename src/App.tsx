@@ -111,7 +111,8 @@ const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: Re
                 <div className="flex-1">
                   <RouteBoundary>
                     <Routes>
-                      <Route path="/" element={<Index />} />
+                      <Route path="/" element={<RastlinaScroll3D />} />
+                      <Route path="/classic-home" element={<Index />} />
                       <Route path="/3d" element={<RastlinaScroll3D />} />
                       <Route path="/shop" element={<Shop />} />
                       <Route path="/shop/:category" element={<Shop />} />
