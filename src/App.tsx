@@ -1,4 +1,3 @@
-import RastlinaScroll3D from './components/RastlinaScroll3D';
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
@@ -34,8 +33,6 @@ const queryClient = new QueryClient();
 
 function RouteBoundary({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
-  // The eager homepage must hydrate as one tree before provider effects update.
-  // Lazy routes still retain their normal loading boundary.
   return pathname === '/' ? <>{children}</> :
     <Suspense fallback={<div className="min-h-[60vh] pt-36 text-center" role="status">Loading Rastlina…</div>}>{children}</Suspense>;
 }
@@ -78,7 +75,6 @@ const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: Re
     fbq('init', META_PIXEL_ID);
     fbq('track', 'PageView');
 
-    // Queue events immediately, but do not compete with first-screen resources.
     const loadPixel = () => {
       const appendScript = () => {
         const script = document.createElement('script');
@@ -111,9 +107,7 @@ const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: Re
                 <div className="flex-1">
                   <RouteBoundary>
                     <Routes>
-                      <Route path="/" element={<RastlinaScroll3D />} />
-                      <Route path="/classic-home" element={<Index />} />
-                      <Route path="/3d" element={<RastlinaScroll3D />} />
+                      <Route path="/" element={<Index />} />
                       <Route path="/shop" element={<Shop />} />
                       <Route path="/shop/:category" element={<Shop />} />
                       <Route path="/product/:slug" element={<ProductDetail />} />
