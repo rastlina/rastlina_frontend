@@ -10,10 +10,11 @@ import { CartProvider } from "@/contexts/CartContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
-import ScrollToTop from "@/components/ScrollToTop"; 
+import ScrollToTop from "@/components/ScrollToTop";
 import WhatsAppButton from "./components/home/WhatsAppButton";
 import { RouteSeo } from '@/components/seo/RouteSeo';
 import Index from "./pages/Home";
+
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const WatchAndShopDetail = lazy(() => import('./pages/WatchAndShopDetail'));
 const Shop = lazy(() => import('./pages/Shop'));
@@ -38,6 +39,7 @@ function RouteBoundary({ children }: { children: ReactNode }) {
   return pathname === '/' ? <>{children}</> :
     <Suspense fallback={<div className="min-h-[60vh] pt-36 text-center" role="status">Loading Rastlina…</div>}>{children}</Suspense>;
 }
+
 const META_PIXEL_ID = '1051662191229917';
 
 type MetaPixel = ((...args: unknown[]) => void) & {
@@ -57,6 +59,7 @@ const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: Re
   useEffect(() => {
     document.dispatchEvent(new Event('rastlina:ready'));
   }, []);
+
   useEffect(() => {
     const pixelWindow = window as MetaPixelWindow;
     if (pixelWindow.fbq) return;
@@ -74,6 +77,7 @@ const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: Re
 
     fbq('init', META_PIXEL_ID);
     fbq('track', 'PageView');
+
     // Queue events immediately, but do not compete with first-screen resources.
     const loadPixel = () => {
       const appendScript = () => {
@@ -93,19 +97,19 @@ const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: Re
   }, []);
 
   return (
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <CartProvider>
-              <Toaster />
-              <Sonner />
-              <Router>
-                <RouteSeo />
-                <ScrollToTop />
-                <div className="min-h-screen flex flex-col">
-                  <Header />
-                  <div className="flex-1">
-                    <RouteBoundary>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <Router>
+              <RouteSeo />
+              <ScrollToTop />
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <div className="flex-1">
+                  <RouteBoundary>
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/3d" element={<RastlinaScroll3D />} />
@@ -125,17 +129,17 @@ const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: Re
                       <Route path="/checkout" element={<CheckoutPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
-                    </RouteBoundary>
-                  </div>
-                  <Footer />
-                  <CartDrawer />
-                  <WhatsAppButton />
+                  </RouteBoundary>
                 </div>
-              </Router>
-            </CartProvider>
-          </TooltipProvider>
-        </QueryClientProvider>
-      </AuthProvider>
+                <Footer />
+                <CartDrawer />
+                <WhatsAppButton />
+              </div>
+            </Router>
+          </CartProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 };
 
