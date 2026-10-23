@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { applyProductEditorial } from '../src/data/productEditorial';
-import { articlePageHtml, pageHtml, productPageHtml, type Article } from '../src/server/pageHtml';
+import { applyProductEditorial } from '../src/data/productEditorial.js';
+import { articlePageHtml, pageHtml, productPageHtml, type Article } from '../src/server/pageHtml.js';
 import type { ApiProductDetail } from '../src/pages/ProductDetail';
 
 type RequestLike = { url?: string; query?: Record<string, string | string[] | undefined> };

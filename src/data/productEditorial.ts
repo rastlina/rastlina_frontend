@@ -1,5 +1,5 @@
 import type { ApiProductDetail } from '@/pages/ProductDetail';
-import { normalizeProductName } from '../utils/productName';
+import { normalizeProductName } from '../utils/productName.js';
 
 // Reviewed against RHS houseplant/calathea guides and NC State Plant Toolbox.
 // Exact SKU matching keeps future catalogue additions out of this editorial pass.

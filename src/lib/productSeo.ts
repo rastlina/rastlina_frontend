@@ -1,5 +1,5 @@
 import type { ApiProductDetail, ProductVariant } from '../pages/ProductDetail';
-import { SITE_URL } from './seoUrls';
+import { SITE_URL } from './seoUrls.js';
 
 export function defaultProductVariant(product: ApiProductDetail) {
   return product.variants.find(variant => variant.in_stock) || product.variants[0] || null;

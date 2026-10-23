@@ -1,5 +1,5 @@
-import { canonicalUrl, schemaJson, SITE_URL } from '../lib/seoUrls';
-import { productSeo } from '../lib/productSeo';
+import { canonicalUrl, schemaJson, SITE_URL } from '../lib/seoUrls.js';
+import { productSeo } from '../lib/productSeo.js';
 import type { ApiProductDetail } from '../pages/ProductDetail';
 
 export const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, character => ({
