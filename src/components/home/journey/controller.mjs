@@ -318,6 +318,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   const currentCopy = byId('story-copy-current');
   const nextCopy = byId('story-copy-next');
   let copyTravel = 320;
+  let introWasVisible = true;
   function measureCopy() {
     copyTravel = Math.max(currentCopy.offsetHeight, nextCopy.offsetHeight, 160) + 32;
   }
@@ -396,21 +397,35 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   }
   function renderScroll() {
     framePending = false;
+    const introRect = introSection.getBoundingClientRect();
+    const introVisible = introRect.top < window.innerHeight && introRect.top + introSection.offsetHeight > scrollOffset;
+    const roomTop = selected ? roomSection.getBoundingClientRect().top : Infinity;
+    const roomVisible = Boolean(selected && (selecting || (roomTop < window.innerHeight && roomTop + roomSection.offsetHeight > scrollOffset)));
+    // Release the room before loading the returning story's two decoders.
+    if (selected && !roomVisible) {
+      roomPlayback.release();
+      roomWindow.classList.remove('has-video');
+    }
     const introPosition = measuredProgress(introSection);
     if (storyMode === 'scroll' && !manualMode() && !introManual) {
       const progress = storyProgress(introPosition);
       introMotion.setTarget(progress, reducedMotion.matches);
     }
-    const introRect = introSection.getBoundingClientRect();
-    autoStory.setActive(!document.hidden && introRect.top < window.innerHeight && introRect.top + introSection.offsetHeight > scrollOffset);
+    // Returning from a room starts the complete story again. Tab visibility
+    // changes alone must preserve the current frame or an explicit user pause.
+    if (storyMode === 'auto' && introVisible && !introWasVisible && autoStory.phase === 'complete') {
+      closeSpacePrompt();
+      autoStory.enable(0);
+    }
+    introWasVisible = introVisible;
+    autoStory.setActive(!document.hidden && introVisible);
     const journeyRect = surface.getBoundingClientRect?.();
     modeButton.hidden = Boolean(journeyRect && (journeyRect.bottom < scrollOffset || journeyRect.top > window.innerHeight));
     document.body?.classList.toggle('has-journey-mode-control', !modeButton.hidden);
     if (selected) {
       if (scrollAnimationEnabled) roomPlayback.setProgress(cinematicProgress(measuredProgress(roomSection)));
       applyDepth(roomSection, 0, 0);
-      const top = roomSection.getBoundingClientRect().top;
-      roomPlayback.setActive(!document.hidden && (selecting || (top < window.innerHeight && top + roomSection.offsetHeight > scrollOffset)));
+      roomPlayback.setActive(!document.hidden && roomVisible);
     }
     updateChoices();
 

@@ -160,6 +160,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
       await scrollStory((index + 0.4) / 5);
       assert.equal(get('story-position').textContent, `${index + 1} / 5`);
       assert.equal(get('story-eyebrow').textContent, labels[index]);
+      assert.ok(chapters.filter(video => video.src).length <= 2, 'Forward and reverse scrolling retain at most two story decoders');
       assert.equal(chapters[index].currentTime, 5, `Chapter ${index + 1} follows scroll progress`);
       assert.equal(get(`story-frame-${index + 1}`).attributes['aria-hidden'], 'false');
       assert.ok(chapters[index].src.endsWith(`/assets/story-0${index + 1}${chapterSuffix}.mp4`));
@@ -279,6 +280,30 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     await scroll(0);
     assert.equal(document.documentElement.classList.contains('manual-mode'), false);
     assert.equal(get('story-position').textContent, '1 / 5');
+    // Complete autoplay, visit a room, and return to the top without pressing Play.
+    await click(get('journey-mode-switch'));
+    await click(get('journey-mode-switch'));
+    for (const chapter of chapters) {
+      await settleMedia();
+      assert.equal(chapter.paused, false);
+      chapter.advance(chapter.duration);
+      chapter.paused = true;
+      chapter.dispatchEvent(new Event('ended'));
+      drain();
+    }
+    assert.equal(get('space-prompt').hidden, false);
+    document.hidden = true;
+    document.dispatchEvent(new Event('visibilitychange')); drain();
+    document.hidden = false;
+    document.dispatchEvent(new Event('visibilitychange')); drain();
+    assert.equal(get('story-position').textContent, '5 / 5', 'Switching tabs preserves the completed frame');
+    await click(cards.find(card => card.dataset.room === 'bedroom'));
+    assert.equal(room.paused, false);
+    await scroll(0);
+    assert.equal(get('story-position').textContent, '1 / 5', 'Returning from a room restarts the story');
+    assert.equal(chapters[0].paused, false, 'The returning story autoplays without a button');
+    assert.equal(room.src, '', 'The offscreen room releases its decoder before story replay');
+    assert.equal(get('space-prompt').hidden, true);
   } finally {
     dispose?.();
     assert.equal(callbacks.size, 0, 'Unmount cancels pending animation frames');

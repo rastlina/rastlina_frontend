@@ -72,6 +72,9 @@ export class StorySequence {
     this.progress = clampProgress(value);
     const state = storyFrame(this.progress, this.entries.length);
     this.state = state;
+    // Scroll mode shares the same two-decoder budget as autoplay, including
+    // large jumps and reverse scrolling. Free old sources before loading new ones.
+    this.trimPlayback(state.index);
     this.ensure(state.index);
     this.ensure(state.index + 1, true);
     this.entries[state.index].scrubber.setProgress(state.movie);
