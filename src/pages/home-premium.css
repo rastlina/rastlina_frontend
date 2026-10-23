@@ -11,7 +11,11 @@ body:not(.rastlina-light-shop) .luxury-header :is(input,select){background:#1725
 body:not(.rastlina-light-shop) .luxury-header input::placeholder{color:#aab5a3}
 body:not(.rastlina-light-shop) .luxury-header :is(button,a):hover{color:#dfc997}
 body:not(.rastlina-light-shop) .luxury-header :is(.hover\:bg-green-50,.hover\:bg-gray-50):hover{background:#213321}
-body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:grayscale(1) invert(1) sepia(.65) saturate(.8) brightness(1.4);mix-blend-mode:screen}
+/* Blend the whole link: the mobile centering transform isolates its image. */
+body:not(.rastlina-light-shop) .luxury-header .brand-logo-link{mix-blend-mode:screen}
+body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:grayscale(1) invert(1) sepia(.65) saturate(.8) brightness(1.4)}
+.rastlina-footer .brand-logo-link{mix-blend-mode:screen}
+.rastlina-footer .brand-logo-link img{filter:grayscale(1) invert(1) sepia(.65) saturate(.8) brightness(1.4)}
 .luxury-header button:focus-visible,.luxury-header a:focus-visible{outline:2px solid #b89b5b;outline-offset:3px}
 @keyframes luxury-enter{from{transform:translateY(16px)}to{transform:translateY(0)}}
 @media(prefers-reduced-motion:no-preference){.home-collections>section[data-revealed="true"]>.container-custom{animation:luxury-enter .5s cubic-bezier(.2,.7,.2,1) both}}

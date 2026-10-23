@@ -1,6 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { clampProgress, sectionProgress, cinematicProgress, nurseryProgress, sceneDepth, choiceDepth, finalFrameTime, roomSelection, VideoScrubber } from '../../src/components/home/journey/controller.mjs';
+import { preferCompactMedia } from '../../src/components/home/journey/media.mjs';
+
+test('normal mobile connections retain HD footage; data saving and 2G keep their compact fallback', () => {
+  assert.equal(preferCompactMedia(undefined), false);
+  assert.equal(preferCompactMedia({ effectiveType: '4g', saveData: false }), false);
+  assert.equal(preferCompactMedia({ effectiveType: '3g' }), false);
+  assert.equal(preferCompactMedia({ effectiveType: '4g', saveData: true }), true);
+  assert.equal(preferCompactMedia({ effectiveType: '2g' }), true);
+  assert.equal(preferCompactMedia({ effectiveType: 'slow-2g' }), true);
+});
 
 class Video extends EventTarget {
   constructor() {

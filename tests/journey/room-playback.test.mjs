@@ -74,6 +74,42 @@ function fixture() {
   };
 }
 
+test('a transient room play interruption retries when data arrives without requiring Play', async () => {
+  const f = fixture();
+  try {
+    f.video.playResult = () => Promise.reject(Object.assign(new Error('seek interrupted play'), { name: 'AbortError' }));
+    await f.start('bedroom');
+    assert.equal(f.playback.phase, 'playing');
+    f.video.playResult = undefined;
+    f.video.dispatchEvent(new Event('canplay'));
+    await Promise.resolve();
+    assert.equal(f.video.paused, false);
+    assert.equal(f.states.at(-1), true);
+  } finally { f.playback.dispose(); }
+});
+
+test('offscreen room media releases its decoder and restores its frame and manual pause', async () => {
+  const f = fixture();
+  try {
+    await f.start('office');
+    f.video.advance(4);
+    f.playback.release();
+    assert.equal(f.video.src, '');
+    assert.equal(f.timers.size, 0);
+    f.playback.setActive(true);
+    f.video.decoded(); f.video.completeSeek(); await Promise.resolve();
+    assert.equal(f.video.currentTime, 4);
+    assert.equal(f.video.paused, false);
+    f.playback.pause();
+    f.playback.release();
+    f.playback.setActive(true);
+    f.video.decoded(); f.video.completeSeek(); await Promise.resolve();
+    assert.equal(f.video.currentTime, 4);
+    assert.equal(f.video.paused, true);
+    assert.equal(f.playback.phase, 'paused');
+  } finally { f.playback.dispose(); }
+});
+
 for (const room of ['living-room', 'bedroom', 'office']) test(`${room} plays naturally, resets to its first decoded frame, waits exactly five seconds, and repeats`, async () => {
   const f = fixture();
   await f.start(room);

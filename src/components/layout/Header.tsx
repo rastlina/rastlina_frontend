@@ -391,7 +391,7 @@ const extraNavItems = [
             <button aria-label="Toggle menu" aria-expanded={mobileOpen} className="p-2 -ml-2 text-[#1A3831]" onClick={() => { setMobileOpen(!mobileOpen); setMobileSearchOpen(false); }}>
               {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
-            <Link to="/" className="absolute left-1/2 -translate-x-1/2">
+            <Link to="/" className="brand-logo-link absolute left-1/2 -translate-x-1/2">
               <img src="/logo-optimized.webp" alt="Rastlina" width={520} height={196} className="h-10 w-auto object-contain"
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             </Link>
@@ -412,7 +412,7 @@ const extraNavItems = [
 
           {/* ── DESKTOP ── */}
           <div className="hidden lg:flex items-center h-[72px] gap-6">
-            <Link to="/" className="flex-shrink-0">
+            <Link to="/" className="brand-logo-link flex-shrink-0">
               <img src="/logo-optimized.webp" alt="Rastlina" width={520} height={196} className="h-14 w-auto object-contain"
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             </Link>

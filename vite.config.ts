@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => ({
 
     // ✅ ADD THIS
     allowedHosts: [
+      "terminal.local",
       "unmistaking-unsymbolic-jadiel.ngrok-free.dev",
       ".ngrok-free.dev", // optional but recommended for dev
     ],

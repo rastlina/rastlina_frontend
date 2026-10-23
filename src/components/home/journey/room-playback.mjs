@@ -30,7 +30,7 @@ export class RoomPlayback {
     });
     listen('error', () => { if (this.isCurrent()) this.fail(); });
   }
-  isCurrent() { return !this.failed && this.source && (this.video.currentSrc || this.video.src) === this.source; }
+  isCurrent() { return !this.failed && !this.suspended && this.source && (this.video.currentSrc || this.video.src) === this.source; }
   cancelTimers() {
     this.clearTimer(this.waitTimer);
     this.clearTimer(this.timeout);
@@ -45,7 +45,7 @@ export class RoomPlayback {
     this.generation++;
     this.cancelTimers();
     this.video.pause();
-    Object.assign(this, { failed: false, ready: false, progress: 0, pendingSeek: null, phase: 'loading', playPending: false });
+    Object.assign(this, { failed: false, suspended: false, ready: false, progress: 0, pendingSeek: null, phase: 'loading', playPending: false });
     this.onState(true);
     this.onFrame(0);
     try {
@@ -103,9 +103,12 @@ export class RoomPlayback {
     try {
       Promise.resolve(this.video.play()).then(() => {
         if (generation === this.generation) this.playPending = false;
-      }, () => {
+      }, error => {
         if (generation !== this.generation) return;
         this.playPending = false;
+        // Loading or seeking can interrupt a pending play on mobile. Readiness
+        // events retry it without turning that interruption into a user pause.
+        if (error?.name === 'AbortError') return;
         this.pause(); // A blocked autoplay can be resumed with the visible button.
       });
     } catch { this.playPending = false; this.pause(); }
@@ -150,8 +153,24 @@ export class RoomPlayback {
       this.clearTimer(this.waitTimer);
       this.waitTimer = null;
       this.video.pause();
+    } else if (this.suspended) {
+      const { source, progress, phase } = this;
+      this.load(source);
+      this.progress = progress;
+      this.pendingSeek = progress;
+      this.phase = phase === 'paused' ? 'paused' : phase === 'waiting' || phase === 'resetting' ? 'resetting' : 'loading';
+      this.onState(this.phase !== 'paused');
     } else if (this.phase === 'waiting') this.waitToReplay();
     else if (this.phase === 'playing' || this.phase === 'loading') this.frameReady();
+  }
+  release() {
+    if (!this.source || this.suspended || this.failed) return;
+    this.setActive(false);
+    this.cancelTimers();
+    this.suspended = true;
+    this.ready = false;
+    this.video.removeAttribute?.('src');
+    this.video.load();
   }
   fail() {
     if (this.failed) return;

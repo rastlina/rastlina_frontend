@@ -25,7 +25,7 @@ function fixture(options = {}){
   const auto=new StoryAutoplay(sequence,{requestFrame:cb=>{queue.set(++id,cb);return id;},cancelFrame:key=>queue.delete(key),onState:x=>states.push(x),onComplete:()=>completions.push(true),transitionMs:100,...options});
   return {videos,sequence,auto,states,queue,mediaStates,completions,
     async start(){auto.enable(0);auto.setActive(true);videos[0].decode();videos[1].decode();await Promise.resolve();},
-    tick(){const entry=queue.entries().next().value;if(entry){queue.delete(entry[0]);time+=20;entry[1](time);}},
+    tick(step=20){const entry=queue.entries().next().value;if(entry){queue.delete(entry[0]);time+=step;entry[1](time);}},
     finishTransition(){let n=0;while(queue.size&&n++<40)this.tick();assert.equal(queue.size,0);},
     dispose(){auto.dispose();sequence.dispose();}
   };
@@ -37,6 +37,16 @@ test('default autoplay uses native playback and advances both the film and copy 
     assert.ok(f.sequence.progress>first);assert.equal(f.videos[0].seeks.length,0);
     f.videos[0].end();f.finishTransition();await Promise.resolve();
     assert.equal(f.sequence.state.index,1);assert.equal(f.videos[1].paused,false);assert.equal(f.videos[0].paused,true);
+  }finally{f.dispose();}
+});
+test('a delayed animation frame completes the handoff on time instead of stretching the transition', async () => {
+  const f=fixture();try{
+    await f.start();
+    f.videos[0].end();
+    f.tick(); f.tick(1000); await Promise.resolve();
+    assert.equal(f.auto.index,1);
+    assert.equal(f.videos[1].paused,false);
+    assert.equal(f.queue.size,0);
   }finally{f.dispose();}
 });
 test('autoplay runs every chapter in sequence and ends with a replay control',async()=>{

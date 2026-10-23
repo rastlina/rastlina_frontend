@@ -29,8 +29,7 @@ export const Footer = () => {
 
           {/* Brand */}
           <div className="space-y-5">
-            <Link to="/" className="inline-block">
-              <div className="bg-white p-2.5 rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:scale-[1.02] transition-transform">
+            <Link to="/" className="brand-logo-link inline-block hover:scale-[1.02] transition-transform">
                 <img
                   src="/logo-optimized.webp"
                   width={520}
@@ -39,7 +38,6 @@ export const Footer = () => {
                   alt="Rastlina Logo"
                   className="h-14 w-auto object-contain"
                 />
-              </div>
             </Link>
 
             <p className="text-sm text-white/75 leading-relaxed max-w-sm">

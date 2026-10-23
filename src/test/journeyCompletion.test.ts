@@ -40,6 +40,8 @@ it('shows the three space choices only after all five films and opens the chosen
   root.className = 'plant-journey'; root.innerHTML = markup; document.body.append(root);
   const intro = root.querySelector<HTMLElement>('#nursery-story')!;
   Object.defineProperty(intro, 'offsetHeight', { value: 700 });
+  // jsdom has no layout; the selected room needs a visible stage rectangle.
+  Object.defineProperty(root.querySelector('#room-story')!, 'offsetHeight', { value: 700 });
   const dialog = root.querySelector<HTMLDialogElement>('#space-prompt')!;
   dialog.showModal = vi.fn(() => { dialog.open = true; });
   dialog.close = vi.fn(() => { dialog.open = false; dialog.dispatchEvent(new Event('close')); });
