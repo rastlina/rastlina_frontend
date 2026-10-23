@@ -23,6 +23,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/3d",
+      "destination": "/index.html"
+    },
+    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },
@@ -35,7 +39,7 @@
     { "source": "/replacement-policy", "destination": "/seo-replacement-policy.html" },
     {
       "source": "/((?!api/|static/|media/).*)",
-      "destination": "/app.html"
+      "destination": "/index.html"
     }
   ]
 }
