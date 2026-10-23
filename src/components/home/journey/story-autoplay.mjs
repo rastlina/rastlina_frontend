@@ -230,7 +230,10 @@ export class StoryAutoplay {
     const tick = time => {
       this.frame = undefined;
       if (!this.running || this.phase !== 'transition') return;
-      if (this.lastTime !== null) this.elapsed += Math.max(0, Math.min(64, time - this.lastTime));
+      // Keep the handoff on its wall clock when a phone drops frames. Clamping
+      // each frame stretches a 900 ms transition into several seconds.
+      // Leaving the viewport already clears lastTime through stopFrame().
+      if (this.lastTime !== null) this.elapsed += Math.max(0, time - this.lastTime);
       this.lastTime = time;
       const t = Math.min(1, this.elapsed / this.transitionMs);
       // setProgress at a chapter boundary preloads the following chapter.
