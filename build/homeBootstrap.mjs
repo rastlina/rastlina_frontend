@@ -53,7 +53,7 @@ export function homeBootstrap(modulePath, fontCss, stylesheetPath = '') {
       }
     }, { once: true });
     const afterPaint = () => requestAnimationFrame(() => requestAnimationFrame(() => boot()));
-    const banner = document.querySelector('img[alt="Rastlina Banner"]');
+    const banner = document.querySelector('img[alt="Rastlina Banner"], #nursery-window .film-poster');
     if (banner?.complete && banner.naturalWidth > 0) afterPaint();
     else if (banner) {
       banner.addEventListener('load', afterPaint, { once: true });

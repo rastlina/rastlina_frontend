@@ -37,6 +37,7 @@ const BlogDetailPage = () => {
           headline: blog.title,
           image: new URL(blog.image, SITE_URL_BASE).toString(),
           datePublished: blog.publishedDate,
+          dateModified: blog.modifiedDate,
           mainEntityOfPage: `${SITE_URL_BASE}/blog/${blog.id}`,
           publisher: {
             '@type': 'Organization', '@id': `${SITE_URL_BASE}/#organization`,
@@ -77,6 +78,7 @@ const BlogDetailPage = () => {
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-10 pb-6 border-b border-gray-200">
           <BookOpen className="h-4 w-4" />
           <time dateTime={blog.publishedDate}>{blog.date}</time>
+          <span> · Updated <time dateTime={blog.modifiedDate}>23 October 2026</time></span>
         </div>
 
         {/* Render HTML Content */}

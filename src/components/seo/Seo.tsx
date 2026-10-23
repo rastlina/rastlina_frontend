@@ -10,6 +10,7 @@ type SeoProps = {
   image?: string;
   type?: 'website' | 'product' | 'article';
   noIndex?: boolean;
+  noFollow?: boolean;
   schema?: Record<string, unknown> | Array<Record<string, unknown>>;
 };
 
@@ -20,6 +21,7 @@ export function Seo({
   image = DEFAULT_IMAGE,
   type = 'website',
   noIndex = false,
+  noFollow = false,
   schema,
 }: SeoProps) {
   const canonical = canonicalUrl(path);
@@ -29,7 +31,7 @@ export function Seo({
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
-      <meta name="robots" content={noIndex ? 'noindex, nofollow' : 'index, follow'} />
+      <meta name="robots" content={`${noIndex ? 'noindex' : 'index'}, ${noFollow ? 'nofollow' : 'follow'}`} />
       <link rel="canonical" href={canonical} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />

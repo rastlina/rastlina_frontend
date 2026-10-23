@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 const footerLinks = [
+  { label: 'About Rastlina', href: '/about' },
   { label: 'Home', href: '/' },
   { label: 'Shop', href: '/shop' },
   { label: 'Contact Us', href: '/bulk' },

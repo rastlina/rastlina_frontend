@@ -3,7 +3,9 @@ import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, expect, it } from 'vitest';
 import { Seo } from '@/components/seo/Seo';
 import { canonicalUrl, schemaJson } from '@/lib/seoUrls';
-import { publicPages } from '@/components/seo/RouteSeo';
+import { publicPages, RouteSeo } from '@/components/seo/RouteSeo';
+import { StaticRouter } from 'react-router-dom/server';
+import vercel from '../../vercel.json';
 import { blogs } from '@/data/blogs';
 
 afterEach(() => { HelmetProvider.canUseDOM = true; });
@@ -35,4 +37,13 @@ it('provides canonical, title and description metadata for every public static s
 
 it('preserves article publication dates using explicit ISO dates', () => {
   expect(blogs.map(blog => blog.publishedDate)).toEqual(['2025-10-12', '2025-09-28', '2025-09-15']);
+});
+
+it('excludes secondary video views while retaining crawlable product links', () => {
+  HelmetProvider.canUseDOM = false;
+  const context: { helmet?: { meta: { toString(): string } } } = {};
+  renderToString(<HelmetProvider context={context}><StaticRouter location="/watch-shop/aglaonema-suksom-jaipong"><RouteSeo /></StaticRouter></HelmetProvider>);
+  expect(context.helmet!.meta.toString()).toContain('content="noindex, follow"');
+  expect(vercel.headers.find(rule => rule.source === '/watch-shop/:slug')?.headers)
+    .toContainEqual({ key: 'X-Robots-Tag', value: 'noindex, follow' });
 });

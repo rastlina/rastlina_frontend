@@ -7,7 +7,7 @@
     "predev": "node build/repairJourneyMedia.mjs",
     "dev": "vite",
     "prebuild": "node build/repairJourneyMedia.mjs",
-    "build": "vite build && node build/prerender.mjs",
+    "build": "vite build && node build/prerender.mjs && node build/checkServerRuntime.mjs",
     "build:dev": "vite build --mode development",
     "prebuild:dev": "node build/repairJourneyMedia.mjs",
     "lint": "eslint .",

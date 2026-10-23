@@ -16,6 +16,7 @@ import { ProductFAQ } from '@/components/product-detail/ProductFAQ';
 import { FixedBottomBar } from '@/components/product-detail/FixedBottomBar';
 import { Seo, SITE_URL_BASE } from '@/components/seo/Seo';
 import { applyProductEditorial } from '@/data/productEditorial';
+import { productSeo } from '@/lib/productSeo';
 
 // ─── Types matching the backend serializer exactly ────────────────────────────
 
@@ -340,50 +341,17 @@ const ProductDetail = () => {
     );
   }
 
-  const productPrice = activeVariant?.final_price ?? Number(product.price);
-  const primaryImage = product.images.find((image) => image.is_primary)?.image || product.images[0]?.image;
-  // Product descriptions in the catalogue can be editorially updated over time.
-  // Keep search metadata factual and consistently tied to the product being sold.
-  const productDescription = `Buy ${product.name} as a ready-to-gift indoor plant set from Rastlina Nature Hub Private Limited. Includes a self-watering pot and soil mix, with doorstep delivery across India.`;
-  const productSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: product.name,
-    sku: product.sku,
-    description: product.description,
-    image: product.images.map((image) => image.image),
-    brand: { '@type': 'Brand', name: 'Rastlina' },
-    offers: {
-      '@type': 'Offer',
-      url: `${SITE_URL_BASE}/product/${product.slug}`,
-      priceCurrency: 'INR',
-      price: productPrice,
-      availability: product.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      itemCondition: 'https://schema.org/NewCondition',
-    },
-    ...(product.review_count > 0 && product.average_rating > 0
-      ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: product.average_rating, reviewCount: product.review_count } }
-      : {}),
-  };
-  // console.log('PRODUCT DATA', product);
+  const seo = productSeo(product, activeVariant);
 
   return (
     <main className="bg-white pt-[120px] pb-32 relative">
       <Seo
-        title={`Buy ${product.name} Online in India | Rastlina`}
-        description={productDescription.slice(0, 155)}
-        path={`/product/${product.slug}`}
-        image={primaryImage}
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
+        image={seo.image}
         type="product"
-        schema={[productSchema, {
-          '@context': 'https://schema.org',
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL_BASE },
-            { '@type': 'ListItem', position: 2, name: 'Shop', item: `${SITE_URL_BASE}/shop` },
-            { '@type': 'ListItem', position: 3, name: product.name, item: `${SITE_URL_BASE}/product/${product.slug}` },
-          ],
-        }]}
+        schema={seo.schema}
       />
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 max-w-7xl py-3">

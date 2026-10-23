@@ -19,8 +19,8 @@
         </div>
         <div class="film-window" id="nursery-window">
           <div class="story-frame" id="story-frame-1" style="--frame-opacity:1">
-            <img class="film-poster" src="/journey/assets/story-01-start.webp" alt="Philodendron Oxycardium Red growing in the nursery" width="1440" height="810" fetchpriority="high">
-            <video id="nursery-video" class="film-video" muted playsinline disablepictureinpicture disableremoteplayback preload="none" poster="/journey/assets/story-01-start.webp" aria-label="Nursery approach, controlled by scrolling"></video>
+            <picture><source type="image/avif" srcset="/optimized/journey-first-768.avif 768w, /optimized/journey-first-1600.avif 1600w" sizes="100vw"><img class="film-poster" src="/journey/assets/story-01-start.webp" alt="Philodendron Oxycardium Red growing in the nursery" width="1440" height="810" fetchpriority="high"></picture>
+            <video id="nursery-video" class="film-video" muted playsinline disablepictureinpicture disableremoteplayback preload="none" aria-label="Nursery approach, controlled by scrolling"></video>
           </div>
           <div class="story-frame" id="story-frame-2" aria-hidden="true">
             <img class="film-poster" src="/journey/assets/story-02-start.webp" alt="The plant lifts from its nursery pot" width="1440" height="810" loading="lazy">
@@ -93,7 +93,7 @@
           </div>
         </div>
         <div class="film-window" id="room-window">
-          <img id="room-poster" class="film-poster" src="/journey/assets/living-room-start.webp" alt="Your selected room" width="1920" height="1080">
+          <img id="room-poster" class="film-poster" src="/journey/assets/living-room-start.webp" alt="Your selected room" width="1920" height="1080" loading="lazy" decoding="async">
           <video id="room-video" class="film-video" muted playsinline disablepictureinpicture disableremoteplayback preload="none" aria-label="Selected room orbit, plays automatically with a five-second pause between plays"></video>
           <div class="film-shade" aria-hidden="true"></div>
           <div class="room-label"><span class="caption-line" aria-hidden="true"></span><span id="room-label">Living Room</span><span class="orbit-readout" id="orbit-readout" aria-hidden="true">00 / 100</span></div>

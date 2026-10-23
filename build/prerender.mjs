@@ -1,5 +1,5 @@
 import { createServer } from 'vite';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { criticalCss } from './criticalCss.mjs';
 import { homeBootstrap } from './homeBootstrap.mjs';
 
@@ -13,7 +13,7 @@ const server = await createServer({
   ssr: { noExternal: ['react-helmet-async'] },
 });
 try {
-  const { render, renderMetadata, metadataPaths } = await server.ssrLoadModule('/src/entry-server.tsx');
+  const { render, renderMetadata, metadataPaths, renderPublicContent, articles } = await server.ssrLoadModule('/src/entry-server.tsx');
   const { html, helmet } = render();
   if (!html.includes('data-plant-journey') || !html.includes('id="nursery-story"') || !html.includes('Buy Indoor Plants Online in India')) {
     throw new Error('Public homepage prerender is incomplete; refusing to publish it.');
@@ -25,11 +25,23 @@ try {
   // Root index files take precedence over rewrites on static hosts. Preserve
   // the empty SPA shell separately for shop, product and account routes.
   await writeFile('dist/app.html', template);
+  await writeFile('dist/server-shell.html', template);
+  const builtAssets = await readdir('dist/assets');
+  const articleData = articles.map(article => {
+    if (article.image.startsWith('/optimized/')) return { ...article, image: `https://www.rastlina.com${article.image}` };
+    const base = article.image.split('/').pop().split('.')[0];
+    const image = builtAssets.find(file => file.startsWith(`${base}-`) && /\.(webp|avif|jpe?g|png)$/.test(file));
+    if (!image) throw new Error(`Missing article image: ${base}`);
+    return { ...article, image: `https://www.rastlina.com/assets/${image}` };
+  });
+  await writeFile('dist/article-data.json', JSON.stringify(articleData));
   for (const path of metadataPaths) {
     const metadata = renderMetadata(path);
-    const shell = template.replace(/<title[^>]*>[^<]*<\/title>/, metadata.title.toString())
+    let shell = template.replace(/<title[^>]*>[^<]*<\/title>/, metadata.title.toString())
       .replace(/<meta name="robots"[^>]*>/, '')
       .replace('</head>', `${metadata.meta.toString()}${metadata.link.toString()}</head>`);
+    const content = renderPublicContent(path);
+    if (content) shell = shell.replace('<div id="root"></div>', `<div id="root">${content}</div>`);
     // Normal createRoot startup is retained; only metadata is rendered here.
     await writeFile(`dist/seo-${path.slice(1)}.html`, shell);
   }
@@ -53,6 +65,11 @@ try {
   template = template.replace(/<title>[^<]*<\/title>/, helmet.title.toString());
   template = template.replace(/<meta name="robots"[^>]*>/, '');
   template = template.replace('</head>', `${helmet.meta.toString()}${helmet.link.toString()}${helmet.script.toString()}</head>`);
+  const firstImage = template.match(/<link\b[^>]*rel="preload"[^>]*as="image"[^>]*>/);
+  if (firstImage) {
+    template = template.replace(firstImage[0], '');
+    template = template.replace(/(<meta name="viewport"[^>]*>)/, `$1${firstImage[0]}`);
+  }
   await writeFile('dist/index.html', template);
   console.log(`Prerendered public homepage: ${template.length} characters`);
 } finally {

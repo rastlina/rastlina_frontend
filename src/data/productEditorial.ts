@@ -1,8 +1,9 @@
 import type { ApiProductDetail } from '@/pages/ProductDetail';
+import { normalizeProductName } from '../utils/productName.js';
 
 // Reviewed against RHS houseplant/calathea guides and NC State Plant Toolbox.
 // Exact SKU matching keeps future catalogue additions out of this editorial pass.
-type CareKey = 'tropical' | 'moist' | 'calathea' | 'dry' | 'jade' | 'peperomia' | 'begonia' | 'bamboo';
+type CareKey = 'tropical' | 'moist' | 'calathea' | 'dry' | 'jade' | 'peperomia' | 'begonia' | 'bamboo' | 'adenium' | 'squill' | 'label';
 type Entry = { name: string; intro: string; care: CareKey; members?: string[] };
 const tropical = 'Let the upper layer of soil dry before watering; keep the root zone drained rather than saturated.';
 const moist = 'Keep the mix lightly moist, checking before watering. Do not leave the roots standing in water.';
@@ -15,6 +16,9 @@ const care: Record<CareKey, { light: string; water: string; tip: string }> = {
   peperomia: { light: 'Bright, indirect light', water: 'Let the upper layer of mix dry before watering; avoid waterlogged soil.', tip: 'Peperomia is a diverse genus. Follow the plant label for species-specific needs and avoid keeping the reservoir permanently full.' },
   begonia: { light: 'Bright, indirect light; avoid scorching sun', water: 'Water when the surface starts to dry; keep the mix drained and avoid wetting the crown.', tip: 'Provide humidity with ventilation. Keep water off the foliage and crown where possible.' },
   bamboo: { light: 'Indirect light; avoid harsh direct sun', water: 'For this soil-grown set, keep the mix lightly moist without saturating it.', tip: 'Lucky bamboo is a Dracaena, not a true bamboo. Use filtered water if mineral-heavy tap water damages leaf tips.' },
+  adenium: { light: 'A sunny, warm position with direct sunlight', water: 'Let the mix dry between waterings. Reduce watering when growth slows or the plant is dormant.', tip: 'Adenium needs much more sun than shade-tolerant foliage plants. Use a freely draining mix and avoid a continuously full reservoir. Flowering depends on maturity and growing conditions.' },
+  squill: { light: 'Bright, indirect light', water: 'Allow the upper layer of mix to dry before watering. Water less during slower growth.', tip: 'Ledebouria stores moisture in its bulbs. Keep the mix freely drained and avoid a permanently full reservoir.' },
+  label: { light: 'Confirm the plant variety before choosing its position', water: 'Check the plant label and soil moisture before watering; avoid leaving the roots waterlogged.', tip: 'Common names can describe different plants. Contact Rastlina to confirm the exact variety and its care requirements.' },
 };
 
 const entries: Record<string, Entry> = {};
@@ -73,6 +77,42 @@ add('AGLA-04', 'Aglaonema Rotundum Hybrid Peacock', 'The Peacock-labelled Rotund
 add('AGLA-03', 'Aglaonema Lipstick Red', 'Lipstick Red offers a colour-focused Aglaonema selection for indoor styling.');
 add('AGLA-02', 'Aglaonema Lady Valentine', 'Lady Valentine is a named Aglaonema selection for a living plant gift.');
 add('AGLA-01', 'Aglaonema Chinese Evergreen', 'Chinese evergreen is an Aglaonema foliage plant for a sheltered indoor position.');
+add('SNAK-02', 'Snake Green', 'Snake Green offers an upright foliage display and is best grown with careful watering and a freely draining mix.', 'dry');
+add('SNAK-03', 'Snake Parva', 'The Parva-labelled snake plant is a foliage choice for a bright indoor position; allow its mix to dry between waterings.', 'dry');
+add('MONE-05', 'Money Plant Black', 'The Black-labelled money plant adds a named foliage selection to Rastlina’s plant gifting range.');
+add('MONE-06', 'Money Plant Sleeping', 'The Sleeping-labelled money plant is supplied as a living foliage gift. Confirm the exact variety from the plant label.');
+add('leda-01', 'Ledebouria Socialis', 'Ledebouria socialis, also known as silver squill, is a bulb-forming plant grown for its spotted foliage.', 'squill');
+add('JADE-02', 'Jade Jumbo', 'The Jumbo-labelled jade selection is suited to a bright position and a watering routine that allows its mix to dry.', 'jade');
+add('JADE-03', 'Jade Variegated', 'This variegated jade selection adds a foliage-focused option for a bright windowsill. Leaf patterns vary naturally.', 'jade');
+add('FRIE-01', 'Friendship Tree', 'Friendship Tree is the catalogue name of this living plant gift. Confirm the exact plant variety with Rastlina before choosing a growing position.', 'label');
+add('DIEF-01', 'Dieffenbachia', 'Dieffenbachia is a tropical foliage plant for a warm indoor position with indirect light. Keep its leaves and sap away from pets and children.');
+add('CHAM-01', 'Chamaedorea Elegans Palm', 'Chamaedorea elegans, commonly called parlour palm, brings fine palm foliage to a sheltered indoor space.');
+add('CALA-12', 'Calathea Roseopicta', 'Roseopicta is a prayer-plant selection grown for its patterned leaves in a warm, sheltered position.', 'calathea');
+add('CALA-11', 'Calathea Makoyana', 'Makoyana is a prayer-plant selection grown for decorative foliage and suited to humid conditions with filtered light.', 'calathea');
+add('CALA-10', 'Calathea Lutea Variegated', 'This Lutea Variegated-labelled selection is offered for its foliage. Confirm its mature size and exact variety when choosing a space.', 'calathea');
+add('CALA-09', 'Calathea Gandersii', 'The Gandersii-labelled Calathea is offered as a foliage plant. Refer to the supplied plant label for its exact variety.', 'calathea');
+add('CALA-08', 'Calathea Freddie', 'Freddie offers another named prayer-plant selection for an indoor collection with warmth and filtered light.', 'calathea');
+add('CALA-07', 'Calathea Amagris', 'Amagris is offered under its catalogue trade name as a prayer-plant foliage selection. Provide warmth and filtered light.', 'calathea');
+add('CALA-06', 'Calathea Leuconeura Gold', 'The Leuconeura Gold-labelled prayer plant is a foliage selection for a warm, sheltered space. Check its label for the exact variety.', 'calathea');
+add('ARDI-01', 'Ardisia', 'Ardisia is offered as a named plant gift. The species and any flowering or fruiting stage should be confirmed from the plant label.', 'moist');
+add('AGLA-08', 'Aglaonema Red Vein', 'Red Vein is a named Aglaonema foliage selection for a sheltered indoor position.');
+add('ADEN-01', 'Adenium', 'Adenium is a sun-loving plant with a thickened stem. Choose it for a sunny position rather than a shaded room; flowers are not guaranteed.', 'adenium');
+add('PHIL-14', 'Philodendron Oxycardium Red', 'The Red-labelled Oxycardium selection adds a named Philodendron foliage option to a living plant gift.');
+add('PHIL-13', 'Philodendron Oxycardium Green', 'The Green-labelled Oxycardium selection is a Philodendron foliage choice for bright, indirect light.');
+add('PHIL-12', 'Philodendron Oxycardium Gold', 'The Gold-labelled Oxycardium selection is offered for a colour-focused Philodendron foliage display.');
+
+function profileForName(name: string): CareKey {
+  if (/adenium/i.test(name)) return 'adenium';
+  if (/ledebouria|silver squill/i.test(name)) return 'squill';
+  if (/snake|\bzz\b/i.test(name)) return 'dry';
+  if (/jade/i.test(name)) return 'jade';
+  if (/calathe|ctenanthe|maranta/i.test(name)) return 'calathea';
+  if (/begonia/i.test(name)) return 'begonia';
+  if (/peperomia/i.test(name)) return 'peperomia';
+  if (/lucky bamboo/i.test(name)) return 'bamboo';
+  if (/spathiphyllum|peace lily|fittonia|alocasia|anthurium|cryptanthus/i.test(name)) return 'moist';
+  return 'tropical';
+}
 
 const bundles: Record<string, string[]> = {
   'SET4-05': ['AGLA-02', 'MONE-02', 'SNAK-01', 'CALA-02'],
@@ -103,11 +143,18 @@ export function applyProductEditorial(product: ApiProductDetail): ApiProductDeta
   const entry = entries[product.sku];
   const members = bundles[product.sku];
   if (!entry && !members) return product;
-  const name = entry?.name || product.name.replace(/Pepperomia/g, 'Peperomia').replace(/Synogium/g, 'Syngonium').replace(/Set (?:0f|os) /g, 'Set of ').replace(/\s+/g, ' ').trim();
-  const profile = care[entry?.care || 'tropical'];
-  const intro = entry?.intro || `This set brings together ${product.name.split(/ - Set/i)[0].replace(/Pepperomia/g, 'Peperomia').replace(/Synogium/g, 'Syngonium')} for a varied indoor plant display. Care for each plant separately: mixed sets can have different light and watering needs.`;
+  // Catalogue names and bundle contents can change while a SKU stays the same.
+  // Never rename a current cultivar or reuse an old bundle's member list.
+  const name = normalizeProductName(product.name);
+  const sameLabel = entry && normalizeProductName(entry.name).toLowerCase() === name.toLowerCase();
+  const profile = care[sameLabel ? entry.care : profileForName(name)];
+  const memberNames = members ? name.split(/\s*-\s*Set\s+of\s+\d+/i)[0].split(/\s*[|&┃]\s*/).filter(Boolean) : [];
+  const count = Number(name.match(/Set\s+of\s+(\d+)/i)?.[1]) || memberNames.length;
+  const intro = members
+    ? `This ${count}-plant set brings together ${memberNames.join(', ')} for a varied plant display. Each plant has its own light and watering needs; check each pot separately.`
+    : sameLabel ? entry.intro : `${name} is offered as a living plant gift for a suitably lit indoor position. Follow the plant label for the exact variety and choose its position using the care guide below.`;
   const instructions = members
-    ? members.map((sku, index) => `${product.name.split(/ - Set/i)[0].split(/\s*[|&]\s*/)[index] || entries[sku].name}: ${care[entries[sku].care].light}. ${care[entries[sku].care].water}`)
+    ? memberNames.map(member => { const guide = care[profileForName(member)]; return `${member}: ${guide.light}. ${guide.water}`; })
     : [profile.tip];
   return {
     ...product,
@@ -124,6 +171,6 @@ export function applyProductEditorial(product: ApiProductDetail): ApiProductDeta
       'Water according to soil moisture, light and season, rather than a fixed number of days. Make sure excess water can drain.',
       'Keep plants out of reach of pets and small children. Check the exact plant identity before choosing it for an area where leaves may be chewed.',
     ],
-    what_you_get_list: [members ? `Indoor plant combo as listed (${members.length} plants)` : 'Indoor plant as listed', 'Self-watering pot with soil mix'],
+    what_you_get_list: [members ? `Plant combo as listed (${count} plants)` : 'Plant as listed', 'Self-watering pot with soil mix'],
   };
 }

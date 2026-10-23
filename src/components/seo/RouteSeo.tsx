@@ -3,6 +3,10 @@ import { Seo } from './Seo';
 
 // eslint-disable-next-line react-refresh/only-export-components -- Shared metadata is also read by the prerender build.
 export const publicPages: Record<string, { title: string; description: string }> = {
+  '/about': {
+    title: 'About Rastlina Nature Hub Private Limited | Rastlina',
+    description: 'Meet Rastlina Nature Hub Private Limited, a Hyderabad company offering living plant gifts with a self-watering pot and soil mix.',
+  },
   '/shop': {
     title: 'All Products | Buy Indoor Plants Online | Rastlina',
     description: 'Browse all products at Rastlina. Shop ready-to-gift indoor plants with a self-watering pot and soil mix, delivered across India.',
@@ -42,8 +46,12 @@ export function RouteSeo() {
   // Shop owns its filtered metadata after the application starts.
   if (page && pathname !== '/shop') return <Seo {...page} path={pathname} />;
 
-  if (privatePaths.has(pathname) || pathname.startsWith('/watch-shop/')) {
-    return <Seo title="Rastlina" description="Rastlina online store." path={pathname} noIndex />;
+  if (pathname.startsWith('/watch-shop/')) {
+    return <Seo title="Watch & Shop | Rastlina" description="Watch Rastlina plant videos and shop the linked indoor plants." path={pathname} noIndex />;
+  }
+
+  if (privatePaths.has(pathname)) {
+    return <Seo title="Rastlina" description="Rastlina online store." path={pathname} noIndex noFollow />;
   }
 
   return null;

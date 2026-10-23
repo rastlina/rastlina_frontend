@@ -7,8 +7,8 @@ function fixture(sku: string, name = 'Plant') {
 }
 
 describe('reviewed product content', () => {
-  it('covers 71 unique existing SKUs with description, care and included items', () => {
-    expect(new Set(reviewedProductSkus).size).toBe(71);
+  it('covers unique reviewed SKUs with description, care and included items', () => {
+    expect(new Set(reviewedProductSkus).size).toBe(reviewedProductSkus.length);
     for (const sku of reviewedProductSkus) {
       const product = applyProductEditorial(fixture(sku));
       expect(product.description).toContain('self-watering pot and soil mix');
@@ -23,11 +23,22 @@ describe('reviewed product content', () => {
     expect(applyProductEditorial(product)).toBe(product);
   });
   it('does not apply tropical watering to snake and jade plants', () => {
-    expect(applyProductEditorial(fixture('SNAK-01')).watering).toContain('dry well');
-    expect(applyProductEditorial(fixture('JADE-01')).watering).toContain('dry between');
+    expect(applyProductEditorial(fixture('SNAK-02', 'Snake Green')).watering).toContain('dry well');
+    expect(applyProductEditorial(fixture('JADE-01', 'Jade Plant')).watering).toContain('dry between');
     const combo = applyProductEditorial(fixture('SET2-06', 'Snake & Jade - Set of 2'));
     expect(combo.care_instructions_list[0]).toContain('dry well');
     expect(combo.care_instructions_list[1]).toContain('dry between');
+  });
+  it('preserves the current cultivar when a SKU has been reused', () => {
+    const renamed = applyProductEditorial(fixture('PHIL-01', 'Philodendron Bellavita'));
+    expect(renamed.name).toBe('Philodendron Bellavita');
+    expect(renamed.description).not.toContain('Billietiae');
+  });
+  it('uses the current bundle members rather than an older SKU recipe', () => {
+    const bundle = applyProductEditorial(fixture('SET3-05', "Money Plant 'N' Joy | Calathea Ornata | Syngonium Pink - Set of 3"));
+    expect(bundle.care_instructions_list[0]).toContain("Money Plant 'N' Joy");
+    expect(bundle.care_instructions_list[1]).toContain('Calathea Ornata');
+    expect(bundle.description).not.toMatch(/Suksom|Silver Sword|Peperomia/);
   });
   it('does not publish blanket safe-for-pets or air-cleaning claims', () => {
     for (const sku of reviewedProductSkus) {

@@ -11,18 +11,42 @@ export default function PlantJourney({ onReady }: { onReady?: () => void }) {
     const element = root.current;
     if (!element) return;
     const poster = element.querySelector<HTMLImageElement>('#nursery-window .film-poster');
-    const ready = () => onReady?.();
-    poster?.addEventListener('load', ready, { once: true });
-    if (poster?.complete && poster.naturalWidth > 0) ready();
-    const dispose = mountJourney(element, { assetBase: '/journey/assets', scrollOffset: 110 });
+    let cancelled = false;
+    let started = false;
+    let frame = 0;
+    let dispose: (() => void) | undefined;
+    const start = () => {
+      if (cancelled || started) return;
+      started = true;
+      // Paint the lightweight poster before HD video downloads and decoders start.
+      const decoded = poster?.decode?.().catch(() => {}) || Promise.resolve();
+      decoded.then(() => {
+        if (cancelled) return;
+        frame = requestAnimationFrame(() => {
+          frame = requestAnimationFrame(() => {
+            if (cancelled) return;
+            onReady?.();
+            dispose = mountJourney(element, { assetBase: '/journey/assets', scrollOffset: 110 });
+          });
+        });
+      });
+    };
+    poster?.addEventListener('load', start, { once: true });
+    poster?.addEventListener('error', start, { once: true });
+    if (!poster || poster.complete) start();
+    const timeout = window.setTimeout(start, 3000);
     return () => {
-      poster?.removeEventListener('load', ready);
-      dispose();
+      cancelled = true;
+      window.clearTimeout(timeout);
+      cancelAnimationFrame(frame);
+      poster?.removeEventListener('load', start);
+      poster?.removeEventListener('error', start);
+      dispose?.();
     };
   }, [onReady]);
 
   return <>
-    <Helmet><link rel="preload" as="image" href="/journey/assets/story-01-start.webp" /></Helmet>
+    <Helmet><link rel="preload" as="image" type="image/avif" href="/optimized/journey-first-1600.avif" imageSrcSet="/optimized/journey-first-768.avif 768w, /optimized/journey-first-1600.avif 1600w" imageSizes="100vw" /></Helmet>
     <div ref={root} className="plant-journey is-autoplay" data-plant-journey dangerouslySetInnerHTML={{ __html: markup }} />
   </>;
 }
