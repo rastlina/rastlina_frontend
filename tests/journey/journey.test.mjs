@@ -131,7 +131,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     assert.equal(get('nursery-loading').hidden, true);
     assert.equal(get('story-frame-1').classList.contains('has-video'), true);
     assert.equal(get('story-position').textContent, '1 / 5');
-    const chapterSuffix = mobile ? '-mobile' : ''; // High-DPR phones still use the mobile decoder budget.
+    const chapterSuffix = ''; // Phones retain HD footage while sharing the two-decoder budget.
     assert.ok(chapters[0].src.endsWith(`/assets/story-01${chapterSuffix}.mp4`));
 
     const firstSeeks = chapters[0].seeks.length;
@@ -202,7 +202,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     await scroll(0);
     assert.equal(get('story-position').textContent, '1 / 5', 'Scrolling retakes control after using the slider');
 
-    const roomSuffix = mobile ? '-mobile-v5' : '-v4';
+    const roomSuffix = '-v4';
     for (const [id, heading] of [['bedroom', 'Rest easy. Breathe green.'], ['office', 'Fresh thinking. Naturally.'], ['living-room', 'Your space. More alive.']]) {
       const choice = cards.find(card => card.dataset.room === id && (id === 'office' ? !card.classList.contains('room-card') : card.classList.contains('room-card')));
       const plays = room.plays.length;

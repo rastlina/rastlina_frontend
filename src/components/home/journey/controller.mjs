@@ -1,7 +1,7 @@
 import { StoryAutoplay } from './story-autoplay.mjs';
 import { RoomPlayback } from './room-playback.mjs';
 import { StorySequence, STORY_CHAPTERS, storyProgress, copyTransition } from './story-sequence.mjs';
-import { clampProgress, finalFrameTime } from './media.mjs';
+import { clampProgress, finalFrameTime, preferCompactMedia } from './media.mjs';
 export { clampProgress, finalFrameTime } from './media.mjs';
 
 export const ROOMS = Object.freeze({
@@ -238,10 +238,9 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     frames.add(id);
     return id;
   }
-  // Choose the phone encode by viewport even on high-density screens.
+  // Small screens still need HD pixels for the tall, cropped product view.
   const connection = globalThis.navigator?.connection;
-  const mobileMedia = matchMedia('(max-width: 700px)').matches ||
-    Boolean(connection?.saveData) || /(^|-)2g$/.test(connection?.effectiveType || '');
+  const mobileMedia = preferCompactMedia(connection);
   const introSection = byId('nursery-story');
   const roomSection = byId('room-story');
   const choices = byId('room-choices');

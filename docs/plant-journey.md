@@ -6,7 +6,9 @@ Living Room, Bedroom and Office retain the original approved desktop/mobile vide
 
 `PlantJourney` renders the original scene markup and mounts its disposable controller after hydration. Styles are scoped to `.plant-journey` to preserve storefront navigation, catalogue and cart styling. The fixed storefront header is accounted for in scene measurements and anchor navigation. Page ancestors use horizontal clipping instead of hidden overflow so the stages stick to document scrolling. Reduced-motion mode retains the pinned, directly scroll-controlled video, with no easing, spatial depth or card tilt. Manual sliders remain available, and very short mobile viewports use a stacked layout with manual control.
 
-The repaired video controller calls native timers on `globalThis`, catches synchronous loading failures, and offers retry controls after a failed or stalled load. The current and next story chapters are loaded on demand, along with the selected room; screens up to 700 CSS pixels and data-saving connections select the smaller mobile versions.
+The repaired video controller calls native timers on `globalThis`, catches synchronous loading failures, and offers retry controls after a failed or stalled load. Forward and reverse scrolling retain at most the current and next story decoders. Offscreen room media releases its decoder and restores its frame and playback state when revisited. Returning to a completed story starts autoplay from the nursery again; tab switches preserve the current position. Crossfades use elapsed time so dropped frames do not stretch their duration.
+
+Normal phone and desktop connections use the retained HD story footage (1440 × 812) and Full HD room footage (1920 × 1080). The compact encodes remain available for explicit browser data saving or 2G connections. No footage is recompressed by this repair. Header and footer logo links blend against the surrounding green, including the transformed mobile logo.
 
 Validation:
 
