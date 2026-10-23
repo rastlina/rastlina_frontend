@@ -110,6 +110,47 @@ test('offscreen room media releases its decoder and restores its frame and manua
   } finally { f.playback.dispose(); }
 });
 
+test('rapid room scrubbing coalesces pending seeks and does not restart a timer for every input', async () => {
+  const f = fixture();
+  try {
+    await f.start('living-room');
+    const initialSeeks = f.video.seeks.length;
+    const initialStates = f.states.length;
+    f.playback.setProgress(.12);
+    for (let step = 13; step <= 80; step++) f.playback.setProgress(step / 100);
+    assert.equal(f.video.seeks.length, initialSeeks + 1, 'Only one decoder seek runs at a time');
+    assert.equal(f.states.length, initialStates + 1, 'A gesture pauses playback once');
+    assert.equal(f.timers.size, 1);
+    f.video.completeSeek();
+    assert.equal(f.video.currentTime, 8, 'The queued target is the latest finger position');
+    f.video.completeSeek();
+    assert.equal(f.video.seeks.length, initialSeeks + 2);
+    assert.equal(f.timers.size, 0);
+    assert.equal(f.frames.at(-1), .8);
+    for (let step = 0; step < 30; step++) f.playback.setProgress(.8001);
+    assert.equal(f.video.seeks.length, initialSeeks + 2, 'Sub-frame changes do not seek again');
+    assert.equal(f.timers.size, 0);
+    assert.equal(f.video.paused, true);
+  } finally { f.playback.dispose(); }
+});
+
+test('offscreen room scroll updates cannot arm a false loading failure', async () => {
+  const f = fixture();
+  try {
+    await f.start('bedroom');
+    f.video.advance(4);
+    f.playback.release();
+    for (let i = 0; i < 100; i++) f.playback.setProgress(i / 100);
+    f.advance(30000);
+    assert.equal(f.errors, 0);
+    assert.equal(f.timers.size, 0);
+    f.playback.setActive(true);
+    f.video.decoded(); f.video.completeSeek(); await Promise.resolve();
+    assert.equal(f.video.currentTime, 4);
+    assert.equal(f.video.paused, false);
+  } finally { f.playback.dispose(); }
+});
+
 for (const room of ['living-room', 'bedroom', 'office']) test(`${room} plays naturally, resets to its first decoded frame, waits exactly five seconds, and repeats`, async () => {
   const f = fixture();
   await f.start(room);

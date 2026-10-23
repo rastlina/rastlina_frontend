@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+public/journey/assets/story-03-v2.mp4
+public/journey/assets/story-03-mobile-v2.mp4
 *.local
 
 # Environment files: use .env.example for safe, committed defaults.

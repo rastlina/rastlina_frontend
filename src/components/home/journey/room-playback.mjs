@@ -56,7 +56,7 @@ export class RoomPlayback {
     } catch { this.fail(); }
   }
   reportFrame() {
-    if (!this.isCurrent() || this.video.readyState < 2 || this.video.seeking) return;
+    if (!this.isCurrent() || this.video.readyState < 2 || this.video.seeking || this.pendingSeek !== null) return;
     const last = finalFrameTime(this.video.duration);
     this.progress = last ? clampProgress(this.video.currentTime / last) : 0;
     this.onFrame(this.progress);
@@ -64,9 +64,9 @@ export class RoomPlayback {
   frameReady() {
     if (!this.isCurrent() || this.video.readyState < 1 || this.video.seeking) return;
     if (this.pendingSeek !== null) {
-      const target = this.pendingSeek * finalFrameTime(this.video.duration);
-      if (Math.abs(this.video.currentTime - target) > 0.001) {
-        try { this.video.currentTime = target; } catch { /* Retry when data arrives. */ }
+      const target = Math.round(this.pendingSeek * finalFrameTime(this.video.duration) * 24) / 24;
+      if (Math.abs(this.video.currentTime - target) >= 0.5 / 24) {
+        try { this.video.currentTime = target; this.armTimeout(); } catch { /* Retry when data arrives. */ }
         return;
       }
       if (this.video.readyState < 2) return;
@@ -74,6 +74,7 @@ export class RoomPlayback {
     }
     if (this.video.readyState < 2) return;
     this.clearTimer(this.timeout);
+    this.timeout = null;
     if (!this.ready) { this.ready = true; this.onReady(); }
     this.reportFrame();
     if (this.phase === 'resetting') {
@@ -134,10 +135,14 @@ export class RoomPlayback {
     }
   }
   setProgress(value) {
-    this.pause();
+    if (this.failed || this.suspended || !this.source) return;
+    // A drag can emit hundreds of positions. Pause once, keep the latest
+    // target, and let the decoder finish its single outstanding seek.
+    if (this.phase !== 'paused') this.pause();
     this.progress = clampProgress(value);
     this.pendingSeek = this.progress;
-    this.armTimeout();
+    if (this.video.seeking) return;
+    if (this.video.readyState < 2 && (this.timeout === null || this.timeout === undefined)) this.armTimeout();
     this.frameReady();
   }
   restart() {

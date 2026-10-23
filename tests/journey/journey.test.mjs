@@ -163,7 +163,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
       assert.ok(chapters.filter(video => video.src).length <= 2, 'Forward and reverse scrolling retain at most two story decoders');
       assert.equal(chapters[index].currentTime, 5, `Chapter ${index + 1} follows scroll progress`);
       assert.equal(get(`story-frame-${index + 1}`).attributes['aria-hidden'], 'false');
-      assert.ok(chapters[index].src.endsWith(`/assets/story-0${index + 1}${chapterSuffix}.mp4`));
+      assert.ok(chapters[index].src.endsWith(`/assets/story-0${index + 1}${chapterSuffix}${index === 2 ? '-v2' : ''}.mp4`));
       assert.equal(parseFloat(get('story-copy-current').style['--text-y']), 0, 'Each title rests in full view for reading');
       if (!reducedMotion && index < chapters.length - 1) {
         await scrollStory((index + 0.91) / 5);
@@ -304,6 +304,15 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     assert.equal(chapters[0].paused, false, 'The returning story autoplays without a button');
     assert.equal(room.src, '', 'The offscreen room releases its decoder before story replay');
     assert.equal(get('space-prompt').hidden, true);
+    await click(cards.find(card => card.dataset.room === 'office'));
+    roomStage.offsetHeight = 4000;
+    await click(get('journey-mode-switch'));
+    await scroll(13000);
+    assert.ok(Math.abs(room.currentTime - 5.833333333333333) < 1 / 24, 'Room scroll settles at the latest decoded video frame');
+    assert.equal(room.paused, true, 'Scroll control does not compete with native playback');
+    await scroll(0);
+    assert.equal(room.src, '', 'Scrolling out releases room media without starting another seek');
+    assert.equal(get('room-error').hidden, true);
   } finally {
     dispose?.();
     assert.equal(callbacks.size, 0, 'Unmount cancels pending animation frames');

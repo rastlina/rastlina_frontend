@@ -3,7 +3,7 @@ import { clampProgress } from './media.mjs';
 export const STORY_CHAPTERS = Object.freeze([
   { id: 'story-01', label: 'Rooted in care', title: 'Nature.<br><em>Closer to you.</em>', note: 'From our nursery to your everyday.<br>A little nature, thoughtfully grown.' },
   { id: 'story-02', label: 'Room to grow', title: 'Strong roots.<br><em>New beginnings.</em>', note: 'A healthy beginning, ready for its next home.' },
-  { id: 'story-03', label: 'Made for your everyday', title: 'A better home.<br><em>For your plant.</em>', note: 'From the nursery pot into a thoughtfully designed Rastlina planter.' },
+  { id: 'story-03', version: 'v2', label: 'Made for your everyday', title: 'A better home.<br><em>For your plant.</em>', note: 'From the nursery pot into a thoughtfully designed Rastlina planter.' },
   { id: 'story-04', label: 'Care from within', title: 'Water below.<br><em>Life above.</em>', note: 'A reservoir below. Growing roots above.<br>Discover care from within.' },
   { id: 'story-05', label: 'Ready for your space', title: 'Small detail.<br><em>Big feeling.</em>', note: 'A living companion for your favourite corner.<br>Choose your space below.' },
 ]);
@@ -41,7 +41,7 @@ export class StorySequence {
     this.progress = 0;
     this.entries = layers.map((layer, index) => {
       const entry = { layer, loaded: false, ready: false, failed: false,
-        source: `${assetBase}/${STORY_CHAPTERS[index].id}${mobile ? '-mobile' : ''}.mp4` };
+        source: `${assetBase}/${STORY_CHAPTERS[index].id}${mobile ? '-mobile' : ''}${STORY_CHAPTERS[index].version ? `-${STORY_CHAPTERS[index].version}` : ''}.mp4` };
       entry.scrubber = new Scrubber(layer.video, {
         onReady: () => { entry.ready = true; layer.element.classList.add('has-video'); this.render(); this.reportState(); },
         onError: () => { entry.failed = true; entry.ready = false; layer.element.classList.remove('has-video'); this.reportState(); },

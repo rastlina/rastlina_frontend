@@ -10,6 +10,10 @@ The repaired video controller calls native timers on `globalThis`, catches synch
 
 Normal phone and desktop connections use the retained HD story footage (1440 × 812) and Full HD room footage (1920 × 1080). The compact encodes remain available for explicit browser data saving or 2G connections. No footage is recompressed by this repair. Header and footer logo links blend against the surrounding green, including the transformed mobile logo.
 
+Clip 3 now uses versioned `story-03-v2.mp4` / `story-03-mobile-v2.mp4` sources. Its original SPS declared Level 6.2 and a 2,000,000 Hz timing scale; FFmpeg stream-copy metadata repair sets a 48 Hz tick rate and levels 3.2 / 3.1. All 288 decoded frame hashes match the originals. `build/repairJourneyMedia.mjs` reproduces the verified repaired containers from the retained media through a small hash-checked copy/literal recipe before development or production builds. The repaired files are generated, not additional source assets.
+
+Room scroll motion eases to the latest target and seeks only to decoded frame boundaries. Only one seek can be outstanding; later input replaces the queued target. Offscreen scroll updates do not start loading timers. Autoplay and the five-second replay hold remain available when scroll mode is off.
+
 Validation:
 
 - `npm test`: storefront behavior and hydration.

@@ -8,6 +8,6 @@ it('keeps company and policy details without the removed developer credit', () =
   expect(screen.getByText(/Rastlina Nature Hub Private Limited/)).toBeInTheDocument();
   expect(screen.getByText(/36AAPCR7860K1ZK/)).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy-policy');
-  expect(container.textContent).not.toMatch(/StaffArc|Made with/i);
+  expect(container.textContent).not.toMatch(/StaffArc|Made with|Designed with/i);
   expect(container.querySelector('a[href*="staffarc"], img[src*="footer-credit"]')).toBeNull();
 });

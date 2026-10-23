@@ -4,9 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node build/repairJourneyMedia.mjs",
     "dev": "vite",
+    "prebuild": "node build/repairJourneyMedia.mjs",
     "build": "vite build && node build/prerender.mjs",
     "build:dev": "vite build --mode development",
+    "prebuild:dev": "node build/repairJourneyMedia.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
