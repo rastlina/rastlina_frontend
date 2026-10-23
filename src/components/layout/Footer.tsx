@@ -179,9 +179,6 @@ export const Footer = () => {
             GSTIN: 36AAPCR7860K1ZK
           </p>
 
-          <p className="text-center lg:text-right">
-            Designed with 🌿 in Hyderabad
-          </p>
         </div>
 
       </div>

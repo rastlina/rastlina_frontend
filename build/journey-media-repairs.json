@@ -1,0 +1,102 @@
+{
+  "description": "Lossless FFmpeg h264_metadata repair: tick_rate=48; HD level=3.2, compact level=3.1; stream copy and +faststart. All decoded frames verified identical.",
+  "files": [
+    {
+      "source": "public/journey/assets/story-03.mp4",
+      "output": "public/journey/assets/story-03-v2.mp4",
+      "source_sha256": "25ca2f769dd2cbb03fd412c6e42ed5793852e8f3ccdda496e400246ee6bb1cb9",
+      "output_sha256": "95d2ff9cf07860809380a502ddc6722940076baf752f609da05714c537f1da6e",
+      "operations": [
+        {
+          "data": "AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAA64bW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAALuAAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAADeJ0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAALuAAAAAA"
+        },
+        {
+          "copy": [
+            192,
+            83
+          ]
+        },
+        {
+          "data": "4AAAAAAAAQAAAAANWm1kaWEAAAAgbWRoZAAAAAAAAAAAAAAAAAAPQkAAtxpvVcQAAAAAAC1oZGxyAAAAAAAAAAB2aWRlAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAADQVtaW5mAAAAFHZtaGQAAAABAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAzFc3RibAAAAMFzdHNkAAAAAAAAAAEAAACxYXZjMQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAWgAywASAAAAEgAAAAAAAAAARVMYXZjNjEuMTkuMTAwIGxpYngyNjQAAAAAAAAAAAAAABj//wAAADdhdmNDAWQAIP/hABpnZAAgrLYC0DP94CIAAAMAAgAAAwBgHhAIXAEABmjqw8siwP34+AAAAAAQcGFzcAAAAAEAAAABAAAAFGJ0cnQAAAAAAHF6QQBxFbwAAAYYc3R0"
+        },
+        {
+          "copy": [
+            640,
+            1551
+          ]
+        },
+        {
+          "data": "ojIAAADQc3RzcwAAAAAAAAAwAAAAAQAAAAcAAAANAAAAEwAAABkAAAAfAAAAJQAAAA=="
+        },
+        {
+          "copy": [
+            2240,
+            1416
+          ]
+        },
+        {
+          "data": "6AAOLKYAG9ChACkjAgA2TXsARjWPAFTLlgBj7AgAcwMTAIIFZACQ4iAAn0+/AAAAYnVkdGEAAABabWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRpcmFwcGwAAAAAAAAAAAAAAAAtaWxzdAAAACWpdG9vAAAAHWRhdGEAAAABAAAAAExhdmY2MC4xNi4xMDAAAAAIZnJlZQCpoBxtZGF0AAACbAYF//9o3EXpvebZSLeWLNgg2SPu73g="
+        },
+        {
+          "copy": [
+            3840,
+            11116538
+          ]
+        }
+      ]
+    },
+    {
+      "source": "public/journey/assets/story-03-mobile.mp4",
+      "output": "public/journey/assets/story-03-mobile-v2.mp4",
+      "source_sha256": "92f5c428680bce58b647b17fb82d682e2ae79d42789024f9d534539e867bfc88",
+      "output_sha256": "4ad829be4234565ab765951b6d1e34d9cf6d5aba6e62b2e4375a4d2740a2f7df",
+      "operations": [
+        {
+          "data": "AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAA6bbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAALuAAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAADcV0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAALuAAAAAA"
+        },
+        {
+          "copy": [
+            192,
+            83
+          ]
+        },
+        {
+          "data": "4AAAAAAAAQAAAAANPW1kaWEAAAAgbWRoZAAAAAAAAAAAAAAAAAAPQkAAtxpv"
+        },
+        {
+          "copy": [
+            320,
+            234
+          ]
+        },
+        {
+          "data": "H//hABpnZAAfrLYGwf80RgIgAAADACAAAAYB4QCFwAEABWjqxyyL/fj4AAAAABBwYXNwAAAAAQAAAAEAAAAUYnRydAAAAAAAMnzhADJQKAAABhhzdHQ="
+        },
+        {
+          "copy": [
+            640,
+            1551
+          ]
+        },
+        {
+          "data": "ojIAAADQc3RzcwAAAAAAAAAwAAAAAQAAAAcAAAANAAAAEwAAABkAAAAfAAAAJQAAAA=="
+        },
+        {
+          "copy": [
+            2240,
+            1416
+          ]
+        },
+        {
+          "data": "ywAPUxYAH0oVAC42VAA9OCUAAABidWR0YQAAAFptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAAC1pbHN0AAAAJal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjYwLjE2LjEwMAAAAAhmcg=="
+        },
+        {
+          "copy": [
+            3776,
+            4945931
+          ]
+        }
+      ]
+    }
+  ]
+}

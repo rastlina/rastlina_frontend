@@ -369,6 +369,9 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     introScrubber.setProgress(progress);
     syncRange(nurseryRange, progress);
   }, { requestFrame });
+  const roomMotion = new ProgressSmoother(progress => {
+    roomPlayback.setProgress(progress);
+  }, { requestFrame, responseMs: 65 });
 
   const spacePrompt = byId('space-prompt');
   function closeSpacePrompt() {
@@ -402,6 +405,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     const roomVisible = Boolean(selected && (selecting || (roomTop < window.innerHeight && roomTop + roomSection.offsetHeight > scrollOffset)));
     // Release the room before loading the returning story's two decoders.
     if (selected && !roomVisible) {
+      roomMotion.reset(roomPlayback.progress);
       roomPlayback.release();
       roomWindow.classList.remove('has-video');
     }
@@ -422,9 +426,11 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     modeButton.hidden = Boolean(journeyRect && (journeyRect.bottom < scrollOffset || journeyRect.top > window.innerHeight));
     document.body?.classList.toggle('has-journey-mode-control', !modeButton.hidden);
     if (selected) {
-      if (scrollAnimationEnabled) roomPlayback.setProgress(cinematicProgress(measuredProgress(roomSection)));
-      applyDepth(roomSection, 0, 0);
       roomPlayback.setActive(!document.hidden && roomVisible);
+      if (scrollAnimationEnabled && roomVisible && !document.hidden) {
+        roomMotion.setTarget(cinematicProgress(measuredProgress(roomSection)), reduceEffects());
+      }
+      applyDepth(roomSection, 0, 0);
     }
     updateChoices();
 
@@ -441,6 +447,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   function goToWideView() {
     const generation = ++arrivalGeneration;
     selecting = true;
+    roomMotion.reset(0);
     roomPlayback.setActive(true);
     roomPlayback.restart();
     if (scrollAnimationEnabled) roomPlayback.pause();
@@ -517,6 +524,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   listen(document, 'visibilitychange', schedule);
   listen(window, 'pagehide', () => {
     introMotion.reset(introScrubber.progress);
+    roomMotion.reset(roomPlayback.progress);
     autoStory.setActive(false);
     roomPlayback.setActive(false);
   });
@@ -536,6 +544,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     byId('journey-mode-state').textContent = scrollAnimationEnabled ? 'On' : 'Off';
     introManual = false;
     introMotion.reset(progress);
+    roomMotion.reset(roomPlayback.progress);
     if (storyMode === 'auto') autoStory.enable(progress >= 1 ? 0 : progress);
     if (inRoom) {
       goTo(roomSection);
@@ -570,7 +579,9 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     syncRange(nurseryRange, Number(nurseryRange.value) / 1000);
   });
   listen(roomRange, 'input', () => {
-    roomPlayback.setProgress(Number(roomRange.value) / 1000);
+    const progress = Number(roomRange.value) / 1000;
+    roomMotion.reset(progress);
+    roomPlayback.setProgress(progress);
   });
   listen(byId('room-playback'), 'click', () => {
     if (roomPlayback.phase === 'paused') roomPlayback.resume();
@@ -638,6 +649,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     removers.forEach(remove => remove());
     frames.forEach(id => cancelAnimationFrame(id));
     introMotion.reset();
+    roomMotion.reset();
     autoStory.dispose();
     introScrubber.dispose();
     roomPlayback.dispose();
