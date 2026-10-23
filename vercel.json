@@ -1,4 +1,15 @@
 {
+  "functions": {
+    "api/page.ts": { "includeFiles": "dist/{server-shell.html,article-data.json}", "maxDuration": 30 }
+  },
+  "redirects": [
+    { "source": "/contact", "destination": "/bulk", "permanent": true },
+    { "source": "/terms", "destination": "/terms-and-conditions", "permanent": true },
+    { "source": "/shipping", "destination": "/shipping-policy", "permanent": true },
+    { "source": "/privacy", "destination": "/privacy-policy", "permanent": true },
+    { "source": "/returns", "destination": "/returns-refund-policy", "permanent": true },
+    { "source": "/3d", "destination": "/", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/assets/:path*",
@@ -23,14 +34,16 @@
       "destination": "/index.html"
     },
     {
-      "source": "/3d",
-      "destination": "/index.html"
-    },
-    {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },
     { "source": "/shop", "destination": "/seo-shop.html" },
+    { "source": "/shop/:category", "destination": "/app.html" },
+    { "source": "/about", "destination": "/seo-about.html" },
+    { "source": "/product/:slug", "destination": "/api/page?kind=product&slug=:slug" },
+    { "source": "/blog/:slug", "destination": "/api/page?kind=article&slug=:slug" },
+    { "source": "/:page(login|profile|checkout)", "destination": "/app.html" },
+    { "source": "/watch-shop/:slug", "destination": "/app.html" },
     { "source": "/bulk", "destination": "/seo-bulk.html" },
     { "source": "/privacy-policy", "destination": "/seo-privacy-policy.html" },
     { "source": "/terms-and-conditions", "destination": "/seo-terms-and-conditions.html" },
@@ -39,7 +52,7 @@
     { "source": "/replacement-policy", "destination": "/seo-replacement-policy.html" },
     {
       "source": "/((?!api/|static/|media/).*)",
-      "destination": "/index.html"
+      "destination": "/api/page?kind=not-found"
     }
   ]
 }

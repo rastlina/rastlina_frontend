@@ -15,6 +15,7 @@ import { RouteSeo } from '@/components/seo/RouteSeo';
 import Index from "./pages/Home";
 
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const About = lazy(() => import('./pages/About'));
 const WatchAndShopDetail = lazy(() => import('./pages/WatchAndShopDetail'));
 const Shop = lazy(() => import('./pages/Shop'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -108,6 +109,7 @@ const App = ({ Router = BrowserRouter }: { Router?: ComponentType<{ children: Re
                   <RouteBoundary>
                     <Routes>
                       <Route path="/" element={<Index />} />
+                      <Route path="/about" element={<About />} />
                       <Route path="/shop" element={<Shop />} />
                       <Route path="/shop/:category" element={<Shop />} />
                       <Route path="/product/:slug" element={<ProductDetail />} />

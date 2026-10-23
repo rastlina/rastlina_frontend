@@ -1,6 +1,6 @@
 // src/pages/Shop.tsx
 // Fully API-integrated shop page with dynamic filters from backend
-import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { SlidersHorizontal, X, ChevronDown, Loader2, Search } from 'lucide-react';
 import { storeService } from '@/services/api';
@@ -31,12 +31,13 @@ const SORT_OPTIONS = [
 
 export default function Shop() {
   const location = useLocation();
+  const { category: routeCategory } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
   // Read all active URL filters
   const urlMainCat = searchParams.get('main_category') || '';
-  const urlCat = searchParams.get('category') || '';
+  const urlCat = searchParams.get('category') || routeCategory || '';
   const urlSpace = searchParams.get('space') || '';
   const urlSize = searchParams.get('size') || '';
   const urlColor = searchParams.get('color') || '';
@@ -183,6 +184,7 @@ const getTitle = () => {
         title={`${getTitle()} | Buy Indoor Plants Online | Rastlina`}
         description={`Browse ${getTitle().toLowerCase()} at Rastlina. Shop ready-to-gift indoor plants with a self-watering pot and soil mix, delivered across India.`}
         path={`${location.pathname}${location.search}`}
+        noIndex={Boolean(urlSearch)}
       />
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
 

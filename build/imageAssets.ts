@@ -61,6 +61,15 @@ export function imageAssets(): Plugin {
       },
     },
     async generateBundle() {
+      for (const index of [1, 2, 3]) {
+        const image = await sharp(await readFile(`src/assets/b${index}.jpeg`)).resize({ width: 1200, withoutEnlargement: true }).webp({ quality: 82 }).toBuffer();
+        this.emitFile({ type: 'asset', fileName: `optimized/blog-${index}.webp`, source: image });
+      }
+      const firstPoster = await readFile('public/journey/assets/story-01-start.webp');
+      for (const width of [768, 1600]) {
+        const image = await sharp(firstPoster).resize({ width, withoutEnlargement: true }).avif({ quality: 60, effort: 5 }).toBuffer();
+        this.emitFile({ type: 'asset', fileName: `optimized/journey-first-${width}.avif`, source: image });
+      }
       for (const family of ['inter', 'playfair-display']) {
         this.emitFile({
           type: 'asset', fileName: `optimized/font-${family}-LICENSE.txt`,

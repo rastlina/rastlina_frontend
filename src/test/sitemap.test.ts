@@ -35,3 +35,23 @@ it('returns temporary failure instead of a misleading empty product sitemap', as
   await handler(null, response);
   expect(result.code).toBe(503);
 });
+
+it('keeps all products when the catalogue is paginated', async () => {
+  vi.stubGlobal('fetch', vi.fn()
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ results: [{ slug: 'first' }], next: '?page=2' }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ results: [{ slug: 'second' }], next: null }) }));
+  const { result, response } = responseFixture();
+  await handler(null, response);
+  expect(result.code).toBe(200);
+  expect(result.body).toContain('/product/first');
+  expect(result.body).toContain('/product/second');
+});
+
+it('rejects pagination outside the public catalogue API', async () => {
+  const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ results: [], next: 'https://example.com/private' }) });
+  vi.stubGlobal('fetch', fetch);
+  const { result, response } = responseFixture();
+  await handler(null, response);
+  expect(result.code).toBe(503);
+  expect(fetch).toHaveBeenCalledTimes(1);
+});

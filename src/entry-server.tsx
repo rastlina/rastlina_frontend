@@ -6,6 +6,13 @@ import { StrictMode, type ReactNode } from 'react';
 import App from './App';
 import { Seo } from './components/seo/Seo';
 import { publicPages } from './components/seo/RouteSeo';
+import About from './pages/About';
+import { blogs } from './data/blogs';
+
+export const articles = blogs;
+export function renderPublicContent(path: string) {
+  return path === '/about' ? renderToString(<StaticRouter location={path}><About /></StaticRouter>) : '';
+}
 
 export const metadataPaths = Object.keys(publicPages);
 export function renderMetadata(path: string) {

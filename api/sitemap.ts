@@ -27,14 +27,26 @@ function urlEntry(path: string, changefreq: string, priority: string) {
 
 export default async function handler(_: unknown, response: ResponseLike) {
   try {
-    const productResponse = await fetch(PRODUCT_API_URL, { signal: AbortSignal.timeout(20000) });
-    if (!productResponse.ok) throw new Error(`Product API returned ${productResponse.status}`);
-
-    const products = (await productResponse.json()) as Product[];
+    const products: Product[] = [];
+    const visited = new Set<string>();
+    let next: string | null = PRODUCT_API_URL;
+    while (next) {
+      const url = new URL(next, PRODUCT_API_URL);
+      if (url.origin !== 'https://api.rastlina.com' || url.pathname !== '/api/store/products/' || visited.has(url.href) || visited.size >= 50) throw new Error('Invalid catalogue pagination');
+      visited.add(url.href);
+      const productResponse = await fetch(url.href, { signal: AbortSignal.timeout(20000) });
+      if (!productResponse.ok) throw new Error(`Product API returned ${productResponse.status}`);
+      const data = await productResponse.json();
+      const page = Array.isArray(data) ? data : data.results;
+      if (!Array.isArray(page)) throw new Error('Incomplete product catalogue');
+      products.push(...page);
+      next = Array.isArray(data) ? null : data.next || null;
+    }
     const staticEntries = [
       urlEntry('/', 'weekly', '1.0'),
       urlEntry('/shop', 'daily', '0.9'),
       urlEntry('/bulk', 'monthly', '0.5'),
+      urlEntry('/about', 'monthly', '0.5'),
       urlEntry('/blog/1', 'monthly', '0.6'),
       urlEntry('/blog/2', 'monthly', '0.6'),
       urlEntry('/blog/3', 'monthly', '0.6'),
@@ -44,7 +56,7 @@ export default async function handler(_: unknown, response: ResponseLike) {
       urlEntry('/terms-and-conditions', 'yearly', '0.3'),
       urlEntry('/replacement-policy', 'yearly', '0.3'),
     ];
-    const productEntries = [...new Set(products.map(({ slug }) => slug).filter(Boolean))].map((slug) =>
+    const productEntries = [...new Set(products.map(({ slug }) => slug).filter(slug => typeof slug === 'string' && slug.length > 0))].map((slug) =>
       urlEntry(`/product/${xmlEscape(encodeURIComponent(slug))}`, 'weekly', '0.8'),
     );
 
