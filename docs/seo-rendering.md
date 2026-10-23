@@ -26,3 +26,7 @@ Primary references reviewed on 23 October 2026:
 - https://www.rhs.org.uk/plants/4739/crassula-ovata/details
 
 Run `node build/auditSeo.mjs --output=PATH` after a production build to exercise every current product through the local rendering handler. Add `--live` to verify the published storefront. Reports contain public catalogue metadata only.
+
+The build also runs `build/checkServerRuntime.mjs` without Vite. It verifies emitted Node ESM imports, article rendering and genuine 404s. Shared server imports use explicit `.js` paths, which TypeScript resolves to their source files and Node resolves after compilation.
+
+Search Console's two duplicate examples were Watch & Shop video/product views. These secondary shopping views are deliberately not search landing pages. Their HTTP response now declares `noindex, follow` before JavaScript, matching the browser metadata while allowing discovery of linked product pages. They remain usable and are omitted from the sitemap.

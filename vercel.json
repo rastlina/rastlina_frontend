@@ -26,6 +26,10 @@
     {
       "source": "/:page(login|profile|checkout)",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/watch-shop/:slug",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, follow" }]
     }
   ],
   "rewrites": [

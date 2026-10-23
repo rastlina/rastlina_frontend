@@ -46,7 +46,11 @@ export function RouteSeo() {
   // Shop owns its filtered metadata after the application starts.
   if (page && pathname !== '/shop') return <Seo {...page} path={pathname} />;
 
-  if (privatePaths.has(pathname) || pathname.startsWith('/watch-shop/')) {
+  if (pathname.startsWith('/watch-shop/')) {
+    return <Seo title="Watch & Shop | Rastlina" description="Watch Rastlina plant videos and shop the linked indoor plants." path={pathname} noIndex />;
+  }
+
+  if (privatePaths.has(pathname)) {
     return <Seo title="Rastlina" description="Rastlina online store." path={pathname} noIndex noFollow />;
   }
 
