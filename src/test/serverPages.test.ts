@@ -4,10 +4,13 @@ import { productPageHtml } from '../server/pageHtml';
 import type { ApiProductDetail } from '../pages/ProductDetail';
 
 const shell = '<!doctype html><html><head><title>Rastlina</title><meta name="robots" content="index, follow"></head><body><div id="root"></div><script type="module" src="/assets/app.js"></script></body></html>';
-vi.mock('node:fs/promises', async importOriginal => ({
-  ...await importOriginal<typeof import('node:fs/promises')>(),
-  readFile: vi.fn(async (path: string) => path.endsWith('article-data.json') ? '[]' : '<!doctype html><html><head><title>Rastlina</title></head><body><div id="root"></div></body></html>'),
-}));
+vi.mock('node:fs/promises', async importOriginal => {
+  const actual = await importOriginal<typeof import('node:fs/promises')>();
+  const readFile = vi.fn(async (path: string) => path.endsWith('article-data.json') ? '[]' : '<!doctype html><html data-server-test-shell><head><title>Rastlina</title></head><body><div id="root"></div></body></html>');
+  // Vite's Node builtin interop can use either the named export or default.
+  // Both must be stubbed: CI intentionally runs tests before dist exists.
+  return { ...actual, readFile, default: { ...actual.default, readFile } };
+});
 beforeEach(() => vi.stubGlobal('AbortSignal', { timeout: () => undefined }));
 afterEach(() => vi.unstubAllGlobals());
 
@@ -30,6 +33,7 @@ it('serves the product canonical, visible details and the default purchasable va
   const { result, response } = responseFixture();
   await handler({ query: { kind: 'product', slug: 'snake-green' } }, response);
   expect(result.code).toBe(200);
+  expect(result.body).toContain('data-server-test-shell');
   expect(result.body).toContain('href="https://www.rastlina.com/product/snake-green"');
   expect(result.body).toContain('<h1>Snake Green</h1>');
   expect(result.body).toContain('₹450.00');
