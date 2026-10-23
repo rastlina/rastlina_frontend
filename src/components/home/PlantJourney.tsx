@@ -46,7 +46,7 @@ export default function PlantJourney({ onReady }: { onReady?: () => void }) {
   }, [onReady]);
 
   return <>
-    <Helmet><link rel="preload" as="image" type="image/avif" href="/optimized/journey-first-1600.avif" imageSrcSet="/optimized/journey-first-768.avif 768w, /optimized/journey-first-1600.avif 1600w" imageSizes="100vw" /></Helmet>
+    <Helmet><link rel="preload" as="image" type="image/avif" fetchPriority="high" href="/optimized/journey-first-1600.avif" imageSrcSet="/optimized/journey-first-768.avif 768w, /optimized/journey-first-1600.avif 1600w" imageSizes="100vw" /></Helmet>
     <div ref={root} className="plant-journey is-autoplay" data-plant-journey dangerouslySetInnerHTML={{ __html: markup }} />
   </>;
 }
