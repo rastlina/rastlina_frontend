@@ -1,6 +1,7 @@
 import { canonicalUrl, schemaJson, SITE_URL } from '../lib/seoUrls.js';
 import { productSeo } from '../lib/productSeo.js';
 import type { ApiProductDetail } from '../pages/ProductDetail';
+import { vastuArticleMarkup } from '../lib/vastuArticleMarkup.js';
 
 export const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, character => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -51,7 +52,7 @@ ${product.review_count > 0 ? `<p>${escapeHtml(product.average_rating)}/5 from ${
   return pageHtml(template, { ...metadata, type: 'product' }, body);
 }
 
-export type Article = { id: number; title: string; excerpt: string; image: string; date: string; publishedDate: string; modifiedDate?: string; content: string };
+export type Article = { id: number; title: string; excerpt: string; image: string; imageAlt?: string; date: string; publishedDate: string; modifiedDate?: string; content: string };
 export function articlePageHtml(template: string, article: Article) {
   const path = `/blog/${article.id}`;
   return pageHtml(template, {
@@ -62,5 +63,5 @@ export function articlePageHtml(template: string, article: Article) {
       mainEntityOfPage: `${SITE_URL}${path}`,
       publisher: { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: 'Rastlina Nature Hub Private Limited', url: `${SITE_URL}/` },
     },
-  }, `<main class="seo-preview"><nav><a href="/">Rastlina</a><a href="/shop">Shop indoor plants</a></nav><article><h1>${escapeHtml(article.title)}</h1><p><time datetime="${escapeHtml(article.publishedDate)}">${escapeHtml(article.date)}</time></p><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.title)}" width="1200" height="800"/>${article.content}</article></main>`);
+  }, article.id === 1 ? vastuArticleMarkup(article) : `<main class="seo-preview"><nav><a href="/">Rastlina</a><a href="/shop">Shop indoor plants</a></nav><article><h1>${escapeHtml(article.title)}</h1><p><time datetime="${escapeHtml(article.publishedDate)}">${escapeHtml(article.date)}</time></p><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt || article.title)}" width="1200" height="800"/>${article.content}</article></main>`);
 }

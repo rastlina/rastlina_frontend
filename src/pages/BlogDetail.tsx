@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { blogs } from '@/data/blogs';
 import { Seo, SITE_URL_BASE } from '@/components/seo/Seo';
+import { vastuArticleMarkup } from '@/lib/vastuArticleMarkup';
 
 const BlogDetailPage = () => {
   const { id } = useParams();
@@ -46,13 +47,20 @@ const BlogDetailPage = () => {
           },
         }}
       />
+      {blog.id === 1 ? (
+        <div dangerouslySetInnerHTML={{ __html: vastuArticleMarkup(blog) }} />
+      ) : <>
       {/* Hero Image */}
-      <div className="w-full h-[400px] overflow-hidden">
+      <div className="mx-auto max-w-6xl px-4 pt-32 md:pt-36">
+      <div className="aspect-[3/2] overflow-hidden rounded-xl">
         <img
           src={blog.image}
-          alt={blog.title}
+          alt={blog.imageAlt || blog.title}
+          width={1200}
+          height={800}
           className="w-full h-full object-cover"
         />
+      </div>
       </div>
 
       {/* Content */}
@@ -78,7 +86,7 @@ const BlogDetailPage = () => {
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-10 pb-6 border-b border-gray-200">
           <BookOpen className="h-4 w-4" />
           <time dateTime={blog.publishedDate}>{blog.date}</time>
-          <span> · Updated <time dateTime={blog.modifiedDate}>23 October 2026</time></span>
+          <span> · Updated <time dateTime={blog.modifiedDate}>{new Intl.DateTimeFormat('en-IN', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(blog.modifiedDate))}</time></span>
         </div>
 
         {/* Render HTML Content */}
@@ -87,6 +95,7 @@ const BlogDetailPage = () => {
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
       </div>
+      </>}
     </div>
   );
 };
