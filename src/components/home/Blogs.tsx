@@ -6,7 +6,7 @@ import { blogs } from '@/data/blogs';
 
 const Blogs = () => {
   return (
-    <section className="home-journal py-20 bg-white">
+    <section id="journal" className="home-journal py-20 bg-white">
       <div className="container-custom">
         <div className="home-section-heading">
           <div>
@@ -28,7 +28,9 @@ const Blogs = () => {
               <div className="relative aspect-[3/2] overflow-hidden rounded-xl mb-4 bg-gray-100">
                 <img
                   src={blog.image}
-                  alt={blog.title}
+                  alt={blog.imageAlt || blog.title}
+                  width={1200}
+                  height={800}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                   decoding="async"

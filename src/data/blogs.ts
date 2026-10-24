@@ -1,36 +1,20 @@
+import { vastuGuideContent } from './vastuGuide';
+
 export const blogs = [
   {
     id: 1,
-    title: '10 Indoor Plants for a New Home: Light, Care and Gifting',
-    excerpt: 'Choose a plant for the light in your new home. Compare ten plant options, watering needs and what to check before giving a living plant gift.',
-    image: '/optimized/blog-1.webp', date: 'Oct 12, 2025', publishedDate: '2025-10-12', modifiedDate: '2026-10-23', tag: 'Plant Guide',
-    content: `
-      <p>A plant can be a thoughtful housewarming gift when it suits the recipient’s space. Start with the window light, the room temperature and the time available for care. A bright shop photograph does not tell you how a plant will grow in a dark corner.</p>
-      <p>If Vastu traditions influence your choice, treat their associations as cultural beliefs. A plant cannot guarantee wealth, health or good fortune. Its practical needs still determine where it should grow.</p>
-      <h2>Ten options to compare</h2>
-      <ol>
-        <li><strong>Money plant:</strong> a foliage choice for indirect light. Check the listed variety and allow the surface of the mix to begin drying.</li>
-        <li><strong>Lucky bamboo:</strong> choose indirect light. Rastlina’s set is grown in soil, so follow soil-care instructions.</li>
-        <li><strong>Jade:</strong> choose a bright window and let the mix dry between waterings.</li>
-        <li><strong>Snake plant:</strong> an upright foliage option. Good drainage and cautious watering matter.</li>
-        <li><strong>Peace lily:</strong> choose a sheltered position and monitor moisture. Read our <a href="/blog/2">drooping peace lily guide</a>.</li>
-        <li><strong>Parlour palm:</strong> Chamaedorea elegans offers fine palm foliage for indirect light.</li>
-        <li><strong>Aglaonema:</strong> compare named foliage selections for a warm indoor position.</li>
-        <li><strong>Philodendron:</strong> check the exact selection and the space available as it grows.</li>
-        <li><strong>Spider plant:</strong> an arching foliage choice for a well-lit position.</li>
-        <li><strong>Calathea or prayer plant:</strong> choose filtered light and a warm, humid setting.</li>
-      </ol>
-      <h2>What makes the gift complete?</h2>
-      <p>Rastlina plant sets include the listed plant, a self-watering pot and soil mix. Check the included items, available size, current stock and care guide before ordering. Leaf patterns and plant shape vary naturally.</p>
-      <p>The reservoir does not remove the need to check the soil. Each plant in a mixed set can need different care. Keep plants away from pets or children who may chew them, and check the exact species before choosing a pet-accessible position.</p>
-      <p><a href="/shop">Browse current plants</a> or contact us about <a href="/bulk">bulk housewarming and corporate gifts</a>.</p>
-      <p>Care references: <a href="https://www.rhs.org.uk/plants/calathea/growing-guide" rel="noopener noreferrer" target="_blank">RHS prayer-plant guidance</a>, <a href="https://plants.ces.ncsu.edu/plants/dracaena-trifasciata/" rel="noopener noreferrer" target="_blank">NC State snake-plant profile</a> and <a href="https://www.rhs.org.uk/plants/4739/crassula-ovata/details" rel="noopener noreferrer" target="_blank">RHS jade-plant profile</a>.</p>`,
+    title: 'Top 10 Vastu Plants for Your Home: The Rastlina Edit',
+    excerpt: 'Ten Vastu-inspired plants from Rastlina’s current collection, with traditional placement ideas, practical care advice and direct links to each plant.',
+    image: '/optimized/blog-vastu-v2.webp',
+    imageAlt: 'A selection of Rastlina plants in original ivory self-watering pots in a sunlit home',
+    date: 'Oct 12, 2025', publishedDate: '2025-10-12', modifiedDate: '2026-10-24', tag: 'Vastu & Living',
+    content: vastuGuideContent,
   },
   {
     id: 2,
     title: 'Why Is My Peace Lily Drooping? Check Soil, Drainage and Light',
     excerpt: 'A drooping peace lily can have dry soil or waterlogged roots. Check moisture and drainage first, then review light, temperature and your self-watering reservoir.',
-    image: '/optimized/blog-2.webp', date: 'Sep 28, 2025', publishedDate: '2025-09-28', modifiedDate: '2026-10-23', tag: 'Plant Care',
+    image: '/optimized/blog-peace-lily-care-v2.webp', imageAlt: 'Checking Peace Lily soil moisture in an original Rastlina self-watering pot', date: 'Sep 28, 2025', publishedDate: '2025-09-28', modifiedDate: '2026-10-24', tag: 'Plant Care',
     content: `
       <p>A drooping peace lily does not always need more water. Dry roots and roots damaged by excess moisture can both leave the plant limp. Check the potting mix before deciding what to do.</p>
       <h2>1. Check the mix below the surface</h2>
@@ -52,7 +36,7 @@ export const blogs = [
     id: 3,
     title: 'Buying Indoor Plants Online in India: A Practical Checklist',
     excerpt: 'Compare plant identity, light needs, pot contents, delivery information and support before buying an indoor plant online or sending a plant gift in India.',
-    image: '/optimized/blog-3.webp', date: 'Sep 15, 2025', publishedDate: '2025-09-15', modifiedDate: '2026-10-23', tag: 'Buying Guide',
+    image: '/optimized/blog-buying-guide-v2.webp', imageAlt: 'Rastlina plants in branded self-watering pots beside a plain delivery box', date: 'Sep 15, 2025', publishedDate: '2025-09-15', modifiedDate: '2026-10-24', tag: 'Buying Guide',
     content: `
       <p>Choosing an indoor plant online starts with the space where it will live. A clear listing should help you understand the plant, what arrives in the parcel and how you will look after it.</p>
       <h2>Check the plant name and available light</h2>
@@ -66,6 +50,6 @@ export const blogs = [
       <p>Consider their window light, space and care routine. If pets or small children can reach the plant, check its exact identity and suitability before ordering. Look beyond a general “low maintenance” label.</p>
       <h2>Order using the current listing</h2>
       <p>Check the selected size, pot option, price and stock. A search result or older social post may show earlier information. In a mixed set, each plant can need different care.</p>
-      <p><a href="/about">Rastlina Nature Hub Private Limited</a> is based in Hyderabad. Browse our <a href="/shop">current catalogue</a>, ask about <a href="/bulk">corporate plant gifts</a> or compare plants in our <a href="/blog/1">new-home plant guide</a>.</p>`,
+      <p><a href="/about">Rastlina Nature Hub Private Limited</a> is based in Hyderabad. Browse our <a href="/shop">current catalogue</a>, ask about <a href="/bulk">corporate plant gifts</a> or compare plants in our <a href="/blog/1">Vastu plant guide</a>.</p>`,
   },
 ];
