@@ -7,7 +7,7 @@ const BestSellers = () => {
 
   return (
     <ProductSlider
-      title="Best Sellers"
+      title="Best-Selling Plants"
       sectionClassName="home-bestsellers"
       eyebrow="03 / The favourites"
       subtitle="Good company, chosen again and again."

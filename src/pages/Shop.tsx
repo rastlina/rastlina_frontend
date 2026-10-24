@@ -9,13 +9,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Seo } from '@/components/seo/Seo';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+interface ShopCategory {
+  id: number;
+  name: string;
+  slug: string;
+  main_category_name?: string;
+  main_category_slug?: string;
+}
+
 interface FilterOptions {
   price_range: { min: number; max: number };
   sizes: Array<{ id: number; name: string }>;
   colors: Array<{ id: number; name: string; hex_code: string }>;
   care_levels: string[];
   spaces: Array<{ id: number; name: string; slug: string }>;
-  categories: Array<{ id: number; name: string; slug: string; main_category_name?: string }>;
+  categories: ShopCategory[];
   has_pet_friendly: boolean;
   has_air_purifying: boolean;
 }
@@ -50,6 +58,7 @@ export default function Shop() {
   // Local filter state (separate from URL so "Apply" commits them)
   const [showFilters, setShowFilters] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+  const [categories, setCategories] = useState<ShopCategory[]>([]);
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [ordering, setOrdering] = useState(urlOrdering);
@@ -72,6 +81,13 @@ export default function Shop() {
     localAirPurifying,
     localPrice[0] > 0 || (filterOptions && localPrice[1] < filterOptions.price_range.max),
   ].filter(Boolean).length;
+
+  // Category labels must also resolve for collections with no products.
+  useEffect(() => {
+    storeService.getCategories().then(data => {
+      setCategories(Array.isArray(data) ? data : data.results || []);
+    }).catch(() => {});
+  }, []);
 
   // Fetch filter options whenever main filters change
   useEffect(() => {
@@ -141,8 +157,13 @@ export default function Shop() {
     setShowFilters(false);
   };
 
+  const categoryName = categories.find(category => category.slug === urlCat)?.name
+    || filterOptions?.categories.find(category => category.slug === urlCat)?.name
+    || products[0]?.category_name || 'Plant Collection';
+  const mainCategoryName = categories.find(category => category.main_category_slug === urlMainCat)?.main_category_name
+    || products[0]?.main_category_name || 'Plant Collection';
+
   // Page title
-// Page title
 const getTitle = () => {
   if (urlSearch) return `Results for "${urlSearch}"`;
 
@@ -150,10 +171,10 @@ const getTitle = () => {
 
   if (urlNewArrival) return 'New Arrivals';
 
-  if (urlBestSeller) return 'Best Sellers';
+  if (urlBestSeller) return 'Best-Selling Plants';
 
   if (urlCat) {
-    return products[0]?.category_name || urlCat;
+    return categoryName;
   }
 
   if (urlSpace) {
@@ -168,7 +189,7 @@ const getTitle = () => {
   }
 
   if (urlMainCat) {
-    return urlMainCat.charAt(0).toUpperCase() + urlMainCat.slice(1);
+    return mainCategoryName;
   }
 
   // UPDATED DEFAULT TITLE
@@ -193,7 +214,7 @@ const getTitle = () => {
           <Link to="/" className="hover:text-[#667D00]">Home</Link>
           <span>/</span>
           <Link to="/shop" className="hover:text-[#667D00]">Shop</Link>
-          {(urlMainCat || urlCat) && <><span>/</span><span className="text-gray-700 font-medium capitalize">{urlCat || urlMainCat}</span></>}
+          {(urlMainCat || urlCat) && <><span>/</span><span className="text-gray-700 font-medium">{urlCat ? categoryName : mainCategoryName}</span></>}
         </nav>
 
         {/* Header row */}
