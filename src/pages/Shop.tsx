@@ -45,12 +45,15 @@ export default function Shop() {
 
   // Read all active URL filters
   const urlMainCat = searchParams.get('main_category') || '';
+  // The Plants landing link spans every plant collection and bundle.
+  const isAllPlants = urlMainCat === 'plants';
+  const requestMainCat = isAllPlants ? '' : urlMainCat;
   const urlCat = searchParams.get('category') || routeCategory || '';
   const urlSpace = searchParams.get('space') || '';
   const urlSize = searchParams.get('size') || '';
   const urlColor = searchParams.get('color') || '';
   const urlSearch = searchParams.get('search') || '';
-  const urlOrdering = searchParams.get('ordering') || '-created_at';
+  const urlOrdering = searchParams.get('ordering') || (isAllPlants ? 'price' : '-created_at');
   const urlBestDeal = searchParams.get('is_best_deal') || '';
   const urlNewArrival = searchParams.get('is_new_arrival') || '';
   const urlBestSeller = searchParams.get('is_best_seller') || '';
@@ -92,20 +95,20 @@ export default function Shop() {
   // Fetch filter options whenever main filters change
   useEffect(() => {
     const params: Record<string, string> = {};
-    if (urlMainCat) params.main_category = urlMainCat;
+    if (requestMainCat) params.main_category = requestMainCat;
     if (urlCat) params.category = urlCat;
     storeService.getFilterOptions(params).then((opts: FilterOptions) => {
       setFilterOptions(opts);
       setLocalPrice([opts.price_range.min, opts.price_range.max]);
     }).catch(() => {});
-  }, [urlMainCat, urlCat]);
+  }, [requestMainCat, urlCat]);
 
   // Fetch products
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const params: Record<string, any> = {};
-      if (urlMainCat) params.main_category = urlMainCat;
+      if (requestMainCat) params.main_category = requestMainCat;
       if (urlCat) params.category = urlCat;
       if (urlSpace) params.space = urlSpace;
       if (urlSize) params.size = urlSize;
@@ -120,7 +123,7 @@ export default function Shop() {
       setProducts(Array.isArray(data) ? data : data.results || []);
     } catch { setProducts([]); }
     finally { setLoading(false); }
-  }, [urlMainCat, urlCat, urlSpace, urlSize, urlColor, urlSearch, urlBestDeal, urlNewArrival, urlBestSeller, ordering]);
+  }, [requestMainCat, urlCat, urlSpace, urlSize, urlColor, urlSearch, urlBestDeal, urlNewArrival, urlBestSeller, ordering]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
   useEffect(() => { setOrdering(urlOrdering); }, [urlOrdering]);
@@ -189,7 +192,7 @@ const getTitle = () => {
   }
 
   if (urlMainCat) {
-    return mainCategoryName;
+    return isAllPlants ? 'All Indoor Plants' : mainCategoryName;
   }
 
   // UPDATED DEFAULT TITLE
