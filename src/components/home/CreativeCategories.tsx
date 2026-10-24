@@ -1,6 +1,30 @@
-// Featured categories retain their existing API images, names, and destinations.
+// Category names, ordering, and destinations remain managed by the API.
 import { Link } from 'react-router-dom';
 import { useHomeData } from '@/hooks/useHomeData';
+
+// Replace the approved poster set while allowing later dashboard uploads to win.
+const botanicalImages: Record<string, { previous: string; image: string }> = {
+  'air-purifying-plants': {
+    previous: 'rastlina-spider-plant-arched-poster.webp',
+    image: '/category-images/rastlina-air-purifying-plants-dark-botanical.webp',
+  },
+  'best-sellers': {
+    previous: 'rastlina-best-sellers-arched-poster.webp',
+    image: '/category-images/rastlina-best-selling-plants-dark-botanical.webp',
+  },
+  'exotic-beauties': {
+    previous: 'rastlina-exotic-beauties-arched-poster.webp',
+    image: '/category-images/rastlina-exotic-plants-dark-botanical.webp',
+  },
+  'fast-grown': {
+    previous: 'rastlina-fast-grown-arched-poster.webp',
+    image: '/category-images/rastlina-fast-growing-plants-dark-botanical.webp',
+  },
+  'favourite-collection': {
+    previous: 'rastlina-favourite-collection-arched-poster.webp',
+    image: '/category-images/rastlina-favourites-dark-botanical.webp',
+  },
+};
 
 const imageFrame =
   'aspect-square overflow-hidden rounded-[44%_44%_7%_7%] border-[8px] border-white bg-[#F0F4E8] shadow-[0_15px_24px_-15px_rgba(37,70,51,0.38)]';
@@ -15,7 +39,13 @@ const SkeletonCard = () => (
 
 const CreativeCategories = () => {
   const { data, loading } = useHomeData();
-  const categories = data.featured_categories;
+  const categories = data.featured_categories.map((category) => {
+    const replacement = botanicalImages[category.slug];
+    const currentImage = category.image?.split(/[?#]/)[0];
+    return replacement && (!currentImage || currentImage.endsWith(`/${replacement.previous}`))
+      ? { ...category, image: replacement.image }
+      : category;
+  });
 
   return (
     <section className="home-categories bg-[#FBF8EF] py-8 md:py-10">
