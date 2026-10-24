@@ -9,9 +9,13 @@ afterEach(() => {
   vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
 });
 
-it.each([false, true])('completes the films and respects an open mobile menu (%s)', async (menuOpen) => {
+it.each([
+  { menuOpen: false, mobile: false },
+  { menuOpen: true, mobile: false },
+  { menuOpen: false, mobile: true },
+])('completes the films without interrupting shoppers (%j)', async ({ menuOpen, mobile }) => {
   vi.useFakeTimers();
-  vi.stubGlobal('matchMedia', () => Object.assign(new EventTarget(), { matches: false }));
+  vi.stubGlobal('matchMedia', (query: string) => Object.assign(new EventTarget(), { matches: mobile && query === '(max-width: 1023px)' }));
   vi.stubGlobal('ResizeObserver', undefined);
   vi.stubGlobal('scrollTo', vi.fn());
   const states = new WeakMap<HTMLMediaElement, { paused: boolean; time: number; ready: number }>();
@@ -65,10 +69,10 @@ it.each([false, true])('completes the films and respects an open mobile menu (%s
     video.dispatchEvent(new Event('ended'));
     await vi.advanceTimersByTimeAsync(1200);
   }
-  expect(dialog.hidden).toBe(menuOpen);
-  expect(dialog.showModal).toHaveBeenCalledTimes(menuOpen ? 0 : 1);
+  expect(dialog.hidden).toBe(menuOpen || mobile);
+  expect(dialog.showModal).toHaveBeenCalledTimes(menuOpen || mobile ? 0 : 1);
   expect(dialog.querySelectorAll('.space-option')).toHaveLength(3);
-  root.querySelector<HTMLButtonElement>(menuOpen ? '.room-card[data-room="office"]' : '#space-prompt [data-room="office"]')!.click();
+  root.querySelector<HTMLButtonElement>(menuOpen || mobile ? '.room-card[data-room="office"]' : '#space-prompt [data-room="office"]')!.click();
   await vi.advanceTimersByTimeAsync(50);
   expect(dialog.hidden).toBe(true);
   expect(root.querySelector<HTMLElement>('#room-story')!.hidden).toBe(false);

@@ -381,6 +381,8 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   }
   function showSpacePrompt() {
     if (disposed || !spacePrompt.hidden) return;
+    // Phone shoppers can choose a room on the page without an automatic modal.
+    if (matchMedia('(max-width: 1023px)').matches) return;
     const introRect = introSection.getBoundingClientRect();
     const shoppingOverlay = document.querySelector(
       '[aria-controls="mobile-navigation"][aria-expanded="true"], [aria-controls="mobile-search"][aria-expanded="true"], [aria-label="Close cart"]'
@@ -406,6 +408,7 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     framePending = false;
     const introRect = introSection.getBoundingClientRect();
     const introVisible = introRect.top < window.innerHeight && introRect.top + introSection.offsetHeight > scrollOffset;
+    if (!introVisible && !spacePrompt.hidden) closeSpacePrompt();
     const roomTop = selected ? roomSection.getBoundingClientRect().top : Infinity;
     const roomVisible = Boolean(selected && (selecting || (roomTop < window.innerHeight && roomTop + roomSection.offsetHeight > scrollOffset)));
     // Release the room before loading the returning story's two decoders.
