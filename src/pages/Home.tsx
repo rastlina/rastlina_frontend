@@ -85,11 +85,11 @@ const Home = () => {
       </nav>
       <PlantJourney onReady={onHeroReady} />
       <section className="home-gift-intro container-custom max-w-4xl py-12 text-center text-[#18392a]" aria-labelledby="plant-gifts-heading">
-        <h2 id="plant-gifts-heading" className="font-serif text-3xl">Ready-to-gift plant sets for your space</h2>
-        <p className="mt-4 leading-7">Bring home a healthy indoor plant, paired with a self-watering pot and soil mix. Find a plant for your space or a thoughtful gift for someone special.</p>
+        <h2 id="plant-gifts-heading" className="font-serif text-3xl">Plants, ready to gift.</h2>
+        <p className="mt-2 leading-7">Indoor plants in self-watering pots, ready to gift.</p>
         <nav className="home-quick-links" aria-label="Explore Rastlina">
-          <Link to="/shop?main_category=plants"><Leaf aria-hidden="true" /><span>Shop indoor plants</span><ArrowUpRight aria-hidden="true" /></Link>
-          <Link to="/bulk"><Gift aria-hidden="true" /><span>Corporate plant gifts</span><ArrowUpRight aria-hidden="true" /></Link>
+          <Link to="/shop?main_category=plants"><Leaf aria-hidden="true" /><span>Shop plants</span><ArrowUpRight aria-hidden="true" /></Link>
+          <Link to="/bulk"><Gift aria-hidden="true" /><span>Corporate gifts</span><ArrowUpRight aria-hidden="true" /></Link>
           <Link to="/blog/1"><BookOpen aria-hidden="true" /><span>Top 10 Vastu Plants</span><ArrowUpRight aria-hidden="true" /></Link>
           <Link to="/about"><Sprout aria-hidden="true" /><span>About Rastlina</span><ArrowUpRight aria-hidden="true" /></Link>
         </nav>
