@@ -6,23 +6,23 @@ import { useHomeData } from '@/hooks/useHomeData';
 const botanicalImages: Record<string, { previous: string; image: string }> = {
   'air-purifying-plants': {
     previous: 'rastlina-spider-plant-arched-poster.webp',
-    image: '/category-images/rastlina-air-purifying-plants-dark-botanical.webp',
+    image: '/category-images/rastlina-air-purifying-plants-original-pot-v2.webp',
   },
   'best-sellers': {
     previous: 'rastlina-best-sellers-arched-poster.webp',
-    image: '/category-images/rastlina-best-selling-plants-dark-botanical.webp',
+    image: '/category-images/rastlina-best-selling-plants-original-pot-v2.webp',
   },
   'exotic-beauties': {
     previous: 'rastlina-exotic-beauties-arched-poster.webp',
-    image: '/category-images/rastlina-exotic-plants-dark-botanical.webp',
+    image: '/category-images/rastlina-exotic-plants-original-pot-v2.webp',
   },
   'fast-grown': {
     previous: 'rastlina-fast-grown-arched-poster.webp',
-    image: '/category-images/rastlina-fast-growing-plants-dark-botanical.webp',
+    image: '/category-images/rastlina-fast-growing-plants-original-pot-v2.webp',
   },
   'favourite-collection': {
     previous: 'rastlina-favourite-collection-arched-poster.webp',
-    image: '/category-images/rastlina-favourites-dark-botanical.webp',
+    image: '/category-images/rastlina-favourites-original-pot-v2.webp',
   },
 };
 
