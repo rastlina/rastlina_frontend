@@ -162,13 +162,13 @@ export function applyProductEditorial(product: ApiProductDetail): ApiProductDeta
     // The admin description is the source of truth for both the page and SEO.
     // Keep the reviewed fallback only for products without a description.
     description: product.description?.trim() ? product.description : `${name}\n\n${intro}\n\nSupplied as a ready-to-gift indoor plant set with a self-watering pot and soil mix. A living gift for birthdays, housewarmings, thank-you gestures and other occasions.\n\nPlants are living items: leaf patterns, shape and growth vary naturally. Use the care guide to choose a suitable position for the plant.`,
-    sunlight: members ? 'Match each plant to its own light needs' : profile.light,
-    watering: members ? 'Check each pot separately; follow the guide below' : profile.water,
-    temperature: 'Protect from cold drafts and extreme heat',
+    sunlight: product.sunlight?.trim() ? product.sunlight : members ? 'Match each plant to its own light needs' : profile.light,
+    watering: product.watering?.trim() ? product.watering : members ? 'Check each pot separately; follow the guide below' : profile.water,
+    temperature: product.temperature?.trim() ? product.temperature : 'Protect from cold drafts and extreme heat',
     growth_rate: '',
     pet_friendly: null,
     air_purifying: false,
-    care_instructions_list: [...instructions,
+    care_instructions_list: product.care_instructions_list?.some(tip => tip.trim()) ? product.care_instructions_list : [...instructions,
       'Self-watering pot: check the soil as well as the reservoir before refilling. A reservoir does not remove the need to monitor moisture; avoid keeping the mix saturated.',
       'Water according to soil moisture, light and season, rather than a fixed number of days. Make sure excess water can drain.',
       'Keep plants out of reach of pets and small children. Check the exact plant identity before choosing it for an area where leaves may be chewed.',

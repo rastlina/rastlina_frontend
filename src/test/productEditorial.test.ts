@@ -23,6 +23,20 @@ describe('reviewed product content', () => {
     expect(product.description).toContain('Snake Green');
     expect(product.description).toContain('self-watering pot and soil mix');
   });
+  it.each(['SNAK-02', 'SET2-06'])('shows current admin care guidance for %s', sku => {
+    const saved = {
+      ...fixture(sku),
+      watering: 'Water every 14–28 days, only after the soil has dried throughout.',
+      sunlight: 'Bright, indirect light.',
+      temperature: '15–24°C; avoid cold drafts.',
+      care_instructions_list: ['💧 Water every 14–28 days, once dry.', '☀️ Bright, indirect light.', '🌡️ 15–24°C.'],
+    };
+    const product = applyProductEditorial(saved);
+    expect(product.watering).toBe(saved.watering);
+    expect(product.sunlight).toBe(saved.sunlight);
+    expect(product.temperature).toBe(saved.temperature);
+    expect(product.care_instructions_list).toEqual(saved.care_instructions_list);
+  });
   it('covers unique reviewed SKUs with description, care and included items', () => {
     expect(new Set(reviewedProductSkus).size).toBe(reviewedProductSkus.length);
     for (const sku of reviewedProductSkus) {
