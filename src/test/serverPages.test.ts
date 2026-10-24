@@ -17,7 +17,7 @@ afterEach(() => vi.unstubAllGlobals());
 function product() {
   return {
     name: 'Snake Green', slug: 'snake-green', sku: 'SNAK-02', price: '399.00', in_stock: true,
-    description: 'A plant set', care_instructions_list: [], what_you_get_list: [], images: [{ image: 'https://api.rastlina.com/media/snake.webp', is_primary: true }],
+    description: '🌿 Snake Green: Upright green foliage for your indoor collection.\n🪴 Includes a self-watering pot.', care_instructions_list: [], what_you_get_list: [], images: [{ image: 'https://api.rastlina.com/media/snake.webp', is_primary: true }],
     variants: [{ id: 1, final_price: 300, in_stock: false }, { id: 2, final_price: 450, in_stock: true }],
     review_count: 0, average_rating: 0,
   } as unknown as ApiProductDetail;
@@ -36,6 +36,8 @@ it('serves the product canonical, visible details and the default purchasable va
   expect(result.body).toContain('data-server-test-shell');
   expect(result.body).toContain('href="https://www.rastlina.com/product/snake-green"');
   expect(result.body).toContain('<h1>Snake Green</h1>');
+  expect(result.body).toContain('🌿 Snake Green: Upright green foliage for your indoor collection.');
+  expect(result.body).toContain(JSON.stringify(product().description));
   expect(result.body).toContain('₹450.00');
   expect(result.body).toContain('"price":450');
   expect(result.body).toContain('https://schema.org/InStock');

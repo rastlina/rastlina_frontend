@@ -3,10 +3,26 @@ import { applyProductEditorial, reviewedProductSkus } from '@/data/productEditor
 import type { ApiProductDetail } from '@/pages/ProductDetail';
 
 function fixture(sku: string, name = 'Plant') {
-  return { sku, name, slug: 'existing-url', price: '299.00', variants: [], images: [], description: 'Original', care_instructions_list: [] } as unknown as ApiProductDetail;
+  return { sku, name, slug: 'existing-url', price: '299.00', variants: [], images: [], description: '', care_instructions_list: [] } as unknown as ApiProductDetail;
 }
 
 describe('reviewed product content', () => {
+  it.each([
+    ['AGLA-01', 'Aglaonema Chinese Evergreen'],
+    ['SET2-07', 'Aglaonema Lipstick Red | Jade - Set of 2'],
+  ])('shows saved admin copy for %s without replacing its emoji lines', (sku, name) => {
+    const description = `🌿 ${name}: A living gift for home and office.\n🌱 Check the soil before watering.\n🌞 Choose suitable light.\n🪴 Includes a self-watering pot.\n🎁 A thoughtful plant gift.`;
+    const product = applyProductEditorial({ ...fixture(sku, name), description });
+    expect(product.description).toBe(description);
+    expect(product.care_instructions_list.length).toBeGreaterThanOrEqual(4);
+    expect(product.slug).toBe('existing-url');
+    expect(product.price).toBe('299.00');
+  });
+  it('uses the reviewed fallback when the admin description contains only whitespace', () => {
+    const product = applyProductEditorial({ ...fixture('SNAK-02', 'Snake Green'), description: ' \n ' });
+    expect(product.description).toContain('Snake Green');
+    expect(product.description).toContain('self-watering pot and soil mix');
+  });
   it('covers unique reviewed SKUs with description, care and included items', () => {
     expect(new Set(reviewedProductSkus).size).toBe(reviewedProductSkus.length);
     for (const sku of reviewedProductSkus) {
