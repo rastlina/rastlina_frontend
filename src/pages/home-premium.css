@@ -120,7 +120,7 @@ body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:graysca
 
 /* Clear shopping shortcuts, with a raised edge that still reads on touch screens. */
 .home-shopping-entry { display:none; }
-.home-gift-intro { max-width:1060px; padding-block:30px 36px; }
+.home-refined .home-gift-intro { max-width:1060px; padding-block:30px 36px; }
 .home-gift-intro h2 { font-size:28px; line-height:1.25; }
 .home-gift-intro>p { font-size:14px; line-height:1.65; }
 .home-quick-links { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:18px auto 0; }
@@ -141,7 +141,7 @@ body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:graysca
   .home-quick-links { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 @media(max-width:700px) {
-  .home-gift-intro { padding:24px 18px 28px; }
+  .home-refined .home-gift-intro { padding:24px 18px 28px; }
   .home-gift-intro h2 { font-size:23px; line-height:1.25; }
   .home-gift-intro>p { font-size:13px; line-height:1.65; }
   .home-quick-links { gap:12px 10px; margin-top:16px; }

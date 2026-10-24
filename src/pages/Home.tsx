@@ -84,7 +84,7 @@ const Home = () => {
         <Link to="/shop?main_category=plants">Shop all plants <ArrowUpRight size={17} aria-hidden="true" /></Link>
       </nav>
       <PlantJourney onReady={onHeroReady} />
-      <section className="home-gift-intro container-custom max-w-4xl py-12 text-center text-[#18392a]" aria-labelledby="plant-gifts-heading">
+      <section className="home-gift-intro container-custom text-center text-[#18392a]" aria-labelledby="plant-gifts-heading">
         <h2 id="plant-gifts-heading" className="font-serif text-3xl">Plants, ready to gift.</h2>
         <p className="mt-2 leading-7">Indoor plants in self-watering pots, ready to gift.</p>
         <nav className="home-quick-links" aria-label="Explore Rastlina">
