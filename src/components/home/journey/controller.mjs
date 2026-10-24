@@ -381,6 +381,11 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   }
   function showSpacePrompt() {
     if (disposed || !spacePrompt.hidden) return;
+    const introRect = introSection.getBoundingClientRect();
+    const shoppingOverlay = document.querySelector(
+      '[aria-controls="mobile-navigation"][aria-expanded="true"], [aria-controls="mobile-search"][aria-expanded="true"], [aria-label="Close cart"]'
+    );
+    if (document.hidden || shoppingOverlay || introRect.bottom <= scrollOffset || introRect.top >= window.innerHeight) return;
     spacePrompt.hidden = false;
     if (spacePrompt.showModal) spacePrompt.showModal();
     else spacePrompt.setAttribute('open', '');

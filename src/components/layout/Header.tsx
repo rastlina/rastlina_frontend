@@ -7,6 +7,7 @@ import {
   ShoppingBag, Menu, X, ChevronDown, ChevronRight,
   Briefcase, Search, User, Leaf, Tag,
 } from 'lucide-react';
+import './header.css';
 import { useCart } from '@/contexts/CartContext';
 import { storeService } from '@/services/api';
 import { contentService } from '@/services/api';
@@ -25,6 +26,11 @@ interface NavbarData {
   planters_sizes: SizeOption[];
   seeds_sizes: SizeOption[];
 }
+
+// Keep the catalogue reachable while the dynamic menu is loading or unavailable.
+const FALLBACK_MAIN_CATEGORIES: MainCat[] = [
+  { id: 0, name: 'Indoor Plants', slug: 'plants', icon: '', order: 0, categories: [] },
+];
 
 // ─── Announcement Bar ─────────────────────────────────────────────────────────
 interface AnnouncementItem {
@@ -301,6 +307,40 @@ export const Header = () => {
   const { openCart, totalItems } = useCart();
   const { user } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobilePanelTop = isScrolled && pathname !== '/' ? 70 : 108;
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setMobileSearchOpen(false);
+    setMobileExpanded(null);
+    setActiveDropdown(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen && !mobileSearchOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setMobileOpen(false);
+      setMobileSearchOpen(false);
+      mobileMenuButtonRef.current?.focus();
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [mobileOpen, mobileSearchOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = () => { if (desktop.matches) setMobileOpen(false); };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      desktop.removeEventListener('change', closeOnDesktop);
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
   const handleScroll = () => {
@@ -339,7 +379,7 @@ export const Header = () => {
     }
   };
 
-  const mainCats = navData?.main_categories || [];
+  const mainCats = navData?.main_categories?.length ? navData.main_categories : FALLBACK_MAIN_CATEGORIES;
   const heroSlides = navData?.hero_slides || [];
   const featuredSpaces = navData?.featured_spaces || [];
 const plantSizes = navData?.plants_sizes || [];
@@ -388,7 +428,7 @@ const extraNavItems = [
 
           {/* ── MOBILE ── */}
           <div className="lg:hidden h-[70px] flex items-center justify-between">
-            <button aria-label="Toggle menu" aria-expanded={mobileOpen} className="p-2 -ml-2 text-[#1A3831]" onClick={() => { setMobileOpen(!mobileOpen); setMobileSearchOpen(false); }}>
+            <button ref={mobileMenuButtonRef} aria-label="Toggle menu" aria-expanded={mobileOpen} aria-controls="mobile-navigation" className="mobile-header-control p-2 -ml-2 text-[#1A3831]" onClick={() => { setMobileOpen(!mobileOpen); setMobileSearchOpen(false); }}>
               {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
             <Link to="/" className="brand-logo-link absolute left-1/2 -translate-x-1/2">
@@ -396,10 +436,10 @@ const extraNavItems = [
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             </Link>
             <div className="flex items-center gap-1">
-              <button aria-label="Toggle search" aria-expanded={mobileSearchOpen} className="p-2 text-gray-800" onClick={() => { setMobileSearchOpen(!mobileSearchOpen); setMobileOpen(false); }}>
+              <button aria-label="Toggle search" aria-expanded={mobileSearchOpen} aria-controls="mobile-search" className="mobile-header-control p-2 text-gray-800" onClick={() => { setMobileSearchOpen(!mobileSearchOpen); setMobileOpen(false); }}>
                 <Search className="h-5 w-5" />
               </button>
-              <button aria-label="Open cart" className="relative p-2 text-[#1A3831]" onClick={openCart}>
+              <button aria-label="Open cart" className="mobile-header-control relative p-2 text-[#1A3831]" onClick={() => { setMobileOpen(false); setMobileSearchOpen(false); openCart(); }}>
                 <ShoppingBag className="h-6 w-6 stroke-[1.5]" />
                 {totalItems > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 bg-[#FACC15] text-black text-[10px] font-extrabold rounded-full h-4.5 w-4.5 min-w-[18px] h-[18px] flex items-center justify-center shadow-sm px-0.5">
@@ -494,12 +534,12 @@ const extraNavItems = [
                   onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-4 pr-9 py-2 rounded-full border border-gray-200 text-sm focus:outline-none focus:border-[#667D00] focus:ring-1 focus:ring-[#667D00] bg-gray-50"
                 />
-                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#667D00]">
+                <button type="submit" aria-label="Search plants" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#667D00]">
                   <Search className="h-4 w-4" />
                 </button>
               </form>
 
-              <Link to={user ? '/profile' : '/login'} className="p-2 text-gray-800 hover:text-[#667D00] transition-colors relative">
+              <Link to={user ? '/profile' : '/login'} aria-label={user ? 'My account' : 'Login or sign up'} className="p-2 text-gray-800 hover:text-[#667D00] transition-colors relative">
                 <User className="h-6 w-6" />
                 {user && (
                   <span className="absolute bottom-0.5 right-0.5 w-2 h-2 bg-[#667D00] rounded-full border-2 border-white" />
@@ -523,6 +563,7 @@ const extraNavItems = [
         <>
           {mobileSearchOpen && (
             <div
+              id="mobile-search"
               className="lg:hidden border-t border-gray-100 bg-white overflow-hidden"
             >
               <div className="px-4 py-3">
@@ -530,10 +571,11 @@ const extraNavItems = [
                   <input
                     type="text" placeholder="Search indoor plants..."
                     value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#667D00] focus:ring-1 focus:ring-[#667D00] bg-gray-50"
+                    aria-label="Search indoor plants"
+                    className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 text-base focus:outline-none focus:border-[#667D00] focus:ring-1 focus:ring-[#667D00] bg-gray-50"
                     autoFocus
                   />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#667D00]">
+                  <button type="submit" aria-label="Search plants" className="mobile-header-control absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#667D00]">
                     <Search className="h-4 w-4" />
                   </button>
                 </form>
@@ -545,14 +587,18 @@ const extraNavItems = [
         {/* Mobile drawer */}
         <>
           {mobileOpen && (
-            <div
-              className="lg:hidden absolute top-[70px] left-0 w-full bg-white border-t border-gray-100 z-40 overflow-y-auto"
-              style={{ maxHeight: 'calc(100vh - 108px)' }}
+            <>
+            <button type="button" aria-label="Close menu" className="lg:hidden fixed inset-x-0 bottom-0 z-30 bg-black/40" style={{top: mobilePanelTop}} onClick={() => setMobileOpen(false)} />
+            <nav
+              id="mobile-navigation"
+              aria-label="Mobile navigation"
+              className="mobile-navigation lg:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 z-40 overflow-y-auto"
+              style={{ maxHeight: `calc(100dvh - ${mobilePanelTop}px)` }}
             >
               <div className="px-4 py-4 space-y-1 pb-10">
                 {/* Profile */}
-                <div
-                  onClick={() => { navigate(user ? '/profile' : '/login'); setMobileOpen(false); }}
+                <Link to={user ? '/profile' : '/login'}
+                  onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-3 p-3 rounded-xl bg-[#1A3831]/5 mb-4 cursor-pointer"
                 >
                   <div className="w-10 h-10 bg-[#1A3831] rounded-full flex items-center justify-center">
@@ -563,25 +609,28 @@ const extraNavItems = [
                     <p className="text-xs text-gray-400">{user ? user.email : 'Sign in to your account'}</p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-gray-400" />
-                </div>
+                </Link>
 
                 {/* Plants with sub-sections */}
                 {plantsCat && (
                   <div className="border-b border-gray-100">
-                    <div className="flex items-center justify-between py-3" onClick={() => setMobileExpanded(mobileExpanded === 'plants' ? null : 'plants')}>
-                      <span className="font-serif text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <button type="button" className="mobile-menu-heading text-gray-900" aria-expanded={mobileExpanded === 'plants'} aria-controls="mobile-plants-links" onClick={() => setMobileExpanded(mobileExpanded === 'plants' ? null : 'plants')}>
+                      <span className="flex items-center gap-2">
                         <Leaf className="h-4 w-4 text-[#667D00]" fill="currentColor" /> {plantsCat.name}
                       </span>
                       <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${mobileExpanded === 'plants' ? 'rotate-180' : ''}`} />
-                    </div>
+                    </button>
                     <>
                       {mobileExpanded === 'plants' && (
-                        <div className="overflow-hidden">
+                        <div id="mobile-plants-links" className="mobile-menu-links overflow-hidden">
                           <div className="pb-4 space-y-1 pl-2">
+                            <Link to="/shop?main_category=plants" onClick={() => setMobileOpen(false)} className="mobile-view-all text-[#1A3831]">
+                              <span>View All</span><ChevronRight size={18} aria-hidden="true" />
+                            </Link>
                             
                             {/* By Size */}
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 mb-1">By Size</p>
-                            {(plantSizes.length ? plantSizes : [{ id: 0, name: 'Small' }, { id: 1, name: 'Medium' }, { id: 2, name: 'Large' }]).map(s => (
+                            {(plantSizes.length ? plantSizes : [{ id: 0, name: 'Small' }]).map(s => (
                               <Link key={s.id} to={`/shop?main_category=plants&size=${s.name}`}
                                 onClick={() => setMobileOpen(false)}
                                 className="block py-2 text-sm text-gray-700 hover:text-[#667D00] font-medium">{s.name} Plants</Link>
@@ -606,14 +655,6 @@ const extraNavItems = [
                               </>
                               
                             )}
-                            {/* All Plants */}
-<Link
-  to="/shop?main_category=plants"
-  onClick={() => setMobileOpen(false)}
-  className="block py-2 text-sm font-semibold text-[#1A3831] hover:text-[#667D00]"
->
-  All Plants
-</Link>
                           </div>
                         </div>
                       )}
@@ -624,17 +665,19 @@ const extraNavItems = [
                 {/* Other main categories */}
                 {mainCats.filter(c => c.slug !== 'plants').map(cat => (
                   <div key={cat.id} className="border-b border-gray-100">
-                    <div className="flex items-center justify-between py-3" onClick={() => setMobileExpanded(mobileExpanded === cat.slug ? null : cat.slug)}>
-                      <Link to={`/shop?main_category=${cat.slug}`} onClick={() => setMobileOpen(false)}
-                        className="font-serif text-base font-semibold text-gray-900">{cat.name}</Link>
+                    <button type="button" className="mobile-menu-heading text-gray-900" aria-expanded={mobileExpanded === cat.slug} aria-controls={`mobile-category-${cat.id}`} onClick={() => setMobileExpanded(mobileExpanded === cat.slug ? null : cat.slug)}>
+                      <span>{cat.name}</span>
                       {cat.categories.length > 0 && (
                         <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${mobileExpanded === cat.slug ? 'rotate-180' : ''}`} />
                       )}
-                    </div>
+                    </button>
                     <>
-                      {mobileExpanded === cat.slug && cat.categories.length > 0 && (
-                        <div className="overflow-hidden">
+                      {mobileExpanded === cat.slug && (
+                        <div id={`mobile-category-${cat.id}`} className="mobile-menu-links overflow-hidden">
                           <div className="pb-4 space-y-1 pl-2">
+                            <Link to={`/shop?main_category=${cat.slug}`} onClick={() => setMobileOpen(false)} className="mobile-view-all text-[#1A3831]">
+                              <span>View All</span><ChevronRight size={18} aria-hidden="true" />
+                            </Link>
                             {cat.categories.map(sub => (
                               <Link key={sub.id} to={`/shop?category=${sub.slug}`}
                                 onClick={() => setMobileOpen(false)}
@@ -650,12 +693,13 @@ const extraNavItems = [
                 {/* Extra items */}
                 {extraNavItems.map(item => (
                   <Link key={item.label} to={item.href} onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-2 py-3 font-serif text-base font-semibold border-b border-gray-100 ${item.highlight ? 'text-[#BFA275]' : 'text-gray-900'}`}>
+                    className={`mobile-menu-heading justify-start gap-2 border-b border-gray-100 ${item.highlight ? 'text-[#BFA275]' : 'text-gray-900'}`}>
                     {item.icon}{item.label}
                   </Link>
                 ))}
               </div>
-            </div>
+            </nav>
+            </>
           )}
         </>
       </header>

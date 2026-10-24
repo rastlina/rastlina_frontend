@@ -21,7 +21,7 @@ body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:graysca
 @media(prefers-reduced-motion:no-preference){.home-collections>section[data-revealed="true"]>.container-custom{animation:luxury-enter .5s cubic-bezier(.2,.7,.2,1) both}}
 @media(max-width:700px){
   .luxury-header button[aria-label]{min-width:44px;min-height:44px}
-  .luxury-header .overflow-y-auto{overscroll-behavior:contain;max-height:calc(100svh - 110px)!important}
+  .luxury-header .overflow-y-auto{overscroll-behavior:contain}
   .luxury-header input{font-size:16px}
   .home-collections .overflow-x-auto{overscroll-behavior-x:contain;scroll-padding-inline:4px;-webkit-overflow-scrolling:touch}
 }
@@ -117,6 +117,45 @@ body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:graysca
 .home-refined .plant-journey .choices { background:#05160e; }
 .home-refined .home-bestsellers .group:hover h3 { color:#30583d; }
 .rastlina-footer .text-accent-gold { color:#c8ac71; }
+
+/* Clear shopping shortcuts, with a raised edge that still reads on touch screens. */
+.home-shopping-entry { display:none; }
+.home-gift-intro { max-width:1060px; padding-block:52px 60px; }
+.home-quick-links { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; margin:30px auto 0; }
+.home-quick-links a { display:flex; align-items:center; justify-content:center; gap:10px; min-height:76px; padding:18px 14px; border:1px solid #c8ac7170; border-radius:14px; background:linear-gradient(150deg,#fffef9,#f0ead9); color:#18392a; box-shadow:inset 0 2px 0 #fff,0 5px 0 #c9c0a6,0 14px 22px -9px #18392a40; font-size:14px; font-weight:600; line-height:1.5; text-align:left; transition:transform .2s,box-shadow .2s; }
+.home-quick-links a>svg { flex:none; width:20px; height:20px; color:#77643e; }
+.home-quick-links a>svg:last-child { width:15px; height:15px; }
+.home-quick-links a:active { transform:translateY(3px); box-shadow:inset 0 2px 0 #fff,0 2px 0 #c9c0a6,0 8px 14px -9px #18392a40; }
+@media(hover:hover) { .home-quick-links a:hover { transform:translateY(-3px); box-shadow:inset 0 2px 0 #fff,0 8px 0 #c9c0a6,0 19px 26px -9px #18392a40; } }
+.home-refined .home-categories .home-category-heading { align-items:center; margin-bottom:30px; }
+.home-refined .home-categories .home-category-heading h2 { flex:1 1 auto; margin:0; }
+.home-view-all { display:inline-flex; flex:none; align-items:center; justify-content:center; gap:9px; min-height:48px; padding:12px 20px; border:1px solid #c8ac7140; border-radius:24px; background:#18392a; color:#fffdf7; font-size:14px; font-weight:600; box-shadow:0 5px 12px -7px #18392a70; }
+.home-view-all:hover { background:#28523b; }
+.category-swipe-hint { margin:-10px 0 18px; font-size:12px; line-height:1.5; color:#65725e; }
+@media(max-width:1023px) {
+  .home-shopping-entry { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:62px; padding:8px 20px; background:#13271c; border-bottom:1px solid #c8ac7138; color:#f7f2e7; }
+  .home-shopping-entry>span { max-width:145px; font-size:12px; line-height:1.5; }
+  .home-shopping-entry a { display:inline-flex; flex:none; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:10px 13px; border:1px solid #c8ac7166; border-radius:9px; color:#f7e6bf; font-size:13px; font-weight:600; }
+  .home-quick-links { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:700px) {
+  .home-gift-intro { padding:38px 22px 44px; }
+  .home-gift-intro h2 { font-size:28px; line-height:1.25; }
+  .home-gift-intro>p { font-size:14px; line-height:1.8; }
+  .home-quick-links { gap:17px 12px; margin-top:26px; }
+  .home-quick-links a { min-height:90px; padding:13px 10px; gap:8px; font-size:13px; }
+  .home-quick-links a>svg { width:18px; height:18px; }
+  .home-quick-links a>svg:last-child { display:none; }
+  .home-refined .home-categories .home-category-heading { gap:14px; margin-bottom:24px; }
+  .home-refined .home-categories .home-category-heading h2 { flex:1 1 170px; font-size:32px; }
+  .home-view-all { min-height:46px; padding:11px 16px; font-size:13px; }
+  .home-refined .plant-journey .intro-note { font-size:13px; line-height:1.6; }
+  .home-refined .plant-journey .eyebrow { font-size:10px; }
+  .home-refined .plant-journey .chapter-controls .text-link { font-size:12px; }
+  .home-refined .plant-journey .room-switcher button { min-height:44px; }
+  .rastlina-footer :is(li>a,.contact-item>a) { display:inline-flex; align-items:center; min-height:44px; }
+}
+@media(prefers-reduced-motion:reduce) { .home-quick-links a { transition:none; } }
 
 /* Narrow-screen alignment and tap targets across the shopping sections. */
 @media(max-width:700px) {

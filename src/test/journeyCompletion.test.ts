@@ -9,7 +9,7 @@ afterEach(() => {
   vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
 });
 
-it('shows the three space choices only after all five films and opens the chosen room', async () => {
+it.each([false, true])('completes the films and respects an open mobile menu (%s)', async (menuOpen) => {
   vi.useFakeTimers();
   vi.stubGlobal('matchMedia', () => Object.assign(new EventTarget(), { matches: false }));
   vi.stubGlobal('ResizeObserver', undefined);
@@ -40,6 +40,13 @@ it('shows the three space choices only after all five films and opens the chosen
   root.className = 'plant-journey'; root.innerHTML = markup; document.body.append(root);
   const intro = root.querySelector<HTMLElement>('#nursery-story')!;
   Object.defineProperty(intro, 'offsetHeight', { value: 700 });
+  vi.spyOn(intro, 'getBoundingClientRect').mockReturnValue({ top: 0, bottom: 700, left: 0, right: 390, width: 390, height: 700, x: 0, y: 0, toJSON: () => ({}) });
+  if (menuOpen) {
+    const menuButton = document.createElement('button');
+    menuButton.setAttribute('aria-controls', 'mobile-navigation');
+    menuButton.setAttribute('aria-expanded', 'true');
+    root.append(menuButton);
+  }
   // jsdom has no layout; the selected room needs a visible stage rectangle.
   Object.defineProperty(root.querySelector('#room-story')!, 'offsetHeight', { value: 700 });
   const dialog = root.querySelector<HTMLDialogElement>('#space-prompt')!;
@@ -58,10 +65,10 @@ it('shows the three space choices only after all five films and opens the chosen
     video.dispatchEvent(new Event('ended'));
     await vi.advanceTimersByTimeAsync(1200);
   }
-  expect(dialog.hidden).toBe(false);
-  expect(dialog.showModal).toHaveBeenCalledTimes(1);
+  expect(dialog.hidden).toBe(menuOpen);
+  expect(dialog.showModal).toHaveBeenCalledTimes(menuOpen ? 0 : 1);
   expect(dialog.querySelectorAll('.space-option')).toHaveLength(3);
-  dialog.querySelector<HTMLButtonElement>('[data-room="office"]')!.click();
+  root.querySelector<HTMLButtonElement>(menuOpen ? '.room-card[data-room="office"]' : '#space-prompt [data-room="office"]')!.click();
   await vi.advanceTimersByTimeAsync(50);
   expect(dialog.hidden).toBe(true);
   expect(root.querySelector<HTMLElement>('#room-story')!.hidden).toBe(false);

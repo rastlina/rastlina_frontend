@@ -4,6 +4,7 @@ import './home-premium.css';
 import { lazy, Suspense, startTransition, useCallback, useEffect, useState } from 'react';
 import { Seo } from '@/components/seo/Seo';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight, Gift, Leaf, BookOpen, Sprout } from 'lucide-react';
 
 const HomeSections = lazy(() => import('@/components/home/HomeSections'));
 
@@ -78,15 +79,19 @@ const Home = () => {
         }]}
       />
       <h1 className="sr-only">Buy Indoor Plants Online in India</h1>
+      <nav className="home-shopping-entry" aria-label="Start shopping">
+        <span>Indoor plants from ₹199</span>
+        <Link to="/shop?main_category=plants">Shop all plants <ArrowUpRight size={17} aria-hidden="true" /></Link>
+      </nav>
       <PlantJourney onReady={onHeroReady} />
-      <section className="container-custom max-w-4xl py-12 text-center text-[#18392a]" aria-labelledby="plant-gifts-heading">
+      <section className="home-gift-intro container-custom max-w-4xl py-12 text-center text-[#18392a]" aria-labelledby="plant-gifts-heading">
         <h2 id="plant-gifts-heading" className="font-serif text-3xl">Ready-to-gift plant sets for your space</h2>
-        <p className="mt-4 leading-7">Choose a living plant gift with a self-watering pot and soil mix included. Browse the current plant selection, match its care needs to your room, and find a gift for a birthday, housewarming or thank-you.</p>
-        <nav className="mt-6 flex flex-wrap justify-center gap-6" aria-label="Explore Rastlina">
-          <Link to="/shop" className="underline">Shop indoor plants</Link>
-          <Link to="/bulk" className="underline">Corporate plant gifts</Link>
-          <Link to="/blog/2" className="underline">Peace lily care guide</Link>
-          <Link to="/about" className="underline">About Rastlina</Link>
+        <p className="mt-4 leading-7">Bring home a healthy indoor plant, paired with a self-watering pot and soil mix. Find a plant for your space or a thoughtful gift for someone special.</p>
+        <nav className="home-quick-links" aria-label="Explore Rastlina">
+          <Link to="/shop?main_category=plants"><Leaf aria-hidden="true" /><span>Shop indoor plants</span><ArrowUpRight aria-hidden="true" /></Link>
+          <Link to="/bulk"><Gift aria-hidden="true" /><span>Corporate plant gifts</span><ArrowUpRight aria-hidden="true" /></Link>
+          <Link to="/blog/1"><BookOpen aria-hidden="true" /><span>Top 10 Vastu Plants</span><ArrowUpRight aria-hidden="true" /></Link>
+          <Link to="/about"><Sprout aria-hidden="true" /><span>About Rastlina</span><ArrowUpRight aria-hidden="true" /></Link>
         </nav>
       </section>
       {sectionsReady ? (

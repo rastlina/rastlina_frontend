@@ -156,7 +156,7 @@ export const Footer = () => {
 
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
               <p className="text-sm text-white/70 leading-relaxed">
-                Need help with plants, décor styling, or bulk requirements?
+                Need help choosing plants or arranging a bulk order?
               </p>
 
               <Link
