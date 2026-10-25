@@ -2,6 +2,7 @@
 // Rastlina — complete API service
 
 import axios from 'axios';
+import { catalogueKey } from '@/lib/catalogueBootstrap.mjs';
 
 export interface BulkOrderPayload {
   name: string;
@@ -136,7 +137,16 @@ export const storeService = {
     is_new_arrival?: boolean; is_best_seller?: boolean;
     is_trending?: boolean; is_best_deal?: boolean;
     search?: string; ordering?: string;
-  }) => (await api.get('/store/products/', { params })).data,
+  }) => {
+    const early = typeof window === 'undefined' ? undefined : (window as Window & {
+      __rastlinaCatalogue?: { key: string; startedAt: number; request: Promise<unknown> };
+    }).__rastlinaCatalogue;
+    if (early && !localStorage.getItem('rastlinaToken') && Date.now() - early.startedAt < 30000 && early.key === catalogueKey(params)) {
+      const data = await early.request;
+      if (data) return data;
+    }
+    return (await api.get('/store/products/', { params })).data;
+  },
 
   getProductBySlug: async (slug: string) =>
     (await api.get(`/store/products/${slug}/`)).data,

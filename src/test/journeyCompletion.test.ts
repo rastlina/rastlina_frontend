@@ -76,5 +76,5 @@ it.each([
   await vi.advanceTimersByTimeAsync(50);
   expect(dialog.hidden).toBe(true);
   expect(root.querySelector<HTMLElement>('#room-story')!.hidden).toBe(false);
-  expect(root.querySelector<HTMLVideoElement>('#room-video')!.src).toContain('office-v4.mp4');
+  expect(root.querySelector<HTMLVideoElement>('#room-video')!.src).toContain('office-web-v6.mp4');
 });

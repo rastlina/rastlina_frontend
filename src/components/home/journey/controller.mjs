@@ -149,6 +149,7 @@ export class VideoScrubber {
     return activeSource === this.source;
   }
   watchLoad() {
+    this.video.preload = 'auto';
     if (this.ready || this.failed || this.timeout != null) return;
     this.timeout = this.setTimer(() => {
       if (!this.ready) this.fail();
@@ -166,7 +167,7 @@ export class VideoScrubber {
       this.video.pause();
       this.video.muted = this.video.defaultMuted = true;
       this.video.playsInline = true;
-      this.video.preload = 'auto';
+      this.video.preload = prefetch ? 'metadata' : 'auto';
       this.timeout = null;
       if (!prefetch) this.watchLoad();
       this.video.src = this.source;
@@ -217,7 +218,7 @@ export class VideoScrubber {
 export function roomSelection(id, mobile = false, assetBase = 'assets') {
   if (!Object.hasOwn(ROOMS, id)) throw new Error('Unknown room');
   const room = ROOMS[id];
-  return { id, ...room, video: `${assetBase}/${id}${mobile ? "-mobile-v5" : "-v4"}.mp4`, poster: `${assetBase}/${id}-start.webp` };
+  return { id, ...room, video: `${assetBase}/${id}-${mobile ? 'mobile' : 'web'}-v6.mp4`, poster: `/optimized/journey-${id}-1280.webp` };
 }
 
 export function mountJourney(root = document, { assetBase = 'assets', scrollOffset = 0, autoplay = true } = {}) {
@@ -238,7 +239,6 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
     frames.add(id);
     return id;
   }
-  // Small screens still need HD pixels for the tall, cropped product view.
   const connection = globalThis.navigator?.connection;
   const mobileMedia = preferCompactMedia(connection);
   const introSection = byId('nursery-story');
@@ -339,7 +339,8 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
         byId('next-story-note').innerHTML = next.note;
         byId('next-story-eyebrow').textContent = next.label;
         byId('next-story-number').textContent = String(Math.min(index + 2, STORY_CHAPTERS.length)).padStart(2, '0');
-        introSection.style.setProperty('--scene-poster', `url("${assetBase}/${chapter.id}-start.webp")`);
+        const posterName = index === 0 ? 'first' : chapter.id;
+        introSection.style.setProperty('--scene-poster', `url("/optimized/journey-${posterName}-768.avif")`);
         measureCopy();
       }
       const motion = copyTransition(blend, copyTravel, reduceEffects());

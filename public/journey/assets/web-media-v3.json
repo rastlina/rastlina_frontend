@@ -1,0 +1,130 @@
+[
+  {
+    "source": "story-01.mp4",
+    "output": "story-01-mobile-v3.mp4",
+    "original_bytes": 4452202,
+    "bytes": 1959646,
+    "width": 1280,
+    "crf": 23
+  },
+  {
+    "source": "story-01.mp4",
+    "output": "story-01-web-v3.mp4",
+    "original_bytes": 4452202,
+    "bytes": 2874715,
+    "width": null,
+    "crf": 21
+  },
+  {
+    "source": "story-02.mp4",
+    "output": "story-02-mobile-v3.mp4",
+    "original_bytes": 4291975,
+    "bytes": 1981629,
+    "width": 1280,
+    "crf": 23
+  },
+  {
+    "source": "story-02.mp4",
+    "output": "story-02-web-v3.mp4",
+    "original_bytes": 4291975,
+    "bytes": 2886663,
+    "width": null,
+    "crf": 21
+  },
+  {
+    "source": "story-03-v2.mp4",
+    "output": "story-03-mobile-v3.mp4",
+    "original_bytes": 11120380,
+    "bytes": 4617544,
+    "width": 1280,
+    "crf": 23
+  },
+  {
+    "source": "story-03-v2.mp4",
+    "output": "story-03-web-v3.mp4",
+    "original_bytes": 11120380,
+    "bytes": 6760715,
+    "width": null,
+    "crf": 21
+  },
+  {
+    "source": "story-04.mp4",
+    "output": "story-04-mobile-v3.mp4",
+    "original_bytes": 9170553,
+    "bytes": 3800856,
+    "width": 1280,
+    "crf": 23
+  },
+  {
+    "source": "story-04.mp4",
+    "output": "story-04-web-v3.mp4",
+    "original_bytes": 9170553,
+    "bytes": 5459271,
+    "width": null,
+    "crf": 21
+  },
+  {
+    "source": "story-05.mp4",
+    "output": "story-05-mobile-v3.mp4",
+    "original_bytes": 4806872,
+    "bytes": 2099318,
+    "width": 1280,
+    "crf": 23
+  },
+  {
+    "source": "story-05.mp4",
+    "output": "story-05-web-v3.mp4",
+    "original_bytes": 4806872,
+    "bytes": 3047472,
+    "width": null,
+    "crf": 21
+  },
+  {
+    "source": "living-room-v4.mp4",
+    "output": "living-room-mobile-v6.mp4",
+    "original_bytes": 23547230,
+    "bytes": 4429868,
+    "width": 1280,
+    "crf": 23
+  },
+  {
+    "source": "living-room-v4.mp4",
+    "output": "living-room-web-v6.mp4",
+    "original_bytes": 23547230,
+    "bytes": 11503681,
+    "width": null,
+    "crf": 21
+  },
+  {
+    "source": "bedroom-v4.mp4",
+    "output": "bedroom-mobile-v6.mp4",
+    "original_bytes": 19203570,
+    "bytes": 3541145,
+    "width": 1280,
+    "crf": 23
+  },
+  {
+    "source": "bedroom-v4.mp4",
+    "output": "bedroom-web-v6.mp4",
+    "original_bytes": 19203570,
+    "bytes": 9061909,
+    "width": null,
+    "crf": 21
+  },
+  {
+    "source": "office-v4.mp4",
+    "output": "office-mobile-v6.mp4",
+    "original_bytes": 19938162,
+    "bytes": 3846921,
+    "width": 1280,
+    "crf": 23
+  },
+  {
+    "source": "office-v4.mp4",
+    "output": "office-web-v6.mp4",
+    "original_bytes": 19938162,
+    "bytes": 9802210,
+    "width": null,
+    "crf": 21
+  }
+]

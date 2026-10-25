@@ -27,3 +27,9 @@ it('keeps product images lazy with reserved dimensions', () => {
   expect(image).toHaveAttribute('width', '480');
   expect(image).toHaveAttribute('height', '600');
 });
+
+it('starts the first catalogue images immediately without a lazy-loading delay', () => {
+  render(<MemoryRouter><ProductCard product={product} priority /></MemoryRouter>);
+  expect(screen.getByAltText('Snake Plant')).toHaveAttribute('loading', 'eager');
+  expect(screen.getByAltText('Snake Plant')).toHaveAttribute('fetchpriority', 'high');
+});

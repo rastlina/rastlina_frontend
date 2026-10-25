@@ -2,6 +2,7 @@ import { createServer } from 'vite';
 import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { criticalCss } from './criticalCss.mjs';
 import { homeBootstrap } from './homeBootstrap.mjs';
+import { catalogueBootstrap } from '../src/lib/catalogueBootstrap.mjs';
 
 // Render only the public first screen. No product prices, stock, personal
 // information or authenticated API responses are captured in static HTML.
@@ -19,6 +20,7 @@ try {
     throw new Error('Public homepage prerender is incomplete; refusing to publish it.');
   }
   let template = await readFile('dist/index.html', 'utf8');
+  template = template.replace('</head>', `<script>${catalogueBootstrap('https://api.rastlina.com/api')}</script></head>`);
   if (!template.includes('<div id="root"></div>')) {
     throw new Error('Expected a fresh client template; rebuild before prerendering.');
   }

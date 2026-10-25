@@ -5,8 +5,14 @@ import path from "path";
 export default defineConfig({
   plugins: [react(), {
     name: 'test-hero-module',
-    resolveId(id) { if (id === 'virtual:rastlina-hero') return '\0test-hero'; },
-    load(id) { if (id === '\0test-hero') return 'export default [];'; },
+    resolveId(id) {
+      if (id === 'virtual:rastlina-hero') return '\0test-hero';
+      if (id === 'virtual:rastlina-watch-covers') return '\0test-watch-covers';
+    },
+    load(id) {
+      if (id === '\0test-hero') return 'export default [];';
+      if (id === '\0test-watch-covers') return 'export default {};';
+    },
   }],
   test: {
     environment: "jsdom",
