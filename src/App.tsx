@@ -35,7 +35,7 @@ const queryClient = new QueryClient();
 function RouteBoundary({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   return pathname === '/' ? <>{children}</> :
-    <Suspense fallback={<div className="min-h-[60vh] pt-36 text-center" role="status">Loading Rastlina…</div>}>{children}</Suspense>;
+    <Suspense fallback={<main className="min-h-screen pt-36 text-center" role="status">Loading Rastlina…</main>}>{children}</Suspense>;
 }
 
 const META_PIXEL_ID = '1051662191229917';

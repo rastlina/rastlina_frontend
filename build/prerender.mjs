@@ -20,7 +20,7 @@ try {
     throw new Error('Public homepage prerender is incomplete; refusing to publish it.');
   }
   let template = await readFile('dist/index.html', 'utf8');
-  template = template.replace('</head>', `<script>${catalogueBootstrap('https://api.rastlina.com/api')}</script></head>`);
+  template = template.replace('</head>', `<script>${catalogueBootstrap()}</script></head>`);
   if (!template.includes('<div id="root"></div>')) {
     throw new Error('Expected a fresh client template; rebuild before prerendering.');
   }

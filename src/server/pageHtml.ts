@@ -50,7 +50,8 @@ export function productPageHtml(template: string, product: ApiProductDetail) {
 ${product.review_count > 0 ? `<p>${escapeHtml(product.average_rating)}/5 from ${escapeHtml(product.review_count)} reviews</p>` : ''}${paragraphs}
 <h2>What is included</h2><ul>${included}</ul><h2>Plant care</h2><p>${escapeHtml(product.sunlight)}. ${escapeHtml(product.watering)}</p><ul>${care}</ul>
 <noscript><p>Enable JavaScript to select a size and complete checkout.</p></noscript></div></div></main>`;
-  return pageHtml(template, { ...metadata, type: 'product' }, body);
+  const html = pageHtml(template, { ...metadata, type: 'product' }, body);
+  return html.replace('</body>', `<script id="rastlina-product-data" type="application/json">${schemaJson({ product, generatedAt: Date.now() })}</script></body>`);
 }
 
 export type Article = { id: number; title: string; excerpt: string; image: string; imageAlt?: string; date: string; publishedDate: string; modifiedDate?: string; content: string };

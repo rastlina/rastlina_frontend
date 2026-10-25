@@ -112,9 +112,7 @@ export const ImageGallery = ({
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.45 }}
+        initial={false}
         className="flex flex-col gap-3"
       >
         {/* ───────────────── DESKTOP ───────────────── */}
@@ -137,6 +135,7 @@ export const ImageGallery = ({
                 >
                   <img
                     src={img.image}
+                  loading="lazy" decoding="async"
                     alt={img.alt_text || `${productName} ${idx + 1}`}
                     className="w-full h-full object-cover"
                   />
@@ -151,10 +150,11 @@ export const ImageGallery = ({
               className="relative aspect-square rounded-2xl overflow-hidden bg-[#F8F7F4] cursor-zoom-in"
               onClick={() => openLightbox(activeIndex)}
             >
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.img
                   key={images[activeIndex]?.id}
                   src={images[activeIndex]?.image}
+                fetchPriority="high" decoding="async"
                   alt={images[activeIndex]?.alt_text || productName}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -224,10 +224,11 @@ className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 s
             onTouchEnd={handleTouchEnd}
             onClick={() => openLightbox(activeIndex)}
           >
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" initial={false}>
               <motion.img
                 key={images[activeIndex]?.id}
                 src={images[activeIndex]?.image}
+                fetchPriority="high" decoding="async"
                 alt={images[activeIndex]?.alt_text || productName}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

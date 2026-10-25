@@ -30,9 +30,11 @@ async function emitModule(sourcePath) {
 try {
   await writeFile(join(temporary, 'package.json'), '{"type":"module"}');
   await emitModule(join(root, 'api/page.ts'));
+  await emitModule(join(root, 'api/catalogue.ts'));
   const runner = join(temporary, 'verify.mjs');
   await writeFile(runner, `import assert from 'node:assert/strict';
 import handler from './api/page.js';
+import catalogue from './api/catalogue.js';
 for (const [query, expected] of [[{kind:'article',slug:'1'},200],[{kind:'article',slug:'missing'},404],[{kind:'not-found'},404]]) {
   let status; let body; const headers = {};
   const response = {setHeader(key,value){headers[key]=value;},status(value){status=value;return this;},send(value){body=value;}};
@@ -41,7 +43,12 @@ for (const [query, expected] of [[{kind:'article',slug:'1'},200],[{kind:'article
   assert.ok(body.includes('<h1>'));
   if(expected===404) assert.equal(headers['X-Robots-Tag'],'noindex, follow');
 }
-console.log('Node server runtime: imports, article rendering and genuine 404s passed.');`);
+globalThis.fetch = async () => ({ok:true,json:async()=>[{id:1,price:'199.00',images:[{id:1,is_primary:true},{id:2,is_primary:false}]}]});
+let catalogueBody; let catalogueStatus;
+await catalogue({url:'/api/catalogue?ordering=price'}, {setHeader(){},status(value){catalogueStatus=value;return this;},send(value){catalogueBody=value;}});
+assert.equal(catalogueStatus,200);
+assert.equal(JSON.parse(catalogueBody)[0].images.length,1);
+console.log('Node server runtime: imports, catalogue, article rendering and genuine 404s passed.');`);
   const check = spawnSync(process.execPath, [runner], { cwd: root, encoding: 'utf8' });
   if (check.stdout) process.stdout.write(check.stdout);
   if (check.stderr) process.stderr.write(check.stderr);

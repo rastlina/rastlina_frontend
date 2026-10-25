@@ -42,6 +42,7 @@ it('serves the product canonical, visible details and the default purchasable va
   expect(result.body).toContain('"price":450');
   expect(result.body).toContain('https://schema.org/InStock');
   expect(result.body).not.toContain('aggregateRating');
+  expect(result.body).toContain('id="rastlina-product-data" type="application/json"');
 });
 
 it('returns HTTP 404 and noindex for a nonexistent product', async () => {

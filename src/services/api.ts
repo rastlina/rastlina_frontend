@@ -3,6 +3,7 @@
 
 import axios from 'axios';
 import { catalogueKey } from '@/lib/catalogueBootstrap.mjs';
+import { serverProduct } from '@/lib/serverProduct';
 
 export interface BulkOrderPayload {
   name: string;
@@ -27,6 +28,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api',
   headers: { 'Content-Type': 'application/json' },
 });
+const publicCatalogue = axios.create({ baseURL: '/' });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('rastlinaToken');
@@ -141,15 +143,21 @@ export const storeService = {
     const early = typeof window === 'undefined' ? undefined : (window as Window & {
       __rastlinaCatalogue?: { key: string; startedAt: number; request: Promise<unknown> };
     }).__rastlinaCatalogue;
+    let earlyFailed = false;
     if (early && !localStorage.getItem('rastlinaToken') && Date.now() - early.startedAt < 30000 && early.key === catalogueKey(params)) {
       const data = await early.request;
       if (data) return data;
+      earlyFailed = true;
+    }
+    if (!earlyFailed && !localStorage.getItem('rastlinaToken') && ['rastlina.com', 'www.rastlina.com'].includes(window.location.hostname)) {
+      try { return (await publicCatalogue.get('/api/catalogue', { params })).data; }
+      catch { /* Keep the original public API as outage recovery. */ }
     }
     return (await api.get('/store/products/', { params })).data;
   },
 
   getProductBySlug: async (slug: string) =>
-    (await api.get(`/store/products/${slug}/`)).data,
+    serverProduct(slug) || (await api.get(`/store/products/${slug}/`)).data,
 
   getRelatedProducts: async (slug: string) =>
     (await api.get(`/store/products/${slug}/related/`)).data,

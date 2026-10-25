@@ -5,8 +5,7 @@ export function catalogueKey(params) {
   return new URLSearchParams(Object.entries(params || {}).filter(([, value]) => value !== undefined && value !== '').sort(([a], [b]) => a.localeCompare(b))).toString();
 }
 
-export function catalogueBootstrap(apiBase) {
-  const base = JSON.stringify(apiBase).replace(/</g, '\\u003c');
+export function catalogueBootstrap() {
   return `(() => {
     if (!/^\\/shop(?:\\/|$)/.test(location.pathname)) return;
     try { if (localStorage.getItem('rastlinaToken')) return; } catch { return; }
@@ -23,7 +22,7 @@ export function catalogueBootstrap(apiBase) {
     const controller = new AbortController();
     const deadline = setTimeout(() => controller.abort(), 10000);
     window.__rastlinaCatalogue = { key, startedAt: Date.now(),
-      request: fetch(${base} + '/store/products/?' + key, { credentials: 'omit', signal: controller.signal })
+      request: fetch('/api/catalogue?' + key, { credentials: 'omit', signal: controller.signal })
         .then(response => response.ok ? response.json() : null).then(data => {
           const products = Array.isArray(data) ? data : data?.results || [];
           for (const product of products.slice(0, 2)) {

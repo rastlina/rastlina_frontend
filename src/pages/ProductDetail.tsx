@@ -17,6 +17,7 @@ import { FixedBottomBar } from '@/components/product-detail/FixedBottomBar';
 import { Seo, SITE_URL_BASE } from '@/components/seo/Seo';
 import { applyProductEditorial } from '@/data/productEditorial';
 import { productSeo } from '@/lib/productSeo';
+import { serverProduct } from '@/lib/serverProduct';
 
 // ─── Types matching the backend serializer exactly ────────────────────────────
 
@@ -172,44 +173,35 @@ const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { addToCart } = useCart();
 
-  const [product, setProduct] = useState<ApiProductDetail | null>(null);
+  const [product, setProduct] = useState<ApiProductDetail | null>(() => serverProduct(slug));
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !serverProduct(slug));
   const [error, setError] = useState(false);
 
   // FIX: quantity lives here and is passed down to FixedBottomBar
   const [quantity, setQuantity] = useState(1);
-  const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
-  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
+  const initialVariant = product?.variants.find(variant => variant.in_stock) || product?.variants[0];
+  const [selectedSizeId, setSelectedSizeId] = useState<number | null>(() => initialVariant?.size_id ?? product?.available_sizes[0]?.id ?? null);
+  const [selectedColorId, setSelectedColorId] = useState<number | null>(() => initialVariant?.color_id ?? null);
 
   // Reset quantity whenever the variant changes
   useEffect(() => {
     setQuantity(1);
   }, [selectedSizeId, selectedColorId]);
 
-  // Fetch product + related + FAQs in parallel
+  // Essential product details must not wait for suggestions or FAQs.
   useEffect(() => {
     if (!slug) return;
-    setLoading(true);
+    let cancelled = false;
+    setLoading(!serverProduct(slug));
     setError(false);
-    Promise.all([
-      storeService.getProductBySlug(slug),
-      storeService.getRelatedProducts(slug),
-      storeService.getFAQs(),
-    ])
-      .then(([prod, related, faqData]) => {
+    setRelatedProducts([]); setFaqs([]);
+    storeService.getProductBySlug(slug)
+      .then(prod => {
+        if (cancelled) return;
         setProduct(applyProductEditorial(prod));
-        setRelatedProducts(related?.results || []);
-
-        const validatedFaqs: FAQ[] = (faqData || []).map((item: any, index: number) => ({
-          id: item.id,
-          question: item.question,
-          answer: item.answer,
-          order: item.order ?? index,
-        }));
-        setFaqs(validatedFaqs);
 
         // Default: first variant with stock, else just first variant
         const firstStocked = prod.variants.find((v: ProductVariant) => v.in_stock);
@@ -221,8 +213,15 @@ const ProductDetail = () => {
           setSelectedSizeId(prod.available_sizes[0].id);
         }
       })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      .catch(() => { if (!cancelled) setError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    storeService.getRelatedProducts(slug).then(related => {
+      if (!cancelled) setRelatedProducts(related?.results || []);
+    }).catch(() => {});
+    storeService.getFAQs().then(faqData => {
+      if (!cancelled) setFaqs((faqData || []).map((item: any, index: number) => ({ ...item, order: item.order ?? index })));
+    }).catch(() => {});
+    return () => { cancelled = true; };
   }, [slug]);
 
   // Recently viewed — read/write localStorage, fetch mini product data
