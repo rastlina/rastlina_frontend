@@ -28,7 +28,7 @@ it('does not cache failures as an empty catalogue', async () => {
 });
 it('rejects authenticated, write and unsupported-query requests before upstream access', async () => {
   const fetch = vi.fn(); vi.stubGlobal('fetch', fetch);
-  for (const request of [{ method: 'POST' }, { headers: { authorization: 'test-token' } }, { url: '/api/catalogue?destination=https://example.test' }]) {
+  for (const request of [{ method: 'POST' }, { headers: { authorization: 'test-token' } }, { headers: { Authorization: 'test-token' } }, { url: '/api/catalogue?destination=https://example.test' }, { url: '/api/catalogue?category=jade&category=calathea' }]) {
     const { result, response } = fixture(); await handler(request, response);
     expect(result.code).toBeGreaterThanOrEqual(400); expect(result.headers['Cache-Control']).toBe('no-store');
   }

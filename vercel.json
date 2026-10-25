@@ -1,4 +1,5 @@
 {
+  "regions": ["bom1"],
   "functions": {
     "api/page.ts": { "includeFiles": "dist/{server-shell.html,article-data.json}", "maxDuration": 30 }
   },
