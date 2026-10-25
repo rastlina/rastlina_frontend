@@ -2,6 +2,7 @@ import { canonicalUrl, schemaJson, SITE_URL } from '../lib/seoUrls.js';
 import { productSeo } from '../lib/productSeo.js';
 import type { ApiProductDetail } from '../pages/ProductDetail';
 import { vastuArticleMarkup } from '../lib/vastuArticleMarkup.js';
+import { visualArticleMarkup } from '../lib/visualArticleMarkup.js';
 
 export const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, character => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -63,5 +64,5 @@ export function articlePageHtml(template: string, article: Article) {
       mainEntityOfPage: `${SITE_URL}${path}`,
       publisher: { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: 'Rastlina Nature Hub Private Limited', url: `${SITE_URL}/` },
     },
-  }, article.id === 1 ? vastuArticleMarkup(article) : `<main class="seo-preview"><nav><a href="/">Rastlina</a><a href="/shop">Shop indoor plants</a></nav><article><h1>${escapeHtml(article.title)}</h1><p><time datetime="${escapeHtml(article.publishedDate)}">${escapeHtml(article.date)}</time></p><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt || article.title)}" width="1200" height="800"/>${article.content}</article></main>`);
+  }, article.id === 1 ? vastuArticleMarkup(article) : visualArticleMarkup(article));
 }
