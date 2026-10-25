@@ -41,7 +41,7 @@ export class StorySequence {
     this.progress = 0;
     this.entries = layers.map((layer, index) => {
       const entry = { layer, loaded: false, ready: false, failed: false,
-        source: `${assetBase}/${STORY_CHAPTERS[index].id}${mobile ? '-mobile' : ''}${STORY_CHAPTERS[index].version ? `-${STORY_CHAPTERS[index].version}` : ''}.mp4` };
+        source: `${assetBase}/${STORY_CHAPTERS[index].id}-${mobile ? 'mobile' : 'web'}-v3.mp4` };
       entry.scrubber = new Scrubber(layer.video, {
         onReady: () => { entry.ready = true; layer.element.classList.add('has-video'); this.render(); this.reportState(); },
         onError: () => { entry.failed = true; entry.ready = false; layer.element.classList.remove('has-video'); this.reportState(); },
@@ -76,7 +76,9 @@ export class StorySequence {
     // large jumps and reverse scrolling. Free old sources before loading new ones.
     this.trimPlayback(state.index);
     this.ensure(state.index);
-    this.ensure(state.index + 1, true);
+    // Fetch only metadata for a future clip until the current one approaches
+    // its handoff. Browsing the shop should not compete with two full films.
+    this.ensure(state.index + 1, state.movie < .7 && state.blend === 0);
     this.entries[state.index].scrubber.setProgress(state.movie);
     this.entries[state.index + 1]?.scrubber.setProgress(0);
     this.render();

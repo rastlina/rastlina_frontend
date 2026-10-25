@@ -10,3 +10,7 @@ declare module 'virtual:rastlina-hero' {
   }>;
   export default slides;
 }
+declare module 'virtual:rastlina-watch-covers' {
+  const covers: Record<string, string>;
+  export default covers;
+}

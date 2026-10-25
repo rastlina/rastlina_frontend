@@ -3,8 +3,8 @@ export function clampProgress(value) {
   return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 0;
 }
 
-// Use the retained HD footage on phones as well as desktop. The compact
-// encodes remain an explicit data-saving fallback, independent of screen size.
+// Preserve the original HD dimensions on phones and desktop. Only an explicit
+// data-saving preference or 2G selects the lower-bandwidth HD alternative.
 export function preferCompactMedia(connection) {
   return Boolean(connection?.saveData) || /(^|-)2g$/.test(connection?.effectiveType || '');
 }

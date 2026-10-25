@@ -84,6 +84,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     globalThis.document = Object.assign(new EventTarget(), {
       getElementById: get,
       createElement: tag => new Element(tag),
+      querySelector: () => null,
       querySelectorAll: selector => { assert.equal(selector, '[data-room]'); return cards; },
       documentElement: Object.assign(new Element('html'), { scrollHeight: 15000 }), activeElement: null, hidden: false,
     });
@@ -91,7 +92,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     window.scrollTo = ({ top }) => { globalThis.scrollY = top; window.dispatchEvent(new Event('scroll')); };
     globalThis.matchMedia = query => {
       if (!media.has(query)) media.set(query, Object.assign(new EventTarget(), { matches:
-        (mobile && query === '(max-width: 700px)') || (reducedMotion && query === '(prefers-reduced-motion: reduce)') }));
+        (mobile && ['(max-width: 700px)', '(max-width: 1023px)'].includes(query)) || (reducedMotion && query === '(prefers-reduced-motion: reduce)') }));
       return media.get(query);
     };
     globalThis.requestAnimationFrame = callback => { callbacks.set(++nextFrame, callback); return nextFrame; };
@@ -131,7 +132,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     assert.equal(get('nursery-loading').hidden, true);
     assert.equal(get('story-frame-1').classList.contains('has-video'), true);
     assert.equal(get('story-position').textContent, '1 / 5');
-    const chapterSuffix = ''; // Phones retain HD footage while sharing the two-decoder budget.
+    const chapterSuffix = '-web-v3'; // Phones retain HD footage while sharing the two-decoder budget.
     assert.ok(chapters[0].src.endsWith(`/assets/story-01${chapterSuffix}.mp4`));
 
     const firstSeeks = chapters[0].seeks.length;
@@ -163,7 +164,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
       assert.ok(chapters.filter(video => video.src).length <= 2, 'Forward and reverse scrolling retain at most two story decoders');
       assert.equal(chapters[index].currentTime, 5, `Chapter ${index + 1} follows scroll progress`);
       assert.equal(get(`story-frame-${index + 1}`).attributes['aria-hidden'], 'false');
-      assert.ok(chapters[index].src.endsWith(`/assets/story-0${index + 1}${chapterSuffix}${index === 2 ? '-v2' : ''}.mp4`));
+      assert.ok(chapters[index].src.endsWith(`/assets/story-0${index + 1}${chapterSuffix}.mp4`));
       assert.equal(parseFloat(get('story-copy-current').style['--text-y']), 0, 'Each title rests in full view for reading');
       if (!reducedMotion && index < chapters.length - 1) {
         await scrollStory((index + 0.91) / 5);
@@ -202,7 +203,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
     await scroll(0);
     assert.equal(get('story-position').textContent, '1 / 5', 'Scrolling retakes control after using the slider');
 
-    const roomSuffix = '-v4';
+    const roomSuffix = '-web-v6';
     for (const [id, heading] of [['bedroom', 'Rest easy. Breathe green.'], ['office', 'Fresh thinking. Naturally.'], ['living-room', 'Your space. More alive.']]) {
       const choice = cards.find(card => card.dataset.room === id && (id === 'office' ? !card.classList.contains('room-card') : card.classList.contains('room-card')));
       const plays = room.plays.length;
@@ -212,7 +213,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
       assert.equal(document.activeElement, get('room-heading'));
       assert.equal(globalThis.scrollY, 11500, 'Room navigation accounts for the storefront header');
       assert.ok(room.src.endsWith(`/assets/${id}${roomSuffix}.mp4`));
-      assert.equal(get('room-poster').src, `assets/${id}-start.webp`);
+      assert.equal(get('room-poster').src, `/optimized/journey-${id}-1280.webp`);
       assert.equal(cards.filter(card => card.attributes['aria-pressed'] === 'true').length, 3);
       assert.equal(room.plays.length, plays + 1, 'Every selection automatically plays its own film');
       assert.equal(room.currentTime, 0);
@@ -291,7 +292,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
       chapter.dispatchEvent(new Event('ended'));
       drain();
     }
-    assert.equal(get('space-prompt').hidden, false);
+    assert.equal(get('space-prompt').hidden, mobile);
     document.hidden = true;
     document.dispatchEvent(new Event('visibilitychange')); drain();
     document.hidden = false;

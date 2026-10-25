@@ -21,12 +21,35 @@ for (const file of recipe.files) test(`${file.output} retains the verified HD st
   assert.ok(output.indexOf('moov') < output.indexOf('mdat'), 'Metadata precedes video data for progressive playback');
 });
 
-test('normal and data-saving sequences both use the corrected, versioned clip 3 URL', () => {
+test('normal and data-saving sequences both use the optimized, versioned clip 3 URL', () => {
   for (const mobile of [false, true]) {
     const layer = { video: {}, element: {} };
     class Scrubber { constructor() {} dispose() {} }
     const sequence = new StorySequence(Array(5).fill(layer), { Scrubber, assetBase: '/journey/assets', mobile });
-    assert.equal(sequence.entries[2].source, `/journey/assets/story-03${mobile ? '-mobile' : ''}-v2.mp4`);
+    assert.equal(sequence.entries[2].source, `/journey/assets/story-03-${mobile ? 'mobile' : 'web'}-v3.mp4`);
     sequence.dispose();
+  }
+});
+
+function dimensions(bytes) {
+  const offset = bytes.indexOf('tkhd') - 4;
+  assert.ok(offset > 0, 'MP4 must contain track metadata');
+  const end = offset + bytes.readUInt32BE(offset);
+  return [bytes.readUInt32BE(end - 8) / 65536, bytes.readUInt32BE(end - 4) / 65536];
+}
+
+test('optimized HD films retain source dimensions and stream before the whole file downloads', async () => {
+  const files = JSON.parse(await readFile(new URL('public/journey/assets/web-media-v3.json', root), 'utf8'));
+  for (const file of files) {
+    const output = await readFile(new URL(`public/journey/assets/${file.output}`, root));
+    assert.ok(output.indexOf('moov') < output.indexOf('mdat'), `${file.output}: fast-start metadata`);
+    assert.equal(output.length, file.bytes);
+    assert.ok(output.length < file.original_bytes, `${file.output}: smaller than its source`);
+    if (file.output.includes('-web-')) {
+      const original = await readFile(new URL(`public/journey/assets/${file.source}`, root));
+      assert.deepEqual(dimensions(output), dimensions(original), `${file.output}: original HD resolution`);
+    } else {
+      assert.ok(dimensions(output)[0] >= 1280, `${file.output}: data-saving alternative remains HD`);
+    }
   }
 });

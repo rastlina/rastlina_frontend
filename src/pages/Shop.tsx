@@ -2,10 +2,9 @@
 // Fully API-integrated shop page with dynamic filters from backend
 import { useSearchParams, useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { SlidersHorizontal, X, ChevronDown, Loader2, Search } from 'lucide-react';
+import { SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
 import { storeService } from '@/services/api';
 import { ProductCard, ApiProduct } from '@/components/products/ProductCard';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Seo } from '@/components/seo/Seo';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -203,7 +202,7 @@ const getTitle = () => {
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val];
 
   return (
-    <div className="min-h-screen bg-[#FAFAF7] pt-[110px]" style={{ fontFamily: "'Lora', Georgia, serif" }}>
+    <main className="min-h-screen bg-[#FAFAF7] pt-[110px]" style={{ fontFamily: "'Lora', Georgia, serif" }}>
       <Seo
         title={`${getTitle()} | Buy Indoor Plants Online | Rastlina`}
         description={`Browse ${getTitle().toLowerCase()} at Rastlina. Shop ready-to-gift indoor plants with a self-watering pot and soil mix, delivered across India.`}
@@ -224,14 +223,13 @@ const getTitle = () => {
         <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-[#1A3831]">{getTitle()}</h1>
-            {!loading && (
-              <p className="text-sm text-gray-400 mt-1">{products.length} product{products.length !== 1 ? 's' : ''}</p>
-            )}
+            <p className="text-sm text-gray-600 mt-1 min-h-5" aria-live="polite">{loading ? 'Loading plants…' : `${products.length} product${products.length !== 1 ? 's' : ''}`}</p>
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
             {/* Sort */}
             <select
+              aria-label="Sort products"
               value={ordering}
               onChange={e => {
                 setOrdering(e.target.value);
@@ -285,13 +283,10 @@ const getTitle = () => {
 
         <div className="flex gap-6">
           {/* ── FILTER SIDEBAR (desktop) ── */}
-          <AnimatePresence>
+          <>
             {showFilters && filterOptions && (
-              <motion.aside
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="w-64 flex-shrink-0 hidden lg:block"
+              <aside
+                className="w-64 flex-shrink-0 hidden lg:block motion-safe:animate-in motion-safe:fade-in"
               >
                 <div className="bg-white rounded-2xl border border-gray-100 p-5 sticky top-[90px] shadow-sm">
                   <div className="flex items-center justify-between mb-5">
@@ -316,15 +311,15 @@ const getTitle = () => {
                     Apply Filters
                   </button>
                 </div>
-              </motion.aside>
+              </aside>
             )}
-          </AnimatePresence>
+          </>
 
           {/* ── PRODUCT GRID ── */}
           <div className="flex-1 min-w-0">
             {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin text-[#667D00]" />
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5" role="status" aria-label="Loading plants">
+                {Array.from({ length: 8 }, (_, index) => <div key={index} className="rounded-2xl overflow-hidden border border-gray-100 bg-white" aria-hidden="true"><div className="aspect-[4/5] bg-[#F0F0E9]" /><div className="h-32" /></div>)}
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
@@ -337,7 +332,7 @@ const getTitle = () => {
             ) : (
               <div className={`grid gap-4 md:gap-5 ${showFilters ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'}`}>
                 {products.map((product, i) => (
-                  <ProductCard key={product.id} product={product} index={i} />
+                  <ProductCard key={product.id} product={product} index={i} priority={i < 4} />
                 ))}
               </div>
             )}
@@ -345,17 +340,14 @@ const getTitle = () => {
         </div>
 
         {/* Mobile Filter Drawer */}
-        <AnimatePresence>
+        <>
           {showFilters && filterOptions && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            <div
               className="lg:hidden fixed inset-0 z-50 bg-black/40 flex items-end"
               onClick={() => setShowFilters(false)}
             >
-              <motion.div
-                initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                className="bg-white w-full rounded-t-3xl max-h-[85vh] overflow-y-auto"
+              <div
+                className="bg-white w-full rounded-t-3xl max-h-[85vh] overflow-y-auto motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"
                 onClick={e => e.stopPropagation()}
               >
                 <div className="p-5">
@@ -378,13 +370,13 @@ const getTitle = () => {
                     <button onClick={applyFilters} className="flex-1 py-3 rounded-xl text-sm font-bold text-white" style={{ background: '#1A3831' }}>Apply</button>
                   </div>
                 </div>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           )}
-        </AnimatePresence>
+        </>
       </div>
       
-    </div>
+    </main>
   );
 }
 
@@ -398,13 +390,13 @@ function FilterSection({ title, open, toggle, children }: {
         <span className="text-sm font-bold text-gray-700">{title}</span>
         <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      <AnimatePresence>
+      <>
         {open && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+          <div>
             {children}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
     </div>
   );
 }

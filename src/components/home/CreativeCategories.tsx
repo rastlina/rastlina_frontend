@@ -74,6 +74,10 @@ const CreativeCategories = () => {
                   {cat.image ? (
                     <img
                       src={cat.image}
+                      srcSet={cat.image.startsWith('/category-images/') && cat.image.endsWith('-original-pot-v2.webp')
+                        ? [320, 480].map(width => `/optimized/category-${cat.image.split('/').pop()!.replace('.webp', '')}-${width}.webp ${width}w`).concat(`${cat.image} 768w`).join(', ')
+                        : undefined}
+                      sizes="(max-width: 767px) 160px, (max-width: 1023px) 30vw, 18vw"
                       alt={cat.name}
                       width={320}
                       height={320}

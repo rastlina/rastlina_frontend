@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { clampProgress, sectionProgress, cinematicProgress, nurseryProgress, sceneDepth, choiceDepth, finalFrameTime, roomSelection, VideoScrubber } from '../../src/components/home/journey/controller.mjs';
 import { preferCompactMedia } from '../../src/components/home/journey/media.mjs';
 
-test('normal mobile connections retain HD footage; data saving and 2G keep their compact fallback', () => {
+test('regular phones and desktops retain full resolution; data-saving connections use the HD alternative', () => {
   assert.equal(preferCompactMedia(undefined), false);
   assert.equal(preferCompactMedia({ effectiveType: '4g', saveData: false }), false);
   assert.equal(preferCompactMedia({ effectiveType: '3g' }), false);
@@ -62,8 +62,8 @@ test('endpoints use the last decodable frame rather than the duration boundary',
 test('all room choices point to their own video and poster', () => {
   for (const id of ['living-room', 'bedroom', 'office']) {
     const selected = roomSelection(id);
-    assert.equal(selected.video, `assets/${id}-v4.mp4`);
-    assert.equal(selected.poster, `assets/${id}-start.webp`);
+    assert.equal(selected.video, `assets/${id}-web-v6.mp4`);
+    assert.equal(selected.poster, `/optimized/journey-${id}-1280.webp`);
     assert.ok(selected.name);
   }
   for (const invalid of ['nursery', '__proto__', 'constructor', '']) assert.throws(() => roomSelection(invalid));

@@ -35,9 +35,10 @@ export interface ApiProduct {
 interface ProductCardProps {
   product: ApiProduct;
   index?: number;
+  priority?: boolean;
 }
 
-export const ProductCard = ({ product: sourceProduct }: ProductCardProps) => {
+export const ProductCard = ({ product: sourceProduct, priority = false }: ProductCardProps) => {
   const product = { ...sourceProduct, name: normalizeProductName(sourceProduct.name) };
   const availableColors = product.available_colors ?? [];
 
@@ -70,7 +71,8 @@ export const ProductCard = ({ product: sourceProduct }: ProductCardProps) => {
           <img
             src={displayImage?.image}
             alt={product.name}
-            loading="lazy"
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : undefined}
             decoding="async"
             width={480}
             height={600}

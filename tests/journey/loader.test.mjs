@@ -107,9 +107,11 @@ test('speculative preload has no deadline until the chapter is needed', () => {
   });
   try {
     scrubber.load('assets/story-04-mobile.mp4', { prefetch: true });
+    assert.equal(video.preload, 'metadata', 'A future chapter must not request a full video download');
     assert.equal(timers.size, 0, 'A deferred mobile preload cannot expire before demand');
     assert.equal(scrubber.failed, false);
     scrubber.watchLoad();scrubber.watchLoad();
+    assert.equal(video.preload, 'auto', 'The selected chapter can buffer for smooth HD playback');
     assert.equal(timers.size, 1, 'Demand arms one bounded deadline');
     [...timers.values()][0]();assert.equal(errors, 1);assert.equal(scrubber.failed, true);
   } finally { scrubber.dispose(); }

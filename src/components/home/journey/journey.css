@@ -27,7 +27,7 @@
 .plant-journey .skip-link:focus { top:16px; }
 
 .plant-journey .story { position:relative; }
-.plant-journey .story--nursery { height:850svh; --scene-poster:url('/journey/assets/story-01-start.webp'); }
+.plant-journey .story--nursery { height:850svh; --scene-poster:url('/optimized/journey-first-768.avif'); }
 .plant-journey .chapter-stage { position:sticky; top:0; height:100svh; min-height:540px; overflow:hidden; isolation:isolate; background:var(--ink); }
 .plant-journey .story--room .chapter-stage { position:relative; }
 .plant-journey .scene-ambience { position:absolute; inset:0; background:var(--scene-poster) center/cover no-repeat; }

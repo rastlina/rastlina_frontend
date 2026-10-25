@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { mountJourney } from './journey/controller.mjs';
 import markup from './journey/markup.html?raw';
 import './journey/journey.css';
 
@@ -15,10 +14,19 @@ export default function PlantJourney({ onReady }: { onReady?: () => void }) {
     let started = false;
     let frame = 0;
     let dispose: (() => void) | undefined;
+    const activate = () => {
+      import('./journey/controller.mjs').then(({ mountJourney }) => {
+        if (cancelled || dispose) return;
+        dispose = mountJourney(element, { assetBase: '/journey/assets', scrollOffset: 110 });
+        element.querySelector<HTMLElement>('#nursery-error')!.hidden = true;
+      }).catch(() => {
+        if (!cancelled) element.querySelector<HTMLElement>('#nursery-error')!.hidden = false;
+      });
+    };
     const start = () => {
       if (cancelled || started) return;
       started = true;
-      // Paint the lightweight poster before HD video downloads and decoders start.
+      // Shopping controls hydrate before the optional film controller downloads.
       const decoded = poster?.decode?.().catch(() => {}) || Promise.resolve();
       decoded.then(() => {
         if (cancelled) return;
@@ -26,7 +34,7 @@ export default function PlantJourney({ onReady }: { onReady?: () => void }) {
           frame = requestAnimationFrame(() => {
             if (cancelled) return;
             onReady?.();
-            dispose = mountJourney(element, { assetBase: '/journey/assets', scrollOffset: 110 });
+            activate();
           });
         });
       });
@@ -35,12 +43,16 @@ export default function PlantJourney({ onReady }: { onReady?: () => void }) {
     poster?.addEventListener('error', start, { once: true });
     if (!poster || poster.complete) start();
     const timeout = window.setTimeout(start, 3000);
+    const retry = element.querySelector<HTMLButtonElement>('#nursery-retry');
+    const retryActivation = () => { if (!dispose) activate(); };
+    retry?.addEventListener('click', retryActivation);
     return () => {
       cancelled = true;
       window.clearTimeout(timeout);
       cancelAnimationFrame(frame);
       poster?.removeEventListener('load', start);
       poster?.removeEventListener('error', start);
+      retry?.removeEventListener('click', retryActivation);
       dispose?.();
     };
   }, [onReady]);
