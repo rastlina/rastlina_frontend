@@ -13,9 +13,9 @@ vi.mock('@/services/api', () => ({
 
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
-it('loads navigation once and keeps mobile menu/search controls working', async () => {
+it('loads navigation once and keeps mobile menu/search controls working on the shop', async () => {
   mocks.navbar.mockResolvedValue({ main_categories: [], hero_slides: [] });
-  render(<MemoryRouter><Header /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={['/shop']}><Header /></MemoryRouter>);
   await waitFor(() => expect(mocks.navbar).toHaveBeenCalledTimes(1));
   const menu = screen.getByRole('button', { name: 'Toggle menu' });
   fireEvent.click(menu);
