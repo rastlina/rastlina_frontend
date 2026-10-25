@@ -83,3 +83,17 @@ it('preserves the general shop default ordering', async () => {
   openShop('/shop');
   await waitFor(() => expect(mocks.products).toHaveBeenLastCalledWith({ ordering: '-created_at' }));
 });
+
+it('does not report the default price range as an applied filter', async () => {
+  openShop('/shop');
+  await screen.findByText('3 products');
+  expect(screen.getByRole('button', { name: /^Filters$/ })).toBeInTheDocument();
+});
+
+it('sends committed plant traits and price limits to the catalogue', async () => {
+  openShop('/shop?pet_friendly=true&air_purifying=true&min_price=250&max_price=500');
+  await waitFor(() => expect(mocks.products).toHaveBeenLastCalledWith({
+    pet_friendly: true, air_purifying: true, min_price: 250, max_price: 500, ordering: '-created_at',
+  }));
+  expect(screen.getByRole('button', { name: 'Filters 3' })).toBeInTheDocument();
+});

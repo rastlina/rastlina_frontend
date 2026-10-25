@@ -60,14 +60,14 @@ export const ProductCard = ({ product: sourceProduct, priority = false }: Produc
 
   return (
     <div
-      className="group h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300"
+      className="product-card group h-full flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300"
     >
       <Link
         to={`/product/${product.slug}`}
         className="flex-1 flex flex-col"
       >
         {/* ── Image ── */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-[#F8F7F4]">
+        <div className="relative aspect-square overflow-hidden bg-[#F8F7F4]">
           <img
             src={displayImage?.image}
             alt={product.name}
@@ -75,8 +75,8 @@ export const ProductCard = ({ product: sourceProduct, priority = false }: Produc
             fetchPriority={priority ? 'high' : undefined}
             decoding="async"
             width={480}
-            height={600}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            height={480}
+            className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
           />
 
           {/* Out of stock overlay */}
@@ -108,7 +108,7 @@ export const ProductCard = ({ product: sourceProduct, priority = false }: Produc
               </span>
             )}
 
-            {product.is_new_arrival && (
+            {product.is_new_arrival && !product.is_best_seller && !hasDiscount && (
               <span
                 className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
                 style={{ background: '#667D00' }}
@@ -117,7 +117,7 @@ export const ProductCard = ({ product: sourceProduct, priority = false }: Produc
               </span>
             )}
 
-            {product.is_best_seller && (
+            {product.is_best_seller && !hasDiscount && (
               <span
                 className="text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide"
                 style={{ background: '#1A3831' }}
@@ -148,7 +148,7 @@ export const ProductCard = ({ product: sourceProduct, priority = false }: Produc
           {/* Category */}
           {(product.category_name ||
             product.main_category_name) && (
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
               {product.category_name ??
                 product.main_category_name}
             </p>
@@ -184,7 +184,7 @@ export const ProductCard = ({ product: sourceProduct, priority = false }: Produc
           )}
 
           {/* Price */}
-          <div className="flex items-baseline gap-2 mt-auto pt-2">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mt-auto pt-2">
             <span className="text-lg font-extrabold text-gray-900">
               {formatPrice(price)}
             </span>
@@ -195,12 +195,11 @@ export const ProductCard = ({ product: sourceProduct, priority = false }: Produc
                   {formatPrice(originalPrice)}
                 </span>
 
-                <span className="text-xs font-bold text-green-600">
-                  {product.discount_percentage}% off
-                </span>
+
               </>
             )}
           </div>
+          <span className="product-card-action">{product.in_stock ? 'Choose options' : 'View details'} <span aria-hidden="true">→</span></span>
         </div>
       </Link>
     </div>

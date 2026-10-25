@@ -3,6 +3,7 @@ import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2 } from 'l
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 
 const formatPrice = (v: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -19,6 +20,32 @@ export const CartDrawer = () => {
   } = useCart();
 
   const navigate = useNavigate();
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusable = () => Array.from(drawerRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), [tabindex="0"]') ?? []);
+    focusable()[0]?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeCart(); }
+      if (event.key !== 'Tab') return;
+      const nodes = focusable();
+      const first = nodes[0], last = nodes[nodes.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !drawerRef.current?.contains(document.activeElement))) {
+        event.preventDefault(); last?.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !drawerRef.current?.contains(document.activeElement))) {
+        event.preventDefault(); first?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocus?.focus();
+    };
+  }, [isOpen, closeCart]);
   const subtotal = totals.subtotal;
   const totalSaved = totals.totalSavings;
   const freeDeliveryTarget = Number(siteConfig.free_shipping_threshold || 499);
@@ -57,11 +84,12 @@ export const CartDrawer = () => {
 
           {/* Drawer */}
           <div
-            className="fixed right-0 top-0 h-full w-full max-w-[420px] bg-white shadow-2xl z-[101] flex flex-col"
+            ref={drawerRef} role="dialog" aria-modal="true" aria-labelledby="cart-heading"
+            className="shopping-cart-drawer fixed right-0 top-0 h-[100dvh] w-full max-w-[420px] bg-white shadow-2xl z-[101] flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-[#1A3831]">
+              <h2 id="cart-heading" className="text-sm font-bold uppercase tracking-widest text-[#1A3831]">
                 Your Cart
                 {totalItems > 0 && (
                   <span className="ml-2 text-xs font-semibold text-gray-400 normal-case tracking-normal">
@@ -71,7 +99,7 @@ export const CartDrawer = () => {
               </h2>
               <button
                 onClick={closeCart}
-                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                className="min-w-11 min-h-11 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
                 aria-label="Close cart"
               >
                 <X className="h-5 w-5" />
@@ -118,7 +146,7 @@ export const CartDrawer = () => {
             )}
 
             {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center px-8 py-12">
                   <div className="w-20 h-20 rounded-full bg-[#F8F7F4] flex items-center justify-center mb-5">
@@ -150,13 +178,13 @@ export const CartDrawer = () => {
                     return (
                       <div
                         key={`${item.product.id}-${item.selectedSize}-${item.selectedColor}`}
-                        className="flex gap-4 p-5"
+                        className="flex gap-3 p-4"
                       >
                         {/* Product image */}
                         <Link
                           to={`/product/${item.product.slug}`}
                           onClick={closeCart}
-                          className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-[#F8F7F4] border border-gray-100"
+                          className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-[#F8F7F4] border border-gray-100"
                         >
                           {imageUrl ? (
                             <img
@@ -183,7 +211,7 @@ export const CartDrawer = () => {
                             </Link>
                             <button
                               onClick={() => removeFromCart(item.product.id, item.selectedSize, item.selectedColor)}
-                              className="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0 p-0.5"
+                              className="text-gray-500 hover:text-red-400 transition-colors flex-shrink-0 min-w-11 min-h-11 flex items-center justify-center"
                               aria-label="Remove item"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -206,12 +234,12 @@ export const CartDrawer = () => {
                           )}
 
                           {/* Qty + Price */}
-                          <div className="flex items-center justify-between mt-auto pt-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2 mt-auto pt-2">
                             {/* Quantity */}
                             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                               <button
                                 onClick={() => updateQuantity(item.product.id, item.selectedSize, item.selectedColor, item.quantity - 1)}
-                                className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                                className="w-11 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                                 aria-label="Decrease quantity"
                               >
                                 <Minus className="h-3 w-3" />
@@ -222,7 +250,7 @@ export const CartDrawer = () => {
                               <button
                                 onClick={() => updateQuantity(item.product.id, item.selectedSize, item.selectedColor, item.quantity + 1)}
                                 disabled={item.quantity >= item.stock}
-                                className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors"
+                                className="w-11 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition-colors"
                                 aria-label="Increase quantity"
                               >
                                 <Plus className="h-3 w-3" />
@@ -263,7 +291,7 @@ export const CartDrawer = () => {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="border-t border-gray-100 bg-white px-5 py-4 space-y-3">
+              <div className="cart-checkout-footer border-t border-gray-100 bg-white px-5 py-4 space-y-3">
                 {/* Savings summary */}
                 {totalSaved > 0 && (
                   <div className="flex items-center justify-between py-2 px-3 bg-[#F0F4E8] rounded-xl">

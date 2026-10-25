@@ -58,6 +58,12 @@ const EMPTY: HomeData = {
   featured_reviews: [],
 };
 
+export function selectHomeBestSellers(products: ApiProduct[]) {
+  const available = products.filter((product, index, all) => product.in_stock && all.findIndex(item => item.id === product.id) === index);
+  const isCombo = (product: ApiProduct) => /combo/i.test(product.category_name ?? '') || /set\s+(?:of|0f|os)\s*\d/i.test(product.name);
+  return [...available.filter(product => !isCombo(product)), ...available.filter(isCombo)].slice(0, 8);
+}
+
 export function useHomeData() {
   const query = useQuery({
     queryKey: ['rastlina-home-data'],
@@ -67,7 +73,7 @@ export function useHomeData() {
       return {
             hero_slides: res.hero_slides ?? [],
             new_arrivals: (res.new_arrivals ?? []).slice(0, 8),
-            best_sellers: (res.best_sellers ?? []).slice(0, 8),
+            best_sellers: selectHomeBestSellers(res.best_sellers ?? []),
             trending: (res.trending ?? []).slice(0, 8),
             best_deals: (res.best_deals ?? []).slice(0, 8),
             featured_categories: res.featured_categories ?? [],

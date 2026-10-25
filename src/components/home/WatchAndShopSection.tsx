@@ -44,7 +44,7 @@ const WatchAndShopSection = () => {
       <div className="container-custom">
         <div className="home-section-heading watch-shop-heading">
           <div>
-            <p className="home-section-label"><span aria-hidden="true">02</span> The living edit</p>
+            <p className="home-section-label"><span aria-hidden="true">03</span> The living edit</p>
             <h2 id="watch-shop-heading">Watch &amp; Shop</h2>
             <p className="home-section-note">See the plant. Find your favourite.</p>
           </div>

@@ -8,3 +8,23 @@
 .mobile-menu-links p { margin-top:18px; margin-bottom:5px; padding-left:12px; font-size:11px; line-height:1.5; letter-spacing:.1em; }
 .mobile-menu-links .mobile-view-all { justify-content:space-between; margin:2px 0 12px; border:1px solid #9aa47955; background:#667d000c; font-weight:700; }
 .mobile-navigation :is(a,button):focus-visible { outline:2px solid #b89b5b; outline-offset:2px; }
+
+.mobile-shop-primary { display:flex; align-items:center; gap:12px; min-height:54px; padding:14px; border:1px solid #c8ac7166; border-radius:10px; background:#1a3831; color:#fffdf7; font-size:15px; font-weight:700; }
+.mobile-shop-primary span { flex:1; }
+.mobile-shopping-shortcuts { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:10px 0 16px; }
+.mobile-shopping-shortcuts a { display:flex; align-items:center; justify-content:center; min-height:46px; border:1px solid #d4dccc; border-radius:9px; color:#1a3831; font-size:14px; font-weight:600; }
+.desktop-shopping-nav { white-space:nowrap; }
+.desktop-shop-link { display:inline-flex; align-items:center; min-height:44px; padding-left:10px; font-size:14px; font-weight:600; color:#1a3831; }
+@media(min-width:1280px) and (max-width:1439px) {
+  header .xl\:flex { gap:12px; }
+  .desktop-shopping-nav>div>button,.desktop-shopping-nav>a { padding-inline:8px; font-size:13px; }
+  header form.w-52 { width:160px; }
+  header img[alt="Rastlina"] { max-width:130px; object-fit:contain; }
+}
+
+.cart-checkout-footer { padding-bottom:max(16px,env(safe-area-inset-bottom)); }
+.shopping-cart-drawer { overscroll-behavior:contain; }
+@media(max-width:700px) { .product-card h3 { font-size:15px; line-height:1.4; } .product-card> a>div:last-child { padding:12px 10px; } }
+
+.filter-sheet-actions { position:sticky; bottom:-20px; background:white; margin-inline:-20px; padding:14px 20px max(14px,env(safe-area-inset-bottom)); border-top:1px solid #e5e7eb; }
+@media(max-width:700px) { .shop-catalogue .grid.gap-4 { gap:12px; } .shop-catalogue .product-card-action { padding:9px 8px; } }
