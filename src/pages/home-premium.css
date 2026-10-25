@@ -176,14 +176,14 @@ body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:graysca
 }
 
 /* Shopping is available before the film, on phones and desktop alike. */
-.home-shopping-entry { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:14px max(22px,5vw); background:#13271c; color:#fbf8ef; border-bottom:1px solid #c8ac7140; }
-.home-shopping-entry form { display:flex; align-items:center; gap:10px; flex:1 1 380px; max-width:560px; min-width:0; padding-left:14px; border:1px solid #d8d5c5; border-radius:10px; background:#fffdf7; color:#18392a; }
+.home-shopping-entry { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:stretch; justify-content:stretch; gap:14px; width:100%; padding:14px max(22px,5vw); background:linear-gradient(120deg,#13271c,#0d2117); color:#fbf8ef; border-bottom:1px solid #c8ac7140; }
+.home-shopping-entry form { display:flex; align-items:center; gap:10px; width:100%; max-width:none; min-width:0; padding-left:14px; border:1px solid #d8d5c5; border-radius:12px; box-shadow:0 3px 12px #00000012; background:#fffdf7; color:#18392a; }
 .home-shopping-entry input { flex:1; min-width:0; width:100%; min-height:46px; background:transparent; color:#18392a; font-size:16px; outline:none; }
 .home-shopping-entry input::placeholder { color:#65725e; font-size:14px; }
 .home-shopping-entry form button { flex:none; display:grid; place-items:center; width:46px; height:46px; border-radius:9px; color:#18392a; }
-.home-shopping-entry nav { display:flex; align-items:center; gap:12px; }
-.home-shopping-entry nav a { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:46px; padding:10px 20px; border:1px solid #c8ac7166; border-radius:9px; color:#f7e6bf; font-size:14px; font-weight:600; white-space:nowrap; }
-.home-shopping-entry nav .home-shop-primary { background:#e5d1a1; color:#13271c; border-color:#e5d1a1; }
+.home-shopping-entry nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; gap:10px; min-width:0; }
+.home-shopping-entry nav a { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-width:0; min-height:48px; padding:10px 20px; border:1px solid #c8ac7166; border-radius:12px; color:#f7e6bf; font-size:14px; font-weight:600; white-space:nowrap; }
+.home-shopping-entry nav .home-shop-primary { background:linear-gradient(135deg,#f0dfb8,#d8bd86); color:#13271c; border-color:#e5d1a1; box-shadow:inset 0 1px 0 #fff7df80,0 3px 10px #00000018; }
 .home-shopping-sections { scroll-margin-top:124px; }
 .product-card-action { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; min-height:44px; padding:10px 12px; border-radius:8px; background:#edf2eb; color:#1a3831; font-size:12px; font-weight:700; }
 .product-card a:focus-visible { outline:3px solid #667d00; outline-offset:-3px; border-radius:15px; }
@@ -192,10 +192,10 @@ body.rastlina-light-shop .journey-mode-switch { visibility:hidden; pointer-event
 body.rastlina-light-shop.has-journey-mode-control a[aria-label="Chat on WhatsApp"] { bottom:22px; }
 .home-refined .home-collections h2,.watch-shop-card h3 { font-family:'Playfair Display',Georgia,serif; }
 @media(max-width:700px) {
-  .home-shopping-entry { display:grid; gap:10px; padding:12px 16px; }
-  .home-shopping-entry form { max-width:none; }
-  .home-shopping-entry nav { display:grid; grid-template-columns:1.2fr 1fr; gap:10px; }
-  .home-shopping-entry nav a { padding:10px 12px; min-height:46px; font-size:13px; }
+  .home-shopping-entry { grid-template-columns:minmax(0,1fr); justify-items:stretch; gap:10px; padding:12px 16px; }
+  .home-shopping-entry form,.home-shopping-entry nav { width:100%; max-width:none; }
+  .home-shopping-entry nav { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .home-shopping-entry nav a { gap:6px; padding:10px 8px; min-height:48px; font-size:13px; }
   .home-refined .home-collections .container-custom { padding-inline:16px; }
   .home-refined .home-bestsellers [data-card] { width:calc((100% - 12px)/2); min-width:0; align-self:stretch; }
   .home-refined .product-shopping-rail { gap:12px; align-items:stretch; scroll-snap-type:x proximity; }
