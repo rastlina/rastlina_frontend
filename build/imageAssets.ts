@@ -5,7 +5,7 @@ import { readFile, readdir } from 'node:fs/promises';
 export function imageAssets(): Plugin {
   const heroModule = '\0virtual:rastlina-hero';
   const watchModule = '\0virtual:rastlina-watch-covers';
-  let watchCovers: Record<string, string> = {};
+  const watchCovers: Record<string, string> = {};
   let firstHero: { mobileImage: string; optimizedImage: string; mobileAvif: string; optimizedAvif: string } | undefined;
   return {
     name: 'rastlina-image-assets',

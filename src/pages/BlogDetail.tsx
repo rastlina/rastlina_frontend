@@ -1,10 +1,10 @@
 // src/pages/BlogDetailPage.tsx
 
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import { blogs } from '@/data/blogs';
 import { Seo, SITE_URL_BASE } from '@/components/seo/Seo';
 import { vastuArticleMarkup } from '@/lib/vastuArticleMarkup';
+import { visualArticleMarkup } from '@/lib/visualArticleMarkup';
 
 const BlogDetailPage = () => {
   const { id } = useParams();
@@ -47,55 +47,7 @@ const BlogDetailPage = () => {
           },
         }}
       />
-      {blog.id === 1 ? (
-        <div dangerouslySetInnerHTML={{ __html: vastuArticleMarkup(blog) }} />
-      ) : <>
-      {/* Hero Image */}
-      <div className="mx-auto max-w-6xl px-4 pt-32 md:pt-36">
-      <div className="aspect-[3/2] overflow-hidden rounded-xl">
-        <img
-          src={blog.image}
-          alt={blog.imageAlt || blog.title}
-          width={1200}
-          height={800}
-          className="w-full h-full object-cover"
-        />
-      </div>
-      </div>
-
-      {/* Content */}
-      <div className="container-custom max-w-4xl py-16 px-4">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm text-[#667D00] font-semibold mb-8 hover:underline transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Home
-        </Link>
-
-        <div className="mb-6">
-          <span className="bg-[#667D00]/10 text-[#667D00] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide inline-block">
-            {blog.tag}
-          </span>
-        </div>
-
-        <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-6 leading-tight">
-          {blog.title}
-        </h1>
-
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-10 pb-6 border-b border-gray-200">
-          <BookOpen className="h-4 w-4" />
-          <time dateTime={blog.publishedDate}>{blog.date}</time>
-          <span> · Updated <time dateTime={blog.modifiedDate}>{new Intl.DateTimeFormat('en-IN', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(blog.modifiedDate))}</time></span>
-        </div>
-
-        {/* Render HTML Content */}
-        <div 
-          className="blog-content max-w-none text-gray-700"
-          dangerouslySetInnerHTML={{ __html: blog.content }}
-        />
-      </div>
-      </>}
+      <div dangerouslySetInnerHTML={{ __html: blog.id === 1 ? vastuArticleMarkup(blog) : visualArticleMarkup(blog) }} />
     </div>
   );
 };
