@@ -22,7 +22,7 @@ interface ProductSliderProps {
 const SkeletonCard = () => (
   <div className="flex-shrink-0 w-[200px] sm:w-[220px] md:w-[240px] snap-start">
     <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white">
-      <div className="aspect-[4/5] bg-gray-100 animate-pulse" />
+      <div className="aspect-square bg-gray-100 animate-pulse" />
 
       <div className="p-3 space-y-2">
         <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2" />
@@ -72,8 +72,11 @@ export const ProductSlider = ({
       passive: true,
     });
 
-    return () =>
+    window.addEventListener('resize', updateScrollState);
+    return () => {
       el.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+    };
   }, [products, updateScrollState]);
 
   // Scroll by card width
@@ -92,7 +95,7 @@ export const ProductSlider = ({
 
     el.scrollBy({
       left: dir === 'left' ? -cardWidth : cardWidth,
-      behavior: 'smooth',
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
     });
   }, []);
 
@@ -132,6 +135,13 @@ export const ProductSlider = ({
           </Link>
         </div>
 
+        <div className="product-slider-mobile-controls">
+          <p>Swipe to see more plants</p>
+          <div>
+            <button type="button" aria-label="Previous plants" disabled={!canScrollLeft} onClick={() => scroll('left')}><ChevronLeft size={19} aria-hidden="true" /></button>
+            <button type="button" aria-label="Next plants" disabled={!canScrollRight} onClick={() => scroll('right')}><ChevronRight size={19} aria-hidden="true" /></button>
+          </div>
+        </div>
         {/* Slider Wrapper */}
         <div className="relative">
 
@@ -203,7 +213,16 @@ export const ProductSlider = ({
           {/* Slider */}
           <div
             ref={scrollRef}
-            className="
+            role="list"
+            aria-label={title}
+            tabIndex={0}
+            onKeyDown={event => {
+              if (event.target !== event.currentTarget || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+              event.preventDefault();
+              scroll(event.key === 'ArrowLeft' ? 'left' : 'right');
+            }}
+            className="product-shopping-rail
+
               flex gap-4
               overflow-x-auto
               snap-x snap-mandatory
@@ -231,6 +250,7 @@ export const ProductSlider = ({
                   <div
                     key={product.id}
                     data-card
+                    role="listitem"
                     className="
                       flex-shrink-0
                       w-[200px]

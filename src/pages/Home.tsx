@@ -3,12 +3,14 @@ import PlantJourney from '@/components/home/PlantJourney';
 import './home-premium.css';
 import { lazy, Suspense, startTransition, useCallback, useEffect, useState } from 'react';
 import { Seo } from '@/components/seo/Seo';
-import { Link } from 'react-router-dom';
-import { ArrowUpRight, Gift, Leaf, BookOpen, Sprout } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowUpRight, Gift, Leaf, BookOpen, Sprout, Search } from 'lucide-react';
 
 const HomeSections = lazy(() => import('@/components/home/HomeSections'));
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [plantSearch, setPlantSearch] = useState('');
   useEffect(() => {
     let frame = 0;
     const update = () => {
@@ -79,10 +81,20 @@ const Home = () => {
         }]}
       />
       <h1 className="sr-only">Buy Indoor Plants Online in India</h1>
-      <nav className="home-shopping-entry" aria-label="Start shopping">
-        <span>Indoor plants from ₹199</span>
-        <Link to="/shop?main_category=plants">Shop all plants <ArrowUpRight size={17} aria-hidden="true" /></Link>
-      </nav>
+      <div className="home-shopping-entry">
+        <form role="search" aria-label="Find your plant" onSubmit={event => {
+          event.preventDefault();
+          if (plantSearch.trim()) navigate(`/shop?search=${encodeURIComponent(plantSearch.trim())}`);
+        }}>
+          <Search size={18} aria-hidden="true" />
+          <input type="search" aria-label="Find a plant" placeholder="Search plants, e.g. Snake or ZZ" value={plantSearch} onChange={event => setPlantSearch(event.target.value)} />
+          <button type="submit" aria-label="Find plants"><ArrowUpRight size={19} aria-hidden="true" /></button>
+        </form>
+        <nav aria-label="Start shopping">
+          <Link className="home-shop-primary" to="/shop?main_category=plants">Shop all plants <ArrowUpRight size={17} aria-hidden="true" /></Link>
+          <a href="#home-best-sellers" onClick={showSections}>Bestsellers <span aria-hidden="true">↓</span></a>
+        </nav>
+      </div>
       <PlantJourney onReady={onHeroReady} />
       <section className="home-gift-intro container-custom text-center text-[#18392a]" aria-labelledby="plant-gifts-heading">
         <h2 id="plant-gifts-heading" className="font-serif text-3xl">Plants, ready to gift.</h2>
@@ -94,11 +106,13 @@ const Home = () => {
           <Link to="/about"><Sprout aria-hidden="true" /><span>About Rastlina</span><ArrowUpRight aria-hidden="true" /></Link>
         </nav>
       </section>
+      <div id="home-best-sellers" className="home-shopping-sections">
       {sectionsReady ? (
         <Suspense fallback={<div className="min-h-[1200px]" aria-label="Loading plant collections" />}>
           <HomeSections />
         </Suspense>
       ) : <div className="min-h-[1200px]" aria-label="Loading plant collections" />}
+      </div>
     </main>
   );
 };

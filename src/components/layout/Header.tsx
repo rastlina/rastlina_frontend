@@ -306,7 +306,7 @@ export const Header = () => {
   const navigate = useNavigate();
   const { openCart, totalItems } = useCart();
   const { user } = useAuth();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const mobilePanelTop = isScrolled && pathname !== '/' ? 70 : 108;
 
@@ -318,22 +318,27 @@ export const Header = () => {
   }, [pathname]);
 
   useEffect(() => {
-    if (!mobileOpen && !mobileSearchOpen) return;
+    if (!mobileOpen && !mobileSearchOpen && !activeDropdown) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
-      setMobileOpen(false);
-      setMobileSearchOpen(false);
-      mobileMenuButtonRef.current?.focus();
+      if (activeDropdown) {
+        (dropdownRef.current?.querySelector('[aria-expanded="true"]') as HTMLElement | null)?.focus();
+        setActiveDropdown(null);
+      } else {
+        setMobileOpen(false);
+        setMobileSearchOpen(false);
+        mobileMenuButtonRef.current?.focus();
+      }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [mobileOpen, mobileSearchOpen]);
+  }, [mobileOpen, mobileSearchOpen, activeDropdown]);
 
   useEffect(() => {
     if (!mobileOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const desktop = window.matchMedia('(min-width: 1024px)');
+    const desktop = window.matchMedia('(min-width: 1280px)');
     const closeOnDesktop = () => { if (desktop.matches) setMobileOpen(false); };
     desktop.addEventListener('change', closeOnDesktop);
     return () => {
@@ -390,7 +395,7 @@ const plantSizes = navData?.plants_sizes || [];
   // Static extra nav items (Offers, Bulk)
 const extraNavItems = [
   {
-    label: 'Track Your Order',
+    label: 'Track order',
     href:'/profile?tab=orders',
     icon: <ShoppingBag className="h-3.5 w-3.5" />,
   },
@@ -427,7 +432,7 @@ const extraNavItems = [
           <div className="container mx-auto px-4 max-w-7xl">
 
           {/* ── MOBILE ── */}
-          <div className="lg:hidden h-[70px] flex items-center justify-between">
+          <div className="xl:hidden h-[70px] flex items-center justify-between">
             <button ref={mobileMenuButtonRef} aria-label="Toggle menu" aria-expanded={mobileOpen} aria-controls="mobile-navigation" className="mobile-header-control p-2 -ml-2 text-[#1A3831]" onClick={() => { setMobileOpen(!mobileOpen); setMobileSearchOpen(false); }}>
               {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -451,24 +456,26 @@ const extraNavItems = [
           </div>
 
           {/* ── DESKTOP ── */}
-          <div className="hidden lg:flex items-center h-[72px] gap-6">
+          <div className="hidden xl:flex items-center h-[72px] gap-6">
             <Link to="/" className="brand-logo-link flex-shrink-0">
               <img src="/logo-optimized.webp" alt="Rastlina" width={520} height={196} className="h-14 w-auto object-contain"
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             </Link>
 
-<nav className="flex items-center gap-1 flex-1 justify-center">
+<nav ref={dropdownRef} aria-label="Main navigation" className="desktop-shopping-nav flex items-center gap-1 flex-1 justify-center">
   {/* Keep THIS instance of the Plants menu */}
   {plantsCat && (
     <div className="relative h-full flex items-center">
+      <Link to="/shop?main_category=plants" onClick={() => setActiveDropdown(null)} className="desktop-shop-link">Shop plants</Link>
       <button
+        aria-label="Explore plant collections"
+        aria-expanded={activeDropdown === 'plants'}
         onClick={() => setActiveDropdown(activeDropdown === 'plants' ? null : 'plants')}
         className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-all ${
           activeDropdown === 'plants' ? 'bg-green-50 text-[#667D00]' : 'text-gray-900 hover:text-[#667D00] hover:bg-green-50'
         }`}
       >
-        <Leaf className="h-4 w-4 text-[#667D00]" fill="currentColor" />
-        {plantsCat.name}
+
         <ChevronDown className={`h-3 w-3 opacity-50 transition-transform ${activeDropdown === 'plants' ? 'rotate-180' : ''}`} />
       </button>
 
@@ -491,6 +498,7 @@ const extraNavItems = [
               {mainCats.filter(c => c.slug !== 'plants').map(cat => (
                 <div key={cat.id} className="relative h-full flex items-center">
                   <button
+                    aria-expanded={activeDropdown === cat.slug}
                     onClick={() => setActiveDropdown(activeDropdown === cat.slug ? null : cat.slug)}
                     className="flex items-center gap-1 text-sm font-medium text-gray-900 hover:text-[#667D00] px-3 py-2 rounded-lg hover:bg-green-50 transition-all"
                   >
@@ -529,7 +537,7 @@ const extraNavItems = [
               <form onSubmit={handleSearch} className="relative w-52">
                 <input
                   type="text"
-                  placeholder="Search plants..."
+                  placeholder="Search plants..." aria-label="Search plants"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-4 pr-9 py-2 rounded-full border border-gray-200 text-sm focus:outline-none focus:border-[#667D00] focus:ring-1 focus:ring-[#667D00] bg-gray-50"
@@ -564,7 +572,7 @@ const extraNavItems = [
           {mobileSearchOpen && (
             <div
               id="mobile-search"
-              className="lg:hidden border-t border-gray-100 bg-white overflow-hidden"
+              className="xl:hidden border-t border-gray-100 bg-white overflow-hidden"
             >
               <div className="px-4 py-3">
                 <form onSubmit={handleSearch} className="relative">
@@ -588,29 +596,21 @@ const extraNavItems = [
         <>
           {mobileOpen && (
             <>
-            <button type="button" aria-label="Close menu" className="lg:hidden fixed inset-x-0 bottom-0 z-30 bg-black/40" style={{top: mobilePanelTop}} onClick={() => setMobileOpen(false)} />
+            <button type="button" aria-label="Close menu" className="xl:hidden fixed inset-x-0 bottom-0 z-30 bg-black/40" style={{top: mobilePanelTop}} onClick={() => setMobileOpen(false)} />
             <nav
               id="mobile-navigation"
               aria-label="Mobile navigation"
-              className="mobile-navigation lg:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 z-40 overflow-y-auto"
+              className="mobile-navigation xl:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 z-40 overflow-y-auto"
               style={{ maxHeight: `calc(100dvh - ${mobilePanelTop}px)` }}
             >
               <div className="px-4 py-4 space-y-1 pb-10">
-                {/* Profile */}
-                <Link to={user ? '/profile' : '/login'}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-[#1A3831]/5 mb-4 cursor-pointer"
-                >
-                  <div className="w-10 h-10 bg-[#1A3831] rounded-full flex items-center justify-center">
-                    <User className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-[#1A3831] text-sm">{user ? `${user.first_name || 'My Account'}` : 'Login / Sign Up'}</p>
-                    <p className="text-xs text-gray-400">{user ? user.email : 'Sign in to your account'}</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                <Link to="/shop?main_category=plants" onClick={() => setMobileOpen(false)} className="mobile-shop-primary">
+                  <Leaf size={20} aria-hidden="true" /><span>Shop all indoor plants</span><ChevronRight size={20} aria-hidden="true" />
                 </Link>
-
+                <div className="mobile-shopping-shortcuts">
+                  <Link to="/shop?is_best_seller=true" onClick={() => setMobileOpen(false)}>Bestsellers</Link>
+                  <Link to="/shop?is_best_deal=true" onClick={() => setMobileOpen(false)}>Shop offers</Link>
+                </div>
                 {/* Plants with sub-sections */}
                 {plantsCat && (
                   <div className="border-b border-gray-100">
@@ -689,6 +689,21 @@ const extraNavItems = [
                     </>
                   </div>
                 ))}
+
+                {/* Profile */}
+                <Link to={user ? '/profile' : '/login'}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[#1A3831]/5 mb-4 cursor-pointer"
+                >
+                  <div className="w-10 h-10 bg-[#1A3831] rounded-full flex items-center justify-center">
+                    <User className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-[#1A3831] text-sm">{user ? `${user.first_name || 'My Account'}` : 'Login / Sign Up'}</p>
+                    <p className="text-xs text-gray-400">{user ? user.email : 'Sign in to your account'}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </Link>
 
                 {/* Extra items */}
                 {extraNavItems.map(item => (

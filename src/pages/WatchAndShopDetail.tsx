@@ -378,6 +378,7 @@ const WatchAndShopDetail = () => {
       {/* Fixed bottom bar — IDENTICAL to ProductDetail */}
       <FixedBottomBar
         productName={product.name}
+        productImage={getCartImage(product.images, activeVariant?.color_id ?? selectedColorId)}
         canAddToCart={canAddToCart}
         activeVariant={activeVariant}
         quantity={quantity}

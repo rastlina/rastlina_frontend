@@ -9,8 +9,8 @@ const BestSellers = () => {
     <ProductSlider
       title="Best-Selling Plants"
       sectionClassName="home-bestsellers"
-      eyebrow="03 / The favourites"
-      subtitle="Good company, chosen again and again."
+      eyebrow="01 / The favourites"
+      subtitle="Find your favourite. Choose your options on the next page."
       products={data.best_sellers}
       viewAllHref="/shop?is_best_seller=true"
       bgColor="bg-white"

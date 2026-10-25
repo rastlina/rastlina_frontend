@@ -25,11 +25,23 @@ it('keeps product images lazy with reserved dimensions', () => {
   const image = screen.getByAltText('Snake Plant');
   expect(image).toHaveAttribute('loading', 'lazy');
   expect(image).toHaveAttribute('width', '480');
-  expect(image).toHaveAttribute('height', '600');
+  expect(image).toHaveAttribute('height', '480');
 });
 
 it('starts the first catalogue images immediately without a lazy-loading delay', () => {
   render(<MemoryRouter><ProductCard product={product} priority /></MemoryRouter>);
   expect(screen.getByAltText('Snake Plant')).toHaveAttribute('loading', 'eager');
   expect(screen.getByAltText('Snake Plant')).toHaveAttribute('fetchpriority', 'high');
+});
+
+it('offers a clear route to choose the product variant, without adding an arbitrary option', () => {
+  render(<MemoryRouter><ProductCard product={product} /></MemoryRouter>);
+  expect(screen.getByRole('link')).toHaveTextContent('Choose options');
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+});
+
+it('keeps unavailable plants informational', () => {
+  render(<MemoryRouter><ProductCard product={{ ...product, in_stock: false }} /></MemoryRouter>);
+  expect(screen.getByText('Out of Stock')).toBeInTheDocument();
+  expect(screen.getByRole('link')).toHaveTextContent('View details');
 });

@@ -51,7 +51,7 @@ const CreativeCategories = () => {
   return (
     <section className="home-categories bg-[#FBF8EF] py-8 md:py-10" aria-labelledby="category-heading">
       <div className="container-custom">
-        <p className="home-section-label"><span aria-hidden="true">01</span> The collection</p>
+        <p className="home-section-label"><span aria-hidden="true">02</span> The collection</p>
         <div className="home-section-heading home-category-heading">
           <h2 id="category-heading" className="font-serif text-xl font-bold text-[#1A3831] md:text-2xl">
             Explore by Category
@@ -60,7 +60,7 @@ const CreativeCategories = () => {
             View All <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </div>
-        <p className="category-swipe-hint md:hidden">Swipe to explore all 5 collections <span aria-hidden="true">→</span></p>
+        <p className="category-swipe-hint md:hidden">Swipe to explore {data.featured_categories.length} collections <span aria-hidden="true">→</span></p>
         <div className="grid auto-cols-[180px] grid-flow-col gap-6 overflow-x-auto px-1 pb-6 pt-1 snap-x snap-proximity no-scrollbar md:auto-cols-auto md:grid-flow-row md:grid-cols-3 md:overflow-visible lg:grid-cols-5">
           {loading
             ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)

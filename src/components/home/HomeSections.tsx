@@ -18,9 +18,9 @@ export default function HomeSections() {
     return () => observer.disconnect();
   }, []);
   return <div ref={root} className="home-collections">
+    <BestSellers />
     <CreativeCategories />
     <WatchAndShopSection />
-    <BestSellers />
     <Blogs />
   </div>;
 }

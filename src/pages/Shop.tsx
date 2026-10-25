@@ -1,7 +1,7 @@
 // src/pages/Shop.tsx
 // Fully API-integrated shop page with dynamic filters from backend
 import { useSearchParams, useNavigate, useLocation, useParams, Link } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
 import { storeService } from '@/services/api';
 import { ProductCard, ApiProduct } from '@/components/products/ProductCard';
@@ -56,9 +56,35 @@ export default function Shop() {
   const urlBestDeal = searchParams.get('is_best_deal') || '';
   const urlNewArrival = searchParams.get('is_new_arrival') || '';
   const urlBestSeller = searchParams.get('is_best_seller') || '';
+  const urlPetFriendly = searchParams.get('pet_friendly') === 'true';
+  const urlAirPurifying = searchParams.get('air_purifying') === 'true';
+  const urlMinPrice = searchParams.get('min_price') || '';
+  const urlMaxPrice = searchParams.get('max_price') || '';
 
   // Local filter state (separate from URL so "Apply" commits them)
   const [showFilters, setShowFilters] = useState(false);
+  const filterSheetRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!showFilters || window.matchMedia('(min-width: 1024px)').matches) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const nodes = () => Array.from(filterSheetRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled])') ?? []);
+    nodes()[0]?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); setShowFilters(false); }
+      if (event.key !== 'Tab') return;
+      const focusable = nodes(), first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKey);
+      previousFocus?.focus();
+    };
+  }, [showFilters]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [categories, setCategories] = useState<ShopCategory[]>([]);
   const [products, setProducts] = useState<ApiProduct[]>([]);
@@ -76,12 +102,8 @@ export default function Shop() {
 
   // Count active filters
   const activeFilterCount = [
-    localSizes.length > 0,
-    localColors.length > 0,
-    localSpaces.length > 0,
-    localPetFriendly,
-    localAirPurifying,
-    localPrice[0] > 0 || (filterOptions && localPrice[1] < filterOptions.price_range.max),
+    Boolean(urlSize), Boolean(urlColor), Boolean(urlSpace),
+    urlPetFriendly, urlAirPurifying, Boolean(urlMinPrice || urlMaxPrice),
   ].filter(Boolean).length;
 
   // Category labels must also resolve for collections with no products.
@@ -98,9 +120,22 @@ export default function Shop() {
     if (urlCat) params.category = urlCat;
     storeService.getFilterOptions(params).then((opts: FilterOptions) => {
       setFilterOptions(opts);
-      setLocalPrice([opts.price_range.min, opts.price_range.max]);
+
     }).catch(() => {});
   }, [requestMainCat, urlCat]);
+
+  // Keep the filter sheet in sync after applying, clearing or browser navigation.
+  useEffect(() => {
+    setLocalSizes(urlSize ? [urlSize] : []);
+    setLocalColors(urlColor ? [urlColor] : []);
+    setLocalSpaces(urlSpace ? [urlSpace] : []);
+    setLocalPetFriendly(urlPetFriendly);
+    setLocalAirPurifying(urlAirPurifying);
+    if (filterOptions) setLocalPrice([
+      urlMinPrice && Number.isFinite(Number(urlMinPrice)) ? Number(urlMinPrice) : filterOptions.price_range.min,
+      urlMaxPrice && Number.isFinite(Number(urlMaxPrice)) ? Number(urlMaxPrice) : filterOptions.price_range.max,
+    ]);
+  }, [urlSize, urlColor, urlSpace, urlPetFriendly, urlAirPurifying, urlMinPrice, urlMaxPrice, filterOptions]);
 
   // Fetch products
   const fetchProducts = useCallback(async () => {
@@ -116,13 +151,17 @@ export default function Shop() {
       if (urlBestDeal) params.is_best_deal = 'true';
       if (urlNewArrival) params.is_new_arrival = 'true';
       if (urlBestSeller) params.is_best_seller = 'true';
+      if (urlPetFriendly) params.pet_friendly = true;
+      if (urlAirPurifying) params.air_purifying = true;
+      if (urlMinPrice && Number.isFinite(Number(urlMinPrice))) params.min_price = Number(urlMinPrice);
+      if (urlMaxPrice && Number.isFinite(Number(urlMaxPrice))) params.max_price = Number(urlMaxPrice);
       params.ordering = ordering;
 
       const data = await storeService.getProducts(params);
       setProducts(Array.isArray(data) ? data : data.results || []);
     } catch { setProducts([]); }
     finally { setLoading(false); }
-  }, [requestMainCat, urlCat, urlSpace, urlSize, urlColor, urlSearch, urlBestDeal, urlNewArrival, urlBestSeller, ordering]);
+  }, [requestMainCat, urlCat, urlSpace, urlSize, urlColor, urlSearch, urlBestDeal, urlNewArrival, urlBestSeller, urlPetFriendly, urlAirPurifying, urlMinPrice, urlMaxPrice, ordering]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
   useEffect(() => { setOrdering(urlOrdering); }, [urlOrdering]);
@@ -198,9 +237,6 @@ const getTitle = () => {
   return 'All Products';
 };
 
-  const toggle = <T,>(arr: T[], val: T) =>
-    arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val];
-
   return (
     <main className="min-h-screen bg-[#FAFAF7] pt-[110px]" style={{ fontFamily: "'Lora', Georgia, serif" }}>
       <Seo
@@ -209,7 +245,7 @@ const getTitle = () => {
         path={`${location.pathname}${location.search}`}
         noIndex={Boolean(urlSearch)}
       />
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+      <div className="shop-catalogue max-w-7xl mx-auto px-4 md:px-6 py-6">
 
         {/* Breadcrumb */}
         <nav className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
@@ -297,9 +333,9 @@ const getTitle = () => {
                   <FilterSections
                     filterOptions={filterOptions}
                     localPrice={localPrice} setLocalPrice={setLocalPrice}
-                    localSizes={localSizes} setLocalSizes={v => setLocalSizes(toggle(localSizes, v))}
-                    localColors={localColors} setLocalColors={v => setLocalColors(toggle(localColors, v))}
-                    localSpaces={localSpaces} setLocalSpaces={v => setLocalSpaces(toggle(localSpaces, v))}
+                    localSizes={localSizes} setLocalSizes={v => setLocalSizes(localSizes.includes(v) ? [] : [v])}
+                    localColors={localColors} setLocalColors={v => setLocalColors(localColors.includes(v) ? [] : [v])}
+                    localSpaces={localSpaces} setLocalSpaces={v => setLocalSpaces(localSpaces.includes(v) ? [] : [v])}
                     localPetFriendly={localPetFriendly} setLocalPetFriendly={setLocalPetFriendly}
                     localAirPurifying={localAirPurifying} setLocalAirPurifying={setLocalAirPurifying}
                     activeSection={activeFilterSection} setActiveSection={setActiveFilterSection}
@@ -319,7 +355,7 @@ const getTitle = () => {
           <div className="flex-1 min-w-0">
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5" role="status" aria-label="Loading plants">
-                {Array.from({ length: 8 }, (_, index) => <div key={index} className="rounded-2xl overflow-hidden border border-gray-100 bg-white" aria-hidden="true"><div className="aspect-[4/5] bg-[#F0F0E9]" /><div className="h-32" /></div>)}
+                {Array.from({ length: 8 }, (_, index) => <div key={index} className="rounded-2xl overflow-hidden border border-gray-100 bg-white" aria-hidden="true"><div className="aspect-square bg-[#F0F0E9]" /><div className="h-32" /></div>)}
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
@@ -343,29 +379,30 @@ const getTitle = () => {
         <>
           {showFilters && filterOptions && (
             <div
-              className="lg:hidden fixed inset-0 z-50 bg-black/40 flex items-end"
+              className="lg:hidden fixed inset-0 z-[60] bg-black/40 flex items-end"
               onClick={() => setShowFilters(false)}
             >
               <div
-                className="bg-white w-full rounded-t-3xl max-h-[85vh] overflow-y-auto motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"
+                ref={filterSheetRef} role="dialog" aria-modal="true" aria-label="Plant filters"
+                className="mobile-filter-sheet bg-white w-full rounded-t-3xl max-h-[85dvh] overflow-y-auto overscroll-contain motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"
                 onClick={e => e.stopPropagation()}
               >
                 <div className="p-5">
                   <div className="flex items-center justify-between mb-5">
                     <h2 className="font-bold text-gray-800 text-lg">Filters</h2>
-                    <button onClick={() => setShowFilters(false)}><X className="h-5 w-5 text-gray-400" /></button>
+                    <button aria-label="Close filters" className="min-w-11 min-h-11 flex items-center justify-center" onClick={() => setShowFilters(false)}><X className="h-5 w-5 text-gray-400" /></button>
                   </div>
                   <FilterSections
                     filterOptions={filterOptions}
                     localPrice={localPrice} setLocalPrice={setLocalPrice}
-                    localSizes={localSizes} setLocalSizes={v => setLocalSizes(toggle(localSizes, v))}
-                    localColors={localColors} setLocalColors={v => setLocalColors(toggle(localColors, v))}
-                    localSpaces={localSpaces} setLocalSpaces={v => setLocalSpaces(toggle(localSpaces, v))}
+                    localSizes={localSizes} setLocalSizes={v => setLocalSizes(localSizes.includes(v) ? [] : [v])}
+                    localColors={localColors} setLocalColors={v => setLocalColors(localColors.includes(v) ? [] : [v])}
+                    localSpaces={localSpaces} setLocalSpaces={v => setLocalSpaces(localSpaces.includes(v) ? [] : [v])}
                     localPetFriendly={localPetFriendly} setLocalPetFriendly={setLocalPetFriendly}
                     localAirPurifying={localAirPurifying} setLocalAirPurifying={setLocalAirPurifying}
                     activeSection={activeFilterSection} setActiveSection={setActiveFilterSection}
                   />
-                  <div className="flex gap-3 mt-5">
+                  <div className="filter-sheet-actions flex gap-3 mt-5">
                     <button onClick={clearFilters} className="flex-1 py-3 rounded-xl text-sm font-bold border border-gray-200 text-gray-600">Clear</button>
                     <button onClick={applyFilters} className="flex-1 py-3 rounded-xl text-sm font-bold text-white" style={{ background: '#1A3831' }}>Apply</button>
                   </div>
@@ -386,7 +423,7 @@ function FilterSection({ title, open, toggle, children }: {
 }) {
   return (
     <div className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0">
-      <button onClick={toggle} className="flex items-center justify-between w-full mb-3">
+      <button onClick={toggle} aria-expanded={open} className="flex items-center justify-between w-full min-h-11 mb-3">
         <span className="text-sm font-bold text-gray-700">{title}</span>
         <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
