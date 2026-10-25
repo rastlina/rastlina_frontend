@@ -255,6 +255,7 @@ const getTitle = () => {
           {(urlMainCat || urlCat) && <><span>/</span><span className="text-gray-700 font-medium">{urlCat ? categoryName : mainCategoryName}</span></>}
         </nav>
 
+        <a className="catalogue-shopping-help" href="https://wa.me/918143814466?text=Hi%20Rastlina!%20Please%20help%20me%20choose%20an%20indoor%20plant." target="_blank" rel="noopener noreferrer">Need help choosing a plant? Chat with us <span aria-hidden="true">↗</span></a>
         {/* Header row */}
         <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
           <div>

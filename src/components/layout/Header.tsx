@@ -441,9 +441,9 @@ const extraNavItems = [
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             </Link>
             <div className="flex items-center gap-1">
-              <button aria-label="Toggle search" aria-expanded={mobileSearchOpen} aria-controls="mobile-search" className="mobile-header-control p-2 text-gray-800" onClick={() => { setMobileSearchOpen(!mobileSearchOpen); setMobileOpen(false); }}>
+              {pathname !== '/' && <button aria-label="Toggle search" aria-expanded={mobileSearchOpen} aria-controls="mobile-search" className="mobile-header-control p-2 text-gray-800" onClick={() => { setMobileSearchOpen(!mobileSearchOpen); setMobileOpen(false); }}>
                 <Search className="h-5 w-5" />
-              </button>
+              </button>}
               <button aria-label="Open cart" className="mobile-header-control relative p-2 text-[#1A3831]" onClick={() => { setMobileOpen(false); setMobileSearchOpen(false); openCart(); }}>
                 <ShoppingBag className="h-6 w-6 stroke-[1.5]" />
                 {totalItems > 0 && (
@@ -534,7 +534,7 @@ const extraNavItems = [
 
             {/* Right icons */}
             <div className="flex items-center gap-3 flex-shrink-0">
-              <form onSubmit={handleSearch} className="relative w-52">
+              {pathname !== '/' && <form onSubmit={handleSearch} className="relative w-52">
                 <input
                   type="text"
                   placeholder="Search plants..." aria-label="Search plants"
@@ -545,7 +545,7 @@ const extraNavItems = [
                 <button type="submit" aria-label="Search plants" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#667D00]">
                   <Search className="h-4 w-4" />
                 </button>
-              </form>
+              </form>}
 
               <Link to={user ? '/profile' : '/login'} aria-label={user ? 'My account' : 'Login or sign up'} className="p-2 text-gray-800 hover:text-[#667D00] transition-colors relative">
                 <User className="h-6 w-6" />
