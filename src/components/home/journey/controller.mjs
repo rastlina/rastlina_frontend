@@ -276,10 +276,12 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   }
   function syncRange(range, progress) {
     const value = Math.round(clampProgress(progress) * 1000);
-    range.value = String(value);
-    range.style.setProperty('--progress', `${value / 10}%`);
+    const position = String(value);
+    if (range.value !== position) range.value = position;
+    const fill = `${value / 10}%`;
+    if (range.style.getPropertyValue('--progress') !== fill) range.style.setProperty('--progress', fill);
     const description = value === 0 ? range.dataset.start : value === 1000 ? range.dataset.end : `${Math.round(value / 10)}% through the view`;
-    range.setAttribute('aria-valuetext', description);
+    if (range.getAttribute('aria-valuetext') !== description) range.setAttribute('aria-valuetext', description);
   }
   function applyDepth(section, movieProgress, rawProgress, nursery = false) {
     const state = sceneDepth(movieProgress, rawProgress, nursery, manualMode(), reducedMotion.matches);
@@ -308,9 +310,12 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   }
   function updateRoomFinish(progress) {
     const complete = progress >= 0.985;
-    byId('orbit-readout').textContent = `${String(Math.round(progress * 100)).padStart(2, '0')} / 100`;
+    const readout = byId('orbit-readout');
+    const text = `${String(Math.round(progress * 100)).padStart(2, '0')} / 100`;
+    if (readout.textContent !== text) readout.textContent = text;
     byId('room-finish').classList.toggle('visible', complete);
-    byId('room-finish').inert = !complete;
+    const finish = byId('room-finish');
+    if (finish.inert !== !complete) finish.inert = !complete;
   }
 
   let shownChapter = -1;
@@ -357,12 +362,10 @@ export function mountJourney(root = document, { assetBase = 'assets', scrollOffs
   const roomPlayback = new RoomPlayback(byId('room-video'), {
     onReady: () => { roomWindow.classList.add('has-video'); roomWindow.setAttribute('aria-busy', 'false'); byId('room-loading').hidden = true; },
     onError: () => { showError('room-window', 'room-loading', 'room-error'); updateRoomFinish(0); },
-    onFrame: progress => {
-      syncRange(roomRange, progress);
-      updateRoomFinish(progress);
-      // Keep the overlay legible throughout the room film.
-      applyDepth(roomSection, 0, 0);
-    },
+    requestFrame,
+    cancelFrame: id => { cancelAnimationFrame(id); frames.delete(id); },
+    onProgress: progress => syncRange(roomRange, progress),
+    onFrame: updateRoomFinish,
     onState: playing => { byId('room-playback').textContent = playing ? 'Pause animation' : 'Play animation'; },
   });
 

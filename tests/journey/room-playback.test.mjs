@@ -47,15 +47,25 @@ function fixture() {
   let now = 0, nextId = 0;
   const timers = new Map();
   const video = new Video();
-  const states = [], frames = [];
+  const states = [], frames = [], progressValues = [];
+  const displayFrames = new Map();
+  let nextFrame = 0;
   let ready = 0, errors = 0;
   const playback = new RoomPlayback(video, {
     setTimer: (callback, delay) => { const id = ++nextId; timers.set(id, { callback, at: now + delay }); return id; },
     clearTimer: id => timers.delete(id),
     onState: value => states.push(value), onFrame: value => frames.push(value),
+    onProgress: value => progressValues.push(value),
+    requestFrame: callback => { const id = ++nextFrame; displayFrames.set(id, callback); return id; },
+    cancelFrame: id => displayFrames.delete(id),
     onReady: () => ready++, onError: () => errors++,
   });
-  return { video, playback, timers, states, frames,
+  return { video, playback, timers, states, frames, progressValues, displayFrames,
+    paint() {
+      const current = [...displayFrames];
+      displayFrames.clear();
+      current.forEach(([, callback]) => callback());
+    },
     get ready() { return ready; }, get errors() { return errors; },
     advance(ms) {
       const end = now + ms;
@@ -319,4 +329,75 @@ test('touch selection starts a room before a mobile browser emits loadeddata',as
     await Promise.resolve();f.video.decoded();
     assert.equal(f.video.paused,false);assert.equal(f.video.plays.length,1);
   }finally{f.playback.dispose();}
+});
+
+for (const room of ['living-room', 'bedroom', 'office']) test(`${room} progress follows every display frame without seeking`, async () => {
+  const f = fixture();
+  try {
+    await f.start(room);
+    const first = f.progressValues.length;
+    for (let frame = 1; frame <= 60; frame++) {
+      f.video.time = frame / 60; // No timeupdate event.
+      f.paint();
+      assert.equal(f.displayFrames.size, 1);
+    }
+    const values = f.progressValues.slice(first);
+    assert.equal(new Set(values).size, 60);
+    assert.ok(values.every((v, i) => !i || v > values[i - 1]));
+    assert.equal(values.at(-1), .1);
+    assert.deepEqual(f.video.seeks, []);
+    assert.equal(f.video.plays.length, 1);
+  } finally { f.playback.dispose(); }
+  assert.equal(f.displayFrames.size, 0);
+});
+
+test('drag feedback follows the latest input while the decoder catches up', async () => {
+  const f = fixture();
+  try {
+    await f.start();
+    f.playback.setProgress(.1234);
+    assert.equal(f.progressValues.at(-1), .1234);
+    assert.equal(f.displayFrames.size, 0);
+    f.playback.setProgress(.8765);
+    assert.equal(f.progressValues.at(-1), .8765);
+    const count = f.progressValues.length;
+    f.video.completeSeek(); f.video.completeSeek();
+    assert.equal(f.progressValues.length, count, 'Late rounded seek results cannot pull the thumb backward');
+    assert.equal(f.video.paused, true);
+  } finally { f.playback.dispose(); }
+});
+
+test('pause, buffering, offscreen release, room switches and replay holds stop stale display callbacks', async () => {
+  const f = fixture();
+  try {
+    await f.start();
+    f.video.dispatchEvent(new Event('pause'));
+    assert.equal(f.displayFrames.size, 1, 'Ignore a late pause event when already playing');
+    f.video.dispatchEvent(new Event('waiting'));
+    assert.equal(f.displayFrames.size, 0);
+    f.video.dispatchEvent(new Event('playing'));
+    assert.equal(f.displayFrames.size, 1);
+    const stale = [...f.displayFrames.values()][0];
+    f.playback.pause();
+    assert.equal(f.displayFrames.size, 0);
+    f.playback.resume(); await Promise.resolve();
+    assert.equal(f.displayFrames.size, 1);
+    const count = f.progressValues.length;
+    stale();
+    assert.equal(f.progressValues.length, count);
+    assert.equal(f.displayFrames.size, 1);
+    f.playback.setActive(false);
+    assert.equal(f.displayFrames.size, 0);
+    f.playback.setActive(true); await Promise.resolve();
+    assert.equal(f.displayFrames.size, 1);
+    await f.start('office');
+    assert.equal(f.displayFrames.size, 1);
+    f.video.end(); f.video.completeSeek();
+    assert.equal(f.displayFrames.size, 0);
+    f.advance(5000); await Promise.resolve();
+    assert.equal(f.displayFrames.size, 1);
+    f.playback.release();
+    assert.equal(f.displayFrames.size, 0);
+  } finally { f.playback.dispose(); }
+  assert.equal(f.displayFrames.size, 0);
 });

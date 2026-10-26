@@ -1,12 +1,14 @@
 import { clampProgress, finalFrameTime } from './media.mjs';
 
-// Room films run on the media clock. Only explicit scrubbing and the loop reset
-// seek; document scrolling never writes to the room video's currentTime.
+// Room autoplay runs on the media clock. Manual slider/scroll control and
+// the loop reset can seek; progress rendering never changes currentTime.
 export class RoomPlayback {
-  constructor(video, { onReady = () => {}, onError = () => {}, onFrame = () => {}, onState = () => {},
+  constructor(video, { onReady = () => {}, onError = () => {}, onFrame = () => {}, onProgress = () => {}, onState = () => {},
+    requestFrame = callback => globalThis.requestAnimationFrame?.(callback),
+    cancelFrame = id => globalThis.cancelAnimationFrame?.(id),
     setTimer = (callback, delay) => globalThis.setTimeout(callback, delay),
     clearTimer = id => globalThis.clearTimeout(id) } = {}) {
-    Object.assign(this, { video, onReady, onError, onFrame, onState, setTimer, clearTimer });
+    Object.assign(this, { video, onReady, onError, onFrame, onProgress, onState, requestFrame, cancelFrame, setTimer, clearTimer });
     this.listeners = [];
     this.generation = 0;
     this.active = true;
@@ -14,14 +16,20 @@ export class RoomPlayback {
     this.phase = 'paused';
     this.progress = 0;
     this.pendingSeek = null;
+    this.progressFrame = null;
+    this.clockGeneration = 0;
     const listen = (type, callback) => {
       video.addEventListener(type, callback);
       this.listeners.push(() => video.removeEventListener(type, callback));
     };
     for (const event of ['loadedmetadata', 'loadeddata', 'canplay', 'seeked']) listen(event, () => this.frameReady());
     listen('timeupdate', () => this.reportFrame());
+    listen('playing', () => this.startProgressClock());
+    listen('pause', () => { if (video.paused) this.stopProgressClock(); });
+    listen('waiting', () => this.stopProgressClock());
     listen('ended', () => {
       if (!this.isCurrent() || this.phase !== 'playing') return;
+      this.stopProgressClock();
       this.video.pause();
       this.phase = 'resetting';
       this.pendingSeek = 0;
@@ -31,7 +39,26 @@ export class RoomPlayback {
     listen('error', () => { if (this.isCurrent()) this.fail(); });
   }
   isCurrent() { return !this.failed && !this.suspended && this.source && (this.video.currentSrc || this.video.src) === this.source; }
+  // A range driven only by coarse timeupdate events visibly jumps.
+  // Read the real media clock once per display frame; never seek or invent time.
+  startProgressClock() {
+    if (this.progressFrame !== null || !this.isCurrent() || !this.active || this.phase !== 'playing' || this.video.paused) return;
+    const generation = this.clockGeneration;
+    this.progressFrame = this.requestFrame(() => {
+      if (generation !== this.clockGeneration) return;
+      this.progressFrame = null;
+      if (!this.isCurrent() || !this.active || this.phase !== 'playing' || this.video.paused) return;
+      this.reportFrame();
+      this.startProgressClock();
+    }) ?? null;
+  }
+  stopProgressClock() {
+    this.clockGeneration++;
+    if (this.progressFrame !== null) this.cancelFrame(this.progressFrame);
+    this.progressFrame = null;
+  }
   cancelTimers() {
+    this.stopProgressClock();
     this.clearTimer(this.waitTimer);
     this.clearTimer(this.timeout);
     this.waitTimer = this.timeout = null;
@@ -48,6 +75,7 @@ export class RoomPlayback {
     Object.assign(this, { failed: false, suspended: false, ready: false, progress: 0, pendingSeek: null, phase: 'loading', playPending: false });
     this.onState(true);
     this.onFrame(0);
+    this.onProgress(0);
     try {
       this.source = new URL(url, typeof location === 'undefined' ? 'https://example.test/' : location.href).href;
       Object.assign(this.video, { muted: true, defaultMuted: true, playsInline: true, loop: false, preload: 'auto', src: this.source });
@@ -60,6 +88,9 @@ export class RoomPlayback {
     const last = finalFrameTime(this.video.duration);
     this.progress = last ? clampProgress(this.video.currentTime / last) : 0;
     this.onFrame(this.progress);
+    // While scrubbing, keep the control under the finger. Decoded seeks can
+    // arrive later and are rounded to a media frame, so they must not move it back.
+    if (this.phase !== 'paused') this.onProgress(this.progress);
   }
   frameReady() {
     if (!this.isCurrent() || this.video.readyState < 1 || this.video.seeking) return;
@@ -98,12 +129,16 @@ export class RoomPlayback {
     this.waitTimer?.unref?.();
   }
   play() {
-    if (!this.isCurrent() || !this.active || (!this.ready && this.phase !== 'loading') || this.pendingSeek !== null || this.playPending || this.video.paused === false) return;
+    if (!this.isCurrent() || !this.active || (!this.ready && this.phase !== 'loading') || this.pendingSeek !== null || this.playPending) return;
+    if (this.video.paused === false) { this.startProgressClock(); return; }
     const generation = this.generation;
     this.playPending = true;
     try {
       Promise.resolve(this.video.play()).then(() => {
-        if (generation === this.generation) this.playPending = false;
+        if (generation === this.generation) {
+          this.playPending = false;
+          this.startProgressClock();
+        }
       }, error => {
         if (generation !== this.generation) return;
         this.playPending = false;
@@ -115,6 +150,7 @@ export class RoomPlayback {
     } catch { this.playPending = false; this.pause(); }
   }
   pause() {
+    this.stopProgressClock();
     this.generation++;
     this.clearTimer(this.waitTimer);
     this.waitTimer = null;
@@ -140,6 +176,7 @@ export class RoomPlayback {
     // target, and let the decoder finish its single outstanding seek.
     if (this.phase !== 'paused') this.pause();
     this.progress = clampProgress(value);
+    this.onProgress(this.progress);
     this.pendingSeek = this.progress;
     if (this.video.seeking) return;
     if (this.video.readyState < 2 && (this.timeout === null || this.timeout === undefined)) this.armTimeout();
@@ -153,6 +190,7 @@ export class RoomPlayback {
     if (this.active === active) return;
     this.active = active;
     if (!active) {
+      this.stopProgressClock();
       this.generation++;
       this.playPending = false;
       this.clearTimer(this.waitTimer);
