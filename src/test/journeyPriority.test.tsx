@@ -1,10 +1,10 @@
 import { renderToString } from 'react-dom/server';
-import { HelmetProvider } from 'react-helmet-async';
+import { HelmetProvider, type HelmetServerState } from 'react-helmet-async';
 import { expect, it } from 'vitest';
 import PlantJourney from '@/components/home/PlantJourney';
 
 it('prioritizes the visible nursery poster over hidden chapter posters before JavaScript', () => {
-  const context: { helmet?: { link: { toString(): string } } } = {};
+  const context: { helmet?: HelmetServerState } = {};
   HelmetProvider.canUseDOM = false;
   try {
     const html = renderToString(<HelmetProvider context={context}><PlantJourney /></HelmetProvider>);

@@ -1,6 +1,6 @@
 import { createCatalogueLoader } from '../src/server/catalogue.js';
 
-const loadCatalogue = createCatalogueLoader(async () => {
+export const loadCatalogue = createCatalogueLoader(async () => {
   if (!process.env.VERCEL) return null;
   const { getCache } = await import('@vercel/functions');
   return getCache();

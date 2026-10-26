@@ -55,3 +55,17 @@ it('rejects pagination outside the public catalogue API', async () => {
   expect(result.code).toBe(503);
   expect(fetch).toHaveBeenCalledTimes(1);
 });
+
+it('includes each populated canonical category once, without utility facets', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => [
+    { slug: 'first', category_slug: 'exotic-beauties' }, { slug: 'second', category_slug: 'exotic-beauties' },
+    { slug: 'third', category_slug: 'calathea' }, { slug: 'fourth', category_slug: '<bad>' },
+  ] }));
+  const { result, response } = responseFixture();
+  await handler(null, response);
+  expect(result.code).toBe(200);
+  expect(result.body.match(/\/shop\?category=exotic-beauties/g)).toHaveLength(1);
+  expect(result.body).toContain('/shop?category=calathea</loc>');
+  expect(result.body).not.toContain('category=%3Cbad%3E');
+  expect(result.body).not.toContain('ordering=');
+});
