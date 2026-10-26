@@ -32,11 +32,13 @@ try {
   await emitModule(join(root, 'api/page.ts'));
   await emitModule(join(root, 'api/catalogue.ts'));
   await emitModule(join(root, 'api/collection.ts'));
+  await emitModule(join(root, 'api/merchant-feed.ts'));
   const runner = join(temporary, 'verify.mjs');
   await writeFile(runner, `import assert from 'node:assert/strict';
 import handler from './api/page.js';
 import catalogue from './api/catalogue.js';
 import collection from './api/collection.js';
+import merchantFeed from './api/merchant-feed.js';
 for (const [query, expected] of [[{kind:'article',slug:'1'},200],[{kind:'article',slug:'missing'},404],[{kind:'not-found'},404]]) {
   let status; let body; const headers = {};
   const response = {setHeader(key,value){headers[key]=value;},status(value){status=value;return this;},send(value){body=value;}};
@@ -56,7 +58,12 @@ await collection({url:'/shop?category=exotic-beauties'}, {setHeader(){},status(v
 assert.equal(collectionStatus,200);
 assert.ok(collectionBody.includes('<h1>Exotic Plants</h1>'));
 assert.ok(collectionBody.includes('href="https://www.rastlina.com/shop?category=exotic-beauties"'));
-console.log('Node server runtime: imports, catalogue, collections, articles and genuine 404s passed.');`);
+globalThis.fetch = async url => ({ok:true,json:async()=>String(url).endsWith('/runtime-plant/') ? {id:1,name:'Runtime Plant',slug:'runtime-plant',sku:'RUNTIME-01',price:'199.00',description:'A live plant set.',in_stock:true,variants:[],images:[{image:'https://api.rastlina.com/media/runtime.webp'}],review_count:0} : [{slug:'runtime-plant'}]});
+let feedBody; let feedStatus;
+await merchantFeed({url:'/merchant-feed.xml'}, {setHeader(){},status(value){feedStatus=value;return this;},send(value){feedBody=value;}});
+assert.equal(feedStatus,200);
+assert.ok(feedBody.includes('<g:price>199.00 INR</g:price>'));
+console.log('Node server runtime: imports, catalogue, collections, merchant feed, articles and genuine 404s passed.');`);
   const check = spawnSync(process.execPath, [runner], { cwd: root, encoding: 'utf8' });
   if (check.stdout) process.stdout.write(check.stdout);
   if (check.stderr) process.stderr.write(check.stderr);

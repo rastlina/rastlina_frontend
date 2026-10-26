@@ -10,7 +10,7 @@ export default function About() {
       <p>Each plant is a living item. Leaf patterns, shape and growth vary naturally. A self-watering pot helps manage watering, but you still need to check the soil and adjust care for the plant and its surroundings.</p>
       <h2 className="font-serif text-2xl">Company and contact details</h2>
       <p>Rastlina Nature Hub Private Limited<br/>GSTIN: 36AAPCR7860K1ZK</p>
-      <address className="not-italic">4th Floor, Lake View Towers, Safari Nagar, Kondapur, Hyderabad, 500084, India.</address>
+      <address className="not-italic">Current office: 4th Floor, Lake View Towers, Safari Nagar, Kondapur, Hyderabad, Telangana 500084, India.</address>
       <p><a href="tel:+918143814466">+91 81438 14466</a><br/><a href="mailto:info.rastlina@gmail.com">info.rastlina@gmail.com</a></p>
       <nav className="flex flex-wrap gap-5" aria-label="About Rastlina links">
         <Link to="/shop" className="underline">Shop plants</Link>

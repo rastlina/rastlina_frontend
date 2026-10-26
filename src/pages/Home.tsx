@@ -66,6 +66,7 @@ const Home = () => {
             '@type': 'PostalAddress',
             streetAddress: '4th Floor, Lake View Towers, Safari Nagar, Kondapur',
             addressLocality: 'Hyderabad',
+            addressRegion: 'Telangana',
             postalCode: '500084',
             addressCountry: 'IN',
           },

@@ -108,7 +108,7 @@ export const Footer = () => {
                   <br />
                   Safari Nagar, Kondapur,
                   <br />
-                  Hyderabad, 500084
+                  Hyderabad, Telangana 500084, India
                 </span>
               </li>
 

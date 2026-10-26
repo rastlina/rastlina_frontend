@@ -21,7 +21,7 @@ const refundPolicies = [
   "If a replacement plant arrives damaged, you can claim a refund after providing image verification of the damage.",
   "Should you receive an incorrect item, you are entitled to a refund.",
   "Missing items from your package are eligible for a refund with image or video verification.",
-  "Items marked as Return to Origin (RTO) can qualify for a refund.",
+  "Parcels returned because of a customer's incorrect address, refusal or unavailability are resent free of charge under our RTO policy; refunds are not provided for these cases.",
   "If the courier marks your items as delivered, but you haven’t received them, you may request a refund following verification. Report discrepancies within 7 days.",
   "For planters with visible scratches or damage, refunds will be issued upon photo or video verification.",
   "If items are missing or an empty box is received, a video of the package being opened is required to process a refund.",
@@ -42,8 +42,8 @@ const replacementPolicies = [
 const rtoPolicies = [
   "For prepaid orders, only reshipment is allowed (no refund).",
   "Partially paid orders are eligible for reshipment only (no refund).",
-  "If RTO occurs due to customer fault (wrong address, refusal, or unavailability), reshipment is possible.",
-  "Refunds in customer-fault RTO cases will be processed after deducting shipping and handling charges (25-30%).",
+  "If RTO occurs because of an incorrect address, order refusal or customer unavailability, we resend the parcel free of charge. No additional shipping or handling fee is charged.",
+  "Refunds are not provided for these RTO cases. Please contact support to confirm the correct delivery details before reshipment.",
 ];
 
 const ReturnsRefundPolicyPage = () => {
@@ -77,6 +77,16 @@ const ReturnsRefundPolicyPage = () => {
               Rastlina.
             </p>
           </div>
+
+          <section className="bg-card border border-border rounded-2xl p-6 md:p-8 mb-8">
+            <h2 className="text-2xl font-semibold text-primary mb-5">Returns for damaged or incorrect items</h2>
+            <div className="space-y-4 text-muted-foreground leading-8">
+              <p>We accept returns for damaged, defective or incorrect items only. Report the issue to <a className="underline" href="mailto:info.rastlina@gmail.com">info.rastlina@gmail.com</a> within <strong>10 days of delivery</strong>, including your order details and supporting photos or video.</p>
+              <p>If an approved claim requires the item to be returned, <strong>Rastlina pays the return courier cost</strong>. Please contact our support team for return instructions before sending an item back.</p>
+              <p>If your plant arrives completely damaged, we will send an approved replacement at <strong>no additional cost to you</strong>, including replacement shipping.</p>
+              <p>We do not accept change-of-mind returns or exchanges for non-defective items. Replacements for damaged or incorrect items are handled under our replacement policy.</p>
+            </div>
+          </section>
 
           {/* Cancellation Policy */}
           <section className="bg-card border border-border rounded-2xl p-6 md:p-8 mb-8">

@@ -273,8 +273,7 @@ const TermsPage = () => {
 
               <div className="space-y-2">
                 <p>
-                  <strong>Address:</strong> Safari Nagar, Kondapur, Hyderabad
-                  500084
+                  <strong>Office address:</strong> 4th Floor, Lake View Towers, Safari Nagar, Kondapur, Hyderabad, Telangana 500084, India
                 </p>
 
                 <p>
