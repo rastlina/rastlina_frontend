@@ -43,6 +43,7 @@ try {
       .replace(/<meta name="robots"[^>]*>/, '')
       .replace('</head>', `${metadata.meta.toString()}${metadata.link.toString()}</head>`);
     const content = renderPublicContent(path);
+    if (['/shipping-policy', '/returns-refund-policy', '/replacement-policy'].includes(path) && !content.includes('<h1')) throw new Error(`Missing public policy content: ${path}`);
     if (content) shell = shell.replace('<div id="root"></div>', `<div id="root">${content}</div>`);
     // Normal createRoot startup is retained; only metadata is rendered here.
     await writeFile(`dist/seo-${path.slice(1)}.html`, shell);

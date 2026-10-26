@@ -34,6 +34,14 @@ const ShippingPolicyPage = () => {
             </p>
           </div>
 
+          <section className="bg-card border border-border rounded-2xl p-6 md:p-8 mb-8">
+            <h2 className="text-2xl font-semibold text-primary mb-5">Shipping charges in India</h2>
+            <div className="space-y-4 text-muted-foreground leading-8">
+              <p>Shipping costs <strong>₹99 for orders below ₹499</strong>. Orders of <strong>₹499 or more receive free shipping</strong>, subject to delivery PIN-code serviceability.</p>
+              <p>We dispatch orders Monday to Saturday, with handling of 1–3 business days followed by an estimated courier transit time of 5–9 business days. The total estimated delivery time is 6–12 business days; public holidays or courier delays may extend this.</p>
+            </div>
+          </section>
+
           {/* Order Processing */}
           <section className="bg-card border border-border rounded-2xl p-6 md:p-8 mb-8">
             <div className="flex items-center gap-3 mb-5">
@@ -46,9 +54,9 @@ const ShippingPolicyPage = () => {
 
             <div className="space-y-5 text-muted-foreground leading-8">
               <p>
-                At Rastlina.com, we ensure that every order is shipped within
-                <strong> 3 days </strong>
-                of the order date.
+                Orders are normally dispatched within
+                <strong> 3 business days </strong>
+                of the order date. Dispatch days are Monday to Saturday.
               </p>
 
               <p>
@@ -97,7 +105,7 @@ const ShippingPolicyPage = () => {
 
               <p>
                 They typically take
-                <strong> 5–9 days </strong>
+                <strong> 5–9 business days after dispatch </strong>
                 to deliver plants, ensuring timely and secure transportation.
               </p>
             </div>
@@ -149,8 +157,9 @@ const ShippingPolicyPage = () => {
               </p>
 
               <p>
-                Any additional costs for re-delivery due to address errors will
-                be charged accordingly.
+                If a parcel returns because of an incorrect address, refusal
+                or customer unavailability, we resend it free of charge under
+                our RTO policy. Refunds are not provided for these cases.
               </p>
             </div>
           </section>

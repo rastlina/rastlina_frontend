@@ -33,6 +33,12 @@ const ReplacementPolicyPage = () => {
                 <strong>10 days from the date of delivery</strong>.
               </li>
 
+              <li>If an approved damaged, defective or incorrect-item claim requires a return, <strong>Rastlina pays the return courier cost</strong>. Contact support for instructions before sending an item back.</li>
+
+              <li>If your plant arrives completely damaged, an approved replacement is sent <strong>at no additional cost to you</strong>, including replacement shipping.</li>
+
+              <li>Change-of-mind returns and exchanges for non-defective items are not accepted. This does not affect replacements for damaged or incorrect items.</li>
+
               <li>
                 If you receive a wrong or damaged product, please contact our
                 customer support team with proper image proof for quick
@@ -177,14 +183,14 @@ const ReplacementPolicyPage = () => {
               </li>
 
               <li>
-                Customers may request reshipment after additional shipping
-                charges if applicable.
+                If the parcel returns because of an incorrect address, refusal
+                or customer unavailability, we resend it free of charge.
               </li>
 
               <li>
-                Refunds requested for customer-fault RTO cases will be processed
-                only after deducting{" "}
-                <strong>25%–30% shipping and handling charges</strong>.
+                <strong>No additional shipping or handling fee is charged</strong>.
+                Refunds are not provided for these RTO cases. Contact support
+                to confirm the correct delivery details before reshipment.
               </li>
             </ul>
 
@@ -244,8 +250,7 @@ const ReplacementPolicyPage = () => {
             </p>
 
             <p>
-              <strong>Address:</strong> Safari Nagar, Kondapur, Hyderabad
-              500084
+              <strong>Office address:</strong> 4th Floor, Lake View Towers, Safari Nagar, Kondapur, Hyderabad, Telangana 500084, India
             </p>
           </div>
         </section>

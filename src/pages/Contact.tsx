@@ -118,7 +118,7 @@ export default function Contact() {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <MapPin className="h-4 w-4 text-accent-gold" />
-                <span>Lake View Towers, Hyderabad</span>
+                <span>4th Floor, Lake View Towers, Safari Nagar, Kondapur, Hyderabad, Telangana 500084, India</span>
               </div>
             </div>
           </div>

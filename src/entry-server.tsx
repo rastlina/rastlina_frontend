@@ -7,11 +7,16 @@ import App from './App';
 import { Seo } from './components/seo/Seo';
 import { publicPages } from './components/seo/RouteSeo';
 import About from './pages/About';
+import ShippingPolicyPage from './pages/ShippingPolicyPage';
+import ReturnsRefundPolicyPage from './pages/ReturnsRefundPage';
+import ReplacementPolicyPage from './pages/ReplacementPolicyPage';
 import { blogs } from './data/blogs';
 
 export const articles = blogs;
 export function renderPublicContent(path: string) {
-  return path === '/about' ? renderToString(<StaticRouter location={path}><About /></StaticRouter>) : '';
+  const pages = { '/about': About, '/shipping-policy': ShippingPolicyPage, '/returns-refund-policy': ReturnsRefundPolicyPage, '/replacement-policy': ReplacementPolicyPage };
+  const Page = pages[path as keyof typeof pages];
+  return Page ? renderToString(<HelmetProvider context={{}}><StaticRouter location={path}><Page /></StaticRouter></HelmetProvider>) : '';
 }
 
 export const metadataPaths = Object.keys(publicPages);
