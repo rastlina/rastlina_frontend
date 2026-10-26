@@ -1,7 +1,8 @@
 {
   "regions": ["bom1"],
   "functions": {
-    "api/page.ts": { "includeFiles": "dist/{server-shell.html,article-data.json}", "maxDuration": 30 }
+    "api/page.ts": { "includeFiles": "dist/{server-shell.html,article-data.json}", "maxDuration": 30 },
+    "api/collection.ts": { "includeFiles": "dist/server-shell.html", "maxDuration": 30 }
   },
   "redirects": [
     { "source": "/contact", "destination": "/bulk", "permanent": true },
@@ -46,8 +47,8 @@
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
     },
-    { "source": "/shop", "destination": "/seo-shop.html" },
-    { "source": "/shop/:category", "destination": "/app.html" },
+    { "source": "/shop", "destination": "/api/collection" },
+    { "source": "/shop/:category", "destination": "/api/collection?collection_category=:category" },
     { "source": "/about", "destination": "/seo-about.html" },
     { "source": "/product/:slug", "destination": "/api/page?kind=product&slug=:slug" },
     { "source": "/blog/:slug", "destination": "/api/page?kind=article&slug=:slug" },

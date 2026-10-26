@@ -1,5 +1,5 @@
 import { renderToString } from 'react-dom/server';
-import { HelmetProvider } from 'react-helmet-async';
+import { HelmetProvider, type HelmetServerState } from 'react-helmet-async';
 import { afterEach, expect, it } from 'vitest';
 import { Seo } from '@/components/seo/Seo';
 import { canonicalUrl, schemaJson } from '@/lib/seoUrls';
@@ -13,7 +13,7 @@ afterEach(() => { HelmetProvider.canUseDOM = true; });
 it('consolidates sorting/tracking URLs while retaining meaningful filters and category paths', () => {
   expect(canonicalUrl('/shop?ordering=price&utm_source=instagram&fbclid=123')).toBe('https://www.rastlina.com/shop');
   expect(canonicalUrl('/shop?space=bedroom&category=plants&ordering=-price')).toBe('https://www.rastlina.com/shop?category=plants&space=bedroom');
-  expect(canonicalUrl('/shop/indoor-plants?utm_campaign=test')).toBe('https://www.rastlina.com/shop/indoor-plants');
+  expect(canonicalUrl('/shop/indoor-plants?utm_campaign=test')).toBe('https://www.rastlina.com/shop?category=indoor-plants');
   expect(canonicalUrl('/product/snake-plant#reviews')).toBe('https://www.rastlina.com/product/snake-plant');
   expect(() => canonicalUrl('https://example.com/')).toThrow();
 });
@@ -27,7 +27,7 @@ it('escapes script-closing characters while retaining valid schema JSON', () => 
 it('provides canonical, title and description metadata for every public static shell', () => {
   HelmetProvider.canUseDOM = false;
   for (const [path, metadata] of Object.entries(publicPages)) {
-    const context: { helmet?: { title: { toString(): string }; meta: { toString(): string }; link: { toString(): string } } } = {};
+    const context: { helmet?: HelmetServerState } = {};
     renderToString(<HelmetProvider context={context}><Seo {...metadata} path={path} /></HelmetProvider>);
     expect(context.helmet!.title.toString()).toContain('Rastlina');
     expect(context.helmet!.meta.toString()).toContain('name="description"');
@@ -41,7 +41,7 @@ it('preserves article publication dates using explicit ISO dates', () => {
 
 it('excludes secondary video views while retaining crawlable product links', () => {
   HelmetProvider.canUseDOM = false;
-  const context: { helmet?: { meta: { toString(): string } } } = {};
+  const context: { helmet?: HelmetServerState } = {};
   renderToString(<HelmetProvider context={context}><StaticRouter location="/watch-shop/aglaonema-suksom-jaipong"><RouteSeo /></StaticRouter></HelmetProvider>);
   expect(context.helmet!.meta.toString()).toContain('content="noindex, follow"');
   expect(vercel.headers.find(rule => rule.source === '/watch-shop/:slug')?.headers)

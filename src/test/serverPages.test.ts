@@ -9,7 +9,7 @@ vi.mock('node:fs/promises', async importOriginal => {
   const readFile = vi.fn(async (path: string) => path.endsWith('article-data.json') ? '[]' : '<!doctype html><html data-server-test-shell><head><title>Rastlina</title></head><body><div id="root"></div></body></html>');
   // Vite's Node builtin interop can use either the named export or default.
   // Both must be stubbed: CI intentionally runs tests before dist exists.
-  return { ...actual, readFile, default: { ...actual.default, readFile } };
+  return { ...actual, readFile, default: { ...actual, readFile } };
 });
 beforeEach(() => vi.stubGlobal('AbortSignal', { timeout: () => undefined }));
 afterEach(() => vi.unstubAllGlobals());

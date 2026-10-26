@@ -6,6 +6,7 @@ import { SlidersHorizontal, X, ChevronDown, Search } from 'lucide-react';
 import { storeService } from '@/services/api';
 import { ProductCard, ApiProduct } from '@/components/products/ProductCard';
 import { Seo } from '@/components/seo/Seo';
+import { collectionSeo } from '@/lib/collectionSeo';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ShopCategory {
@@ -237,14 +238,11 @@ const getTitle = () => {
   return 'All Products';
 };
 
+  const metadata = collectionSeo(`${location.pathname}${location.search}`, getTitle(), !loading && products.length === 0);
+
   return (
     <main className="min-h-screen bg-[#FAFAF7] pt-[110px]" style={{ fontFamily: "'Lora', Georgia, serif" }}>
-      <Seo
-        title={`${getTitle()} | Buy Indoor Plants Online | Rastlina`}
-        description={`Browse ${getTitle().toLowerCase()} at Rastlina. Shop ready-to-gift indoor plants with a self-watering pot and soil mix, delivered across India.`}
-        path={`${location.pathname}${location.search}`}
-        noIndex={Boolean(urlSearch)}
-      />
+      <Seo {...metadata} />
       <div className="shop-catalogue max-w-7xl mx-auto px-4 md:px-6 py-6">
 
         {/* Breadcrumb */}
@@ -294,6 +292,8 @@ const getTitle = () => {
             </button>
           </div>
         </div>
+
+        <p className="text-sm leading-relaxed text-gray-600 max-w-3xl mb-6">{metadata.intro}</p>
 
         {/* Active filter chips */}
         {(urlSize || urlColor || urlSpace || urlBestDeal || urlNewArrival) && (

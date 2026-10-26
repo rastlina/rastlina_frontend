@@ -1,5 +1,6 @@
 type Product = {
   slug: string;
+  category_slug?: string;
 };
 
 type ResponseLike = {
@@ -59,8 +60,11 @@ export default async function handler(_: unknown, response: ResponseLike) {
     const productEntries = [...new Set(products.map(({ slug }) => slug).filter(slug => typeof slug === 'string' && slug.length > 0))].map((slug) =>
       urlEntry(`/product/${xmlEscape(encodeURIComponent(slug))}`, 'weekly', '0.8'),
     );
+    const categoryEntries = [...new Set(products.map(product => product.category_slug).filter((slug): slug is string => typeof slug === 'string' && /^[a-zA-Z0-9-]+$/.test(slug)))].map(slug =>
+      urlEntry(`/shop?category=${encodeURIComponent(slug)}`, 'weekly', '0.7'),
+    );
 
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...staticEntries, ...productEntries].join('')}</urlset>`;
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[...staticEntries, ...categoryEntries, ...productEntries].join('')}</urlset>`;
     response.setHeader('Content-Type', 'application/xml; charset=utf-8');
     response.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
     response.status(200).send(sitemap);

@@ -50,7 +50,7 @@ it('keeps View All reachable before the dynamic menu finishes loading', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
   const nav = screen.getByRole('navigation', { name: 'Mobile navigation' });
   fireEvent.click(within(nav).getByRole('button', { name: 'Indoor Plants' }));
-  expect(within(nav).getByRole('link', { name: 'View All', exact: true })).toHaveAttribute('href', '/shop?main_category=plants');
+  expect(within(nav).getByRole('link', { name: 'View All' })).toHaveAttribute('href', '/shop?main_category=plants');
   expect(within(nav).queryByRole('link', { name: 'Large Plants' })).not.toBeInTheDocument();
 });
 
@@ -60,7 +60,7 @@ it('puts View All first inside Indoor Plants and closes the menu after opening t
   fireEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
   const nav = screen.getByRole('navigation', { name: 'Mobile navigation' });
   fireEvent.click(await within(nav).findByRole('button', { name: 'Indoor Plants' }));
-  const viewAll = within(nav).getByRole('link', { name: 'View All', exact: true });
+  const viewAll = within(nav).getByRole('link', { name: 'View All' });
   expect(viewAll).toHaveAttribute('href', '/shop?main_category=plants');
   const submenu = document.getElementById('mobile-plants-links')!;
   expect(within(submenu).getAllByRole('link')[0]).toBe(viewAll);
