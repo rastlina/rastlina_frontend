@@ -20,10 +20,14 @@ class Element extends EventTarget {
       add: name => classes.add(name), remove: name => classes.delete(name), contains: name => classes.has(name),
       toggle: (name, force) => { const enabled = force ?? !classes.has(name); enabled ? classes.add(name) : classes.delete(name); return enabled; },
     };
-    this.style = { setProperty: (name, value) => { this.style[name] = value; } };
+    this.style = {
+      setProperty: (name, value) => { this.style[name] = value; },
+      getPropertyValue: name => this.style[name] || '',
+    };
   }
   append(child) { this.textContent += child.textContent; }
   setAttribute(name, value) { this.attributes[name] = String(value); }
+  getAttribute(name) { return this.attributes[name] ?? null; }
   removeAttribute(name) { delete this.attributes[name]; if (name === 'src') this.src = ''; }
   getBoundingClientRect() { return { top: (this.absoluteTop || 0) - globalThis.scrollY }; }
   querySelector(selector) { if (selector === '.chapter-stage') return { offsetHeight: 1000 }; throw new Error(selector); }
@@ -103,7 +107,7 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
         const [id, callback] = callbacks.entries().next().value;
         callbacks.delete(id); frameTime += 1000 / 60; callback(frameTime);
       }
-      assert.equal(callbacks.size, 0, 'Scroll and navigation must settle without an idle animation loop');
+      assert.ok(callbacks.size <= (room.paused ? 0 : 1), 'Only a playing room may retain its single progress-frame callback');
     };
     const settleMedia = async () => {
       for (const video of videos) {
@@ -225,6 +229,9 @@ test(`five story chapters and automatic rooms: ${mobile ? 'mobile' : 'desktop'},
       room.advance(4);
       assert.equal(get('room-range').value, '400');
       assert.equal(get('orbit-readout').textContent, '40 / 100');
+      room.time = 4.2; drain();
+      assert.equal(get('room-range').value, '420', 'The room line advances between coarse timeupdate events');
+      room.advance(4);
       const seeks = room.seeks.length;
       await scroll(11600);
       assert.equal(room.currentTime, 4, 'Scrolling must not fight natural room playback');
