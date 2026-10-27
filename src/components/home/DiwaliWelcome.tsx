@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 const sparkles = [[12, 17], [35, 10], [69, 26], [94, 45], [84, 83], [43, 91], [11, 57], [58, 80]];
-const particles = Array.from({ length: 24 }, (_, index) => {
-  const angle = index / 24 * Math.PI * 2;
-  return [50 + 44 * Math.cos(angle), 53 + 39 * Math.sin(angle)];
-});
+// Trace the existing gold artwork in its original pixel coordinates.
+const magicTrails = [
+  { name: 'Diwali: first i to l', path: 'M740 704 C895 782 1116 800 1335 725 C1515 657 1624 540 1625 417 C1625 315 1445 288 1255 351', delay: .65 },
+  { name: 'Happy: H base to flourish tip', path: 'M555 282 C535 216 375 159 375 107 C375 43 585 148 765 245 C925 325 1115 350 1235 290 C1280 257 1240 232 1190 250', delay: .85 },
+];
 
 export default function DiwaliWelcome() {
   const [mounted, setMounted] = useState(false);
@@ -55,23 +56,24 @@ export default function DiwaliWelcome() {
         .rastlina-diwali-opening{position:absolute;left:50%;top:50%;width:18%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fffbea 0%,#ffe29a88 10%,#f8c65b22 35%,transparent 68%);opacity:0;transform:translate(-50%,-50%)}
         .rastlina-diwali.is-ready .rastlina-diwali-opening{animation:rastlina-diwali-opening .65s ease-out both}
         .rastlina-diwali-orbits{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+        .rastlina-diwali-trail{fill:none;stroke:#ffe9a5;stroke-width:4;stroke-linecap:round;stroke-dasharray:12 100;stroke-dashoffset:12;opacity:0;animation:rastlina-diwali-trace 1.9s linear both}
+        .rastlina-diwali-magic-head,.rastlina-diwali-magic-mote{opacity:0;animation:rastlina-diwali-comet 1.9s linear both}
         .rastlina-diwali-glint{position:absolute;display:block;width:7%;aspect-ratio:1;opacity:0;pointer-events:none}
         .rastlina-diwali.is-ready .rastlina-diwali-glint{animation:rastlina-diwali-glint 1.25s ease-in-out infinite}
         .rastlina-diwali-glint:before,.rastlina-diwali-glint:after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse,#fffef0 0%,#fff2ad 8%,#ffd15e99 25%,transparent 68%)}
         .rastlina-diwali-glint:before{transform:scaleX(.12)}
         .rastlina-diwali-glint:after{transform:scaleY(.12)}
-        .rastlina-diwali-dust{position:absolute;width:.35%;aspect-ratio:1;border-radius:50%;background:#fff3bd;box-shadow:0 0 4px 1px #ffbd48;opacity:0}
-        .rastlina-diwali.is-ready .rastlina-diwali-dust{animation:rastlina-diwali-drift 1.7s ease-out infinite}
         @keyframes rastlina-diwali-enter{from{clip-path:circle(0% at 50% 50%)}to{clip-path:circle(90% at 50% 50%)}}
         @keyframes rastlina-diwali-sweep{0%{opacity:0;transform:translate3d(0,0,0)}12%,88%{opacity:.85}100%{opacity:0;transform:translate3d(520%,0,0)}}
         @keyframes rastlina-diwali-opening{0%{opacity:0;transform:translate(-50%,-50%) scale(.1)}18%{opacity:.85}65%{opacity:.16}100%{opacity:0;transform:translate(-50%,-50%) scale(5.5)}}
         @keyframes rastlina-diwali-fade{from{opacity:1}to{opacity:0}}
         @keyframes rastlina-diwali-glint{0%,100%{opacity:.05;transform:scale(.35) rotate(-12deg)}45%{opacity:1;transform:scale(1) rotate(0deg)}75%{opacity:.2;transform:scale(.5) rotate(10deg)}}
-        @keyframes rastlina-diwali-drift{0%{opacity:0;transform:translate3d(0,4px,0) scale(.5)}30%{opacity:1}100%{opacity:0;transform:translate3d(8px,-14px,0) scale(.2)}}
-        .rastlina-diwali.is-scrolling .rastlina-diwali-orbits,.rastlina-diwali.is-scrolling .rastlina-diwali-shine,.rastlina-diwali.is-scrolling .rastlina-diwali-dust{visibility:hidden}
-        .rastlina-diwali.is-scrolling .rastlina-diwali-beam,.rastlina-diwali.is-scrolling .rastlina-diwali-dust,.rastlina-diwali.is-scrolling .rastlina-diwali-glint{animation-play-state:paused}
-        @media(max-width:600px){.rastlina-diwali-dust{display:none}}
-        @media(prefers-reduced-motion:reduce){.rastlina-diwali.is-ready .rastlina-diwali-art,.rastlina-diwali.is-ready .rastlina-diwali-glint,.rastlina-diwali.is-ready .rastlina-diwali-dust,.rastlina-diwali.is-ready .rastlina-diwali-beam,.rastlina-diwali.is-ready .rastlina-diwali-opening{animation:none}.rastlina-diwali-orbits{display:none}}
+        @keyframes rastlina-diwali-trace{0%{stroke-dashoffset:12;opacity:0}8%{opacity:1}88%{opacity:1}100%{stroke-dashoffset:-88;opacity:0}}
+        @keyframes rastlina-diwali-comet{0%{opacity:0}6%,88%{opacity:1}100%{opacity:0}}
+        .rastlina-diwali.is-scrolling .rastlina-diwali-orbits,.rastlina-diwali.is-scrolling .rastlina-diwali-shine{visibility:hidden}
+        .rastlina-diwali.is-scrolling .rastlina-diwali-beam,.rastlina-diwali.is-scrolling .rastlina-diwali-glint,.rastlina-diwali.is-scrolling .rastlina-diwali-trail,.rastlina-diwali.is-scrolling .rastlina-diwali-magic-head,.rastlina-diwali.is-scrolling .rastlina-diwali-magic-mote{animation-play-state:paused}
+        @media(max-width:600px){.rastlina-diwali-magic-mote:nth-of-type(n+6){display:none}}
+        @media(prefers-reduced-motion:reduce){.rastlina-diwali.is-ready .rastlina-diwali-art,.rastlina-diwali.is-ready .rastlina-diwali-glint,.rastlina-diwali.is-ready .rastlina-diwali-beam,.rastlina-diwali.is-ready .rastlina-diwali-opening{animation:none}.rastlina-diwali-orbits{display:none}}
       `}</style>
       <div className="rastlina-diwali-art">
         <img src="/diwali-welcome.webp" srcSet="/diwali-welcome-640.webp 640w, /diwali-welcome-960.webp 960w, /diwali-welcome.webp 1735w" sizes="(max-width:930px) 86vw, 800px" alt="" width="1735" height="906" loading="eager" decoding="async" onLoad={event => {
@@ -79,13 +81,21 @@ export default function DiwaliWelcome() {
           setReady(true);
         }} onError={() => setFinished(true)} />
         <span className="rastlina-diwali-shine" aria-hidden="true"><span className="rastlina-diwali-beam" /></span>
-        {ready && <svg className="rastlina-diwali-orbits" viewBox="0 0 1000 522" aria-hidden="true" focusable="false">
+        {ready && <svg className="rastlina-diwali-orbits" viewBox="0 0 1735 906" aria-hidden="true" focusable="false">
           <defs><radialGradient id="rastlina-diwali-halo"><stop offset="0" stopColor="#fffdf3" /><stop offset=".3" stopColor="#ffe6a1" stopOpacity=".8" /><stop offset="1" stopColor="#ffc543" stopOpacity="0" /></radialGradient></defs>
-          <g><animateMotion dur="1.55s" repeatCount="indefinite" path="M80 270 C80 70 350 35 500 55 C750 25 950 150 920 270 C910 440 680 480 500 465 C250 490 80 420 80 270Z" /><circle r="23" fill="url(#rastlina-diwali-halo)" /><path d="M0-16 3-3 16 0 3 3 0 16-3 3-16 0-3-3Z" fill="#fff8d4" /></g>
-          <g><animateMotion dur="1.85s" repeatCount="indefinite" path="M920 270 C950 140 750 30 500 55 C300 35 80 100 80 270 C80 440 320 485 500 465 C710 490 920 420 920 270Z" /><circle r="19" fill="url(#rastlina-diwali-halo)" /><path d="M0-12 2-2 12 0 2 2 0 12-2 2-12 0-2-2Z" fill="#fffdf0" /></g>
+          {magicTrails.map(trail => <g key={trail.name}>
+            <path className="rastlina-diwali-trail" d={trail.path} pathLength="100" style={{ animationDelay: `${trail.delay}s` }} />
+            {Array.from({ length: 8 }, (_, index) => <g key={index} className="rastlina-diwali-magic-mote" style={{ animationDelay: `${trail.delay + index * .025}s` }}>
+              <animateMotion dur="1.9s" begin={`${trail.delay + index * .025}s`} fill="freeze" path={trail.path} />
+              <circle r={6 - index * .5} fill="#ffe4a0" opacity={.75 - index * .075} />
+            </g>)}
+            <g className="rastlina-diwali-magic-head" style={{ animationDelay: `${trail.delay}s` }}>
+              <animateMotion dur="1.9s" begin={`${trail.delay}s`} fill="freeze" path={trail.path} />
+              <circle r="38" fill="url(#rastlina-diwali-halo)" /><path d="M0-23 4-4 23 0 4 4 0 23-4 4-23 0-4-4Z" fill="#fff5bf" /><circle r="5" fill="#fffdf5" />
+            </g>
+          </g>)}
         </svg>}
         {sparkles.map(([left, top], index) => <span key={index} aria-hidden="true" className="rastlina-diwali-glint" style={{ left: `${left - 3.5}%`, top: `${top - 6.7}%`, animationDelay: `${-index * .21}s` }} />)}
-        {particles.map(([left, top], index) => <span key={index} aria-hidden="true" className="rastlina-diwali-dust" style={{ left: `${left}%`, top: `${top}%`, animationDelay: `${-index * .13}s` }} />)}
         <span className="rastlina-diwali-opening" aria-hidden="true" />
       </div>
     </div>, document.body,
