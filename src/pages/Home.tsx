@@ -1,5 +1,6 @@
 // src/pages/Home.tsx
 import PlantJourney from '@/components/home/PlantJourney';
+import DiwaliWelcome from '@/components/home/DiwaliWelcome';
 import './home-premium.css';
 import { lazy, Suspense, startTransition, useCallback, useEffect, useState } from 'react';
 import { Seo } from '@/components/seo/Seo';
@@ -46,6 +47,7 @@ const Home = () => {
   }, [showSections]);
   return (
     <main className="home-content home-refined w-full overflow-x-clip pt-[110px]">
+      <DiwaliWelcome />
       <Seo
         title="Buy Indoor Plants Online in India | Rastlina"
         description="Shop ready-to-gift indoor plants online at Rastlina. Each set includes a healthy plant, self-watering pot and soil mix, with doorstep delivery across India."
