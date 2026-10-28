@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Loader2, Minus, Plus, Tag, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { RewardCelebration } from './RewardCelebration';
 
 export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
   const { appliedCoupon, applyCouponCode, removeCoupon, couponPending, totals, appliedCoupons, pricingPolicyVersion, pricingReady, pricingError, retryPromotions } = useCart();
@@ -39,13 +40,7 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
 
   return (
     <section className={`border-y border-gray-100 p-4 ${compact ? 'cart-promo-section' : 'space-y-2'}`} aria-label="Promo codes">
-      {celebration && <span className="reward-milestone-popup" role="status" aria-live="polite"
-        onAnimationEnd={event => { if (event.target === event.currentTarget) setCelebration(null); }}>
-        <span className="text-[#CDA85C] motion-safe:animate-[reward-confetti_900ms_ease-out_1]">✦</span>
-        <span className="text-[#155B46] motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]">🎉</span>
-        <span className="text-[#91A96D] motion-safe:animate-[reward-confetti_900ms_ease-out_1]" style={{ animationDelay: '140ms' }}>✧</span>
-        <span>{celebration} applied!</span>
-      </span>}
+      {celebration && <RewardCelebration key={celebration} text={`${celebration} applied!`} duration={4200} />}
       {compact && <button type="button" aria-label="Promo code" aria-expanded={expanded} aria-controls={`${inputId}-panel`}
         onClick={() => setExpanded(open => !open)} className="cart-promo-toggle">
         <span><Tag size={16} /> Promo code</span>

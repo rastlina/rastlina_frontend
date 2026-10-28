@@ -7,6 +7,7 @@ import { isAutomaticCoupon } from '@/utils/couponPolicy';
 import { PromoCodeInput } from './PromoCodeInput';
 import { AppliedDiscounts } from './AppliedDiscounts';
 import { CartPaymentIcons } from './CartPaymentIcons';
+import { RewardCelebration } from './RewardCelebration';
 import './cart-drawer.css';
 
 const formatPrice = (value: number) => new Intl.NumberFormat('en-IN', {
@@ -94,12 +95,7 @@ export const CartDrawer = () => {
           <Button onClick={closeCart} asChild className="h-12 rounded-lg bg-[#1A3831] px-8 text-white"><Link to="/shop">Browse Products</Link></Button>
         </div> : <>
           <section className="cart-rewards" aria-label="Cart rewards">
-            {pricingReady && (tenPercentApplied || (subtotal >= freeDeliveryTarget && totals.shipping === 0)) && <span key={rewardStage} className="reward-milestone-popup" role="status" aria-live="polite">
-              <span className="text-[#CDA85C] motion-safe:animate-[reward-confetti_900ms_ease-out_1]">✦</span>
-              <span className="text-[#155B46] motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]">🎉</span>
-              <span className="text-[#91A96D] motion-safe:animate-[reward-confetti_900ms_ease-out_1]" style={{ animationDelay: '140ms' }}>✧</span>
-              <span>{tenPercentApplied ? '10% discount unlocked!' : 'Free delivery unlocked!'}</span>
-            </span>}
+            {pricingReady && (tenPercentApplied || (subtotal >= freeDeliveryTarget && totals.shipping === 0)) && <RewardCelebration key={rewardStage} text={tenPercentApplied ? '10% discount unlocked!' : 'Free delivery unlocked!'} />}
             <p aria-live="polite">{shippingWaiver ? <><strong>Free shipping with {shippingWaiver.code}.</strong> No minimum spend.</>
               : subtotal < freeDeliveryTarget ? <>Add <strong>{formatPrice(freeDeliveryTarget - subtotal)}</strong> for free delivery.</>
               : subtotal < tenPercentTarget ? <><strong>Free delivery unlocked.</strong> Add {formatPrice(tenPercentTarget - subtotal)} for 10% off.</>
