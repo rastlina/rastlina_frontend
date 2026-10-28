@@ -623,3 +623,16 @@
 
 }
 
+
+/* Keep the first order within reach on the smallest phones. */
+.account-mobile-title { display:none; }
+@media(max-width:540px) {
+  .account-desktop-title,.account-welcome-extra { display:none; }
+  .account-mobile-title { display:inline; }
+  .account-welcome { padding:20px; }
+  .account-welcome h1 { font-size:28px; margin:12px 0 10px; }
+  .account-welcome .account-shop-link { display:none; }
+  .account-hero-leaf { width:180px; height:180px; top:-25px; right:-25px; }
+  .account-page .account-nav button { white-space:nowrap; min-width:0; gap:5px; padding:12px 4px; }
+  .account-page .account-nav svg { width:14px; height:14px; flex-shrink:0; }
+}
