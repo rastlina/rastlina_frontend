@@ -1,4 +1,4 @@
-import { CheckCircle2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { Check, CheckCircle2, Minus, Plus, ShoppingBag, Trash2, Truck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -75,6 +75,7 @@ export const CartDrawer = () => {
     (pricingPolicyVersion >= 2 ? appliedCoupons?.some(c => c.code === tenPercentCoupon.code) : appliedCoupon?.code === tenPercentCoupon.code));
   const shippingWaiver = appliedCoupons?.find(coupon => coupon.free_shipping);
   const combinedOffer = pricingPolicyVersion >= 2 && appliedCoupons?.some(c => c.code === 'DIWALI10' && c.value === 10) && tenPercentApplied;
+  const rewardStage = tenPercentApplied ? 'discount-unlocked' : 'delivery-unlocked';
 
   if (!isOpen) return null;
   return <>
@@ -93,13 +94,25 @@ export const CartDrawer = () => {
           <Button onClick={closeCart} asChild className="h-12 rounded-lg bg-[#1A3831] px-8 text-white"><Link to="/shop">Browse Products</Link></Button>
         </div> : <>
           <section className="cart-rewards" aria-label="Cart rewards">
+            {pricingReady && (tenPercentApplied || totals.shipping === 0) && <span key={rewardStage} className="reward-milestone-popup" role="status" aria-live="polite">
+              <span className="text-[#CDA85C] motion-safe:animate-[reward-confetti_900ms_ease-out_1]">✦</span>
+              <span className="text-[#155B46] motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]">🎉</span>
+              <span className="text-[#91A96D] motion-safe:animate-[reward-confetti_900ms_ease-out_1]">✧</span>
+              <span>{tenPercentApplied ? '10% discount unlocked!' : 'Free delivery unlocked!'}</span>
+            </span>}
             <p aria-live="polite">{shippingWaiver ? <><strong>Free shipping with {shippingWaiver.code}.</strong> No minimum spend.</>
               : subtotal < freeDeliveryTarget ? <>Add <strong>{formatPrice(freeDeliveryTarget - subtotal)}</strong> for free delivery.</>
               : subtotal < tenPercentTarget ? <><strong>Free delivery unlocked.</strong> Add {formatPrice(tenPercentTarget - subtotal)} for 10% off.</>
               : tenPercentApplied ? <strong>{combinedOffer ? 'DIWALI10 + automatic 10% off applied — 20% total savings.' : 'Automatic 10% off applied. Free delivery unlocked.'}</strong>
               : <strong>{pricingReady ? 'Free delivery unlocked. Your selected offer is applied.' : 'Checking delivery and available offers…'}</strong>}</p>
             <div className="cart-progress" role="img" aria-label={`Cart progress ${Math.round(progressPercent)} percent toward 10 percent savings at ${tenPercentTarget}`}>
-              <span style={{ width: `${progressPercent}%` }} />
+              <span className="cart-progress-track" />
+              <span className="cart-progress-fill" style={{ width: `${progressPercent}%` }} />
+              <span className="cart-delivery-milestone" style={{ left: `${Math.min(80, freeDeliveryTarget / tenPercentTarget * 100)}%` }} aria-hidden="true">
+                {pricingReady && totals.shipping === 0 ? <Check size={12} /> : <Truck size={12} />}
+              </span>
+              {progressPercent < 100 && <span className="cart-progress-truck" style={{ left: `${Math.min(92, Math.max(4, progressPercent))}%` }} aria-hidden="true"><Truck size={13} /></span>}
+              <span className={`cart-discount-milestone ${tenPercentApplied ? 'is-unlocked' : ''}`} aria-hidden="true">10%</span>
             </div>
             <div className="cart-reward-labels"><span>Free delivery · {formatPrice(freeDeliveryTarget)}</span><span>10% off · {formatPrice(tenPercentTarget)}</span></div>
           </section>

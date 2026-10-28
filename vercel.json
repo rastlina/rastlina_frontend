@@ -41,10 +41,10 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/store/config/", "destination": "https://admin.rastlina.com/api/store/config/" },
-    { "source": "/api/store/active-coupons/", "destination": "https://admin.rastlina.com/api/store/active-coupons/" },
-    { "source": "/api/store/promotion-quote/", "destination": "https://admin.rastlina.com/api/store/promotion-quote/" },
-    { "source": "/api/store/validate-coupon/", "destination": "https://admin.rastlina.com/api/store/validate-coupon/" },
+    { "source": "/api/store/config/", "destination": "/api/promotions?action=config" },
+    { "source": "/api/store/active-coupons/", "destination": "/api/promotions?action=active" },
+    { "source": "/api/store/promotion-quote/", "destination": "/api/promotions?action=quote" },
+    { "source": "/api/store/validate-coupon/", "destination": "/api/promotions?action=validate" },
     {
       "source": "/",
       "destination": "/index.html"
