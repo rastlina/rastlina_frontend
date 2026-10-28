@@ -29,14 +29,18 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 const publicCatalogue = axios.create({ baseURL: '/' });
+// Four read-only promotion endpoints use our fixed same-origin Vercel rewrites.
+// Preview and production therefore load the same authoritative pricing rules.
+const pricingApi = axios.create({ baseURL: '/api/store', headers: { 'Content-Type': 'application/json' } });
 
-api.interceptors.request.use((config) => {
+for (const client of [api, pricingApi]) {
+client.interceptors.request.use((config) => {
   const token = localStorage.getItem('rastlinaToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-api.interceptors.response.use(
+client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
@@ -56,6 +60,7 @@ api.interceptors.response.use(
     return Promise.reject(error.response?.data || error);
   }
 );
+}
 
 export const authService = {
   login: async (credentials: { email: string; password: string }) => {
@@ -181,15 +186,15 @@ export const storeService = {
     return (await api.get('/store/search/', { params: { q: query.trim() } })).data;
   },
 
-  getSiteConfig: async () => (await api.get('/store/config/')).data,
+  getSiteConfig: async () => (await pricingApi.get('/config/')).data,
 
   getPromotionQuote: async (orderTotal: number, couponCode = '') =>
-    (await api.post('/store/promotion-quote/', { order_total: orderTotal, coupon_code: couponCode })).data,
+    (await pricingApi.post('/promotion-quote/', { order_total: orderTotal, coupon_code: couponCode })).data,
 
-  getActiveCoupons: async () => (await api.get('/store/active-coupons/')).data,
+  getActiveCoupons: async () => (await pricingApi.get('/active-coupons/')).data,
 
   validateCoupon: async (code: string, orderTotal: number) =>
-    (await api.post('/store/validate-coupon/', { code, order_total: orderTotal })).data,
+    (await pricingApi.post('/validate-coupon/', { code, order_total: orderTotal })).data,
 
   getWatchAndShop: async () => (await api.get('/store/watch-and-shop/')).data,
 

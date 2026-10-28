@@ -56,3 +56,9 @@
 .cart-promo-toggle small { color: #667d00; font-size: 10px; }
 .cart-promo-section > div:not([hidden]) { padding: 4px 0 8px; }
 .cart-checkout-footer .cart-checkout-button { height: 48px; background: #1a3831; border-radius: 9px; color: white; }
+/* One payable amount, then the full-width checkout action with UPI marks. */
+.cart-payable { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.cart-payable > span { color: #1a3831; font-size: 13px; font-weight: 650; }
+.cart-payable > s { margin-left: auto; color: #98a29a; font-size: 11px; }
+.cart-payable > strong { margin-left: auto; font-size: 22px; }
+.cart-checkout-footer .cart-checkout-button { gap: 12px; font-size: 13px; font-weight: 750; text-transform: uppercase; }

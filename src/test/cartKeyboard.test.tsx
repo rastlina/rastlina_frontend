@@ -68,6 +68,9 @@ it('applies and removes a manually typed code while preserving all products and 
   input.focus(); fireEvent.change(input, { target: { value: 'diwali10' } });
   fireEvent.submit(input.closest('form')!);
   await waitFor(() => expect(screen.getByRole('button', { name: 'Checkout — ₹909.60' })).toBeEnabled());
+  expect(screen.getByRole('button', { name: 'Checkout — ₹909.60' })).not.toHaveTextContent('₹909.60');
+  expect(screen.getAllByText('₹909.60')).toHaveLength(1);
+  expect(screen.getByLabelText('PhonePe, Google Pay and CRED UPI')).toBeVisible();
   expect(input).toHaveValue('');
   expect(input).not.toHaveFocus();
   const discounts = screen.getByRole('region', { name: 'Applied discounts' });

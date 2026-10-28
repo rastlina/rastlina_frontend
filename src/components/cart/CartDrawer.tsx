@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { CheckCircle2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import { isAutomaticCoupon } from '@/utils/couponPolicy';
 import { PromoCodeInput } from './PromoCodeInput';
 import { AppliedDiscounts } from './AppliedDiscounts';
+import { CartPaymentIcons } from './CartPaymentIcons';
 import './cart-drawer.css';
 
 const formatPrice = (value: number) => new Intl.NumberFormat('en-IN', {
@@ -96,7 +97,7 @@ export const CartDrawer = () => {
               : subtotal < freeDeliveryTarget ? <>Add <strong>{formatPrice(freeDeliveryTarget - subtotal)}</strong> for free delivery.</>
               : subtotal < tenPercentTarget ? <><strong>Free delivery unlocked.</strong> Add {formatPrice(tenPercentTarget - subtotal)} for 10% off.</>
               : tenPercentApplied ? <strong>{combinedOffer ? 'DIWALI10 + automatic 10% off applied — 20% total savings.' : 'Automatic 10% off applied. Free delivery unlocked.'}</strong>
-              : <strong>{pricingPolicyVersion >= 2 ? 'Free delivery unlocked. Your selected offer is applied.' : 'Free delivery unlocked. Your entered promo code replaces the automatic offer.'}</strong>}</p>
+              : <strong>{pricingReady ? 'Free delivery unlocked. Your selected offer is applied.' : 'Checking delivery and available offers…'}</strong>}</p>
             <div className="cart-progress" role="img" aria-label={`Cart progress ${Math.round(progressPercent)} percent toward 10 percent savings at ${tenPercentTarget}`}>
               <span style={{ width: `${progressPercent}%` }} />
             </div>
@@ -148,13 +149,14 @@ export const CartDrawer = () => {
       </div>
 
       {items.length > 0 && <footer className="cart-checkout-footer">
-        <div className="cart-checkout-row">
-          <div className="cart-payable"><span>To pay</span><strong aria-live="polite">{formatPrice(totals.total)}</strong></div>
+        <div className="cart-payable"><span>To Pay</span>
+          {totals.couponDiscount > 0 && <s>{formatPrice(totals.total + totals.couponDiscount + (totals.shippingDiscount || 0))}</s>}
+          <strong aria-live="polite">{formatPrice(totals.total)}</strong>
+        </div>
           <Button disabled={couponPending || pricingReady === false} aria-label={`Checkout — ${formatPrice(totals.total)}`}
             onClick={() => { closeCart(); navigate('/checkout'); }} className="cart-checkout-button">
-            Checkout <ArrowRight size={17} aria-hidden="true" />
+            <span>Checkout</span><CartPaymentIcons />
           </Button>
-        </div>
         <p className="cart-secure-checkout">Secure checkout · Razorpay encrypted</p>
       </footer>}
     </div>

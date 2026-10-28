@@ -144,6 +144,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const currentSubtotal = useRef(0);
   const [storageReady, setStorageReady] = useState(false);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(DEFAULT_CONFIG);
+  const [siteConfigReady, setSiteConfigReady] = useState(false);
+  const [siteConfigError, setSiteConfigError] = useState<string | null>(null);
   const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
 
   useEffect(() => {
@@ -177,8 +179,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           tax_percentage: Number(cfg.tax_percentage ?? 0),
           promotion_policy_version: Number(cfg.promotion_policy_version ?? 1),
         });
+        setSiteConfigReady(true);
+        setSiteConfigError(null);
+      } else {
+        setSiteConfigReady(false);
+        setSiteConfigError('Unable to load delivery and offers. Please retry before checkout.');
       }
-    }).catch(() => {});
+    }).catch(() => {
+      setSiteConfigReady(false);
+      setSiteConfigError('Unable to load delivery and offers. Please retry before checkout.');
+    });
 
     // Fetch active coupons — used for auto-apply + nudge banners
     storeService.getActiveCoupons().then((coupons: AvailableCoupon[]) => {
@@ -188,7 +198,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
       setAvailableCoupons(sorted);
     }).catch(() => {});
-  }, [isOpen]);
+  }, [isOpen, promotionRefresh]);
 
   // ── Totals ────────────────────────────────────────────────────────────────
 
@@ -205,8 +215,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const appliedCoupons = pricingPolicyVersion >= 2
     ? (promotionQuote?.subtotal === totals.subtotal ? promotionQuote.coupons : [])
     : (appliedCoupon?.validated_subtotal === totals.subtotal ? [appliedCoupon] : []);
-  const pricingReady = pricingPolicyVersion < 2 || totals.subtotal === 0 ||
-    (promotionQuote?.subtotal === totals.subtotal && !pricingError);
+  const pricingReady = siteConfigReady && (pricingPolicyVersion < 2 || totals.subtotal === 0 ||
+    (promotionQuote?.subtotal === totals.subtotal && !pricingError));
   const retryPromotions = useCallback(() => setPromotionRefresh(value => value + 1), []);
 
   const totalItems = useMemo(() => items.reduce((s, i) => s + i.quantity, 0), [items]);
@@ -241,7 +251,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    if (!storageReady) return;
+    if (!storageReady || !siteConfigReady) return;
     const subtotal = totals.subtotal;
     const candidate = manualCode || bestAutomaticCoupon(availableCoupons, subtotal)?.code;
     if (pricingPolicyVersion >= 2) {
@@ -288,7 +298,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (validationRequest.current === request) setCouponPending(false);
     });
     return () => { ++validationRequest.current; };
-  }, [totals.subtotal, manualCode, availableCoupons, storageReady, isOpen, validateCode, pricingPolicyVersion, promotionRefresh]);
+  }, [totals.subtotal, manualCode, availableCoupons, storageReady, siteConfigReady, isOpen, validateCode, pricingPolicyVersion, promotionRefresh]);
 
   const applyCouponCode = useCallback(async (input: string) => {
     const code = normalizeCouponCode(input);
@@ -449,7 +459,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <CartContext.Provider value={{
       items, isOpen, appliedCoupon: appliedCoupon?.validated_subtotal === totals.subtotal ? appliedCoupon : null, siteConfig, availableCoupons: availableCoupons.filter(isAutomaticCoupon),
-      appliedCoupons, manualCouponCode: manualCode, pricingPolicyVersion, pricingReady, pricingError, retryPromotions,
+      appliedCoupons, manualCouponCode: manualCode, pricingPolicyVersion, pricingReady, pricingError: siteConfigError || pricingError, retryPromotions,
       totals, totalItems, freeShippingProgress, remainingForFreeShipping,
       nextCoupon, remainingForNextCoupon,
       addToCart, removeFromCart, updateQuantity, clearCart,
