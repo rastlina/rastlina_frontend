@@ -73,6 +73,12 @@ it('applies and removes a manually typed code while preserving all products and 
   expect(screen.getByLabelText('PhonePe, Google Pay and CRED UPI')).toBeVisible();
   expect(input).toHaveValue('');
   expect(input).not.toHaveFocus();
+  const celebration = screen.getByText('DIWALI10 applied!').closest('.reward-milestone-popup')!;
+  expect(celebration).toBeVisible();
+  fireEvent.animationEnd(celebration.querySelector('span')!);
+  expect(screen.getByText('DIWALI10 applied!')).toBeVisible();
+  fireEvent.animationEnd(celebration);
+  expect(screen.queryByText('DIWALI10 applied!')).not.toBeInTheDocument();
   const discounts = screen.getByRole('region', { name: 'Applied discounts' });
   expect(discounts).toHaveTextContent('Promo code — DIWALI10');
   expect(discounts).toHaveTextContent('Automatic — 10% OFF');
@@ -88,5 +94,6 @@ it('keeps invalid text editable and preserves the previous quote after a rejecte
   fireEvent.submit(input.closest('form')!);
   await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Invalid promo code.'));
   expect(input).toHaveFocus(); expect(input).toHaveValue('INVALID');
+  expect(screen.queryByText('INVALID applied!')).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Checkout — ₹1,023.30' })).toBeEnabled();
 });

@@ -11,6 +11,7 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState(false);
   const [expanded, setExpanded] = useState(!compact);
+  const [celebration, setCelebration] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (compact && expanded) inputRef.current?.focus({ preventScroll: true });
@@ -21,8 +22,10 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
     if (!code.trim() || busy || couponPending || pricingReady === false) return;
     setBusy(true);
     setMessage('');
+    setCelebration(null);
     try {
       await applyCouponCode(code);
+      setCelebration(code.trim().toUpperCase());
       setCode('');
       setError(false);
       setMessage(pricingPolicyVersion >= 2 ? 'Promo code applied. Eligible automatic savings are included.' : 'Promo code applied. One offer per order.');
@@ -36,6 +39,13 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
 
   return (
     <section className={`border-y border-gray-100 p-4 ${compact ? 'cart-promo-section' : 'space-y-2'}`} aria-label="Promo codes">
+      {celebration && <span className="reward-milestone-popup" role="status" aria-live="polite"
+        onAnimationEnd={event => { if (event.target === event.currentTarget) setCelebration(null); }}>
+        <span className="text-[#CDA85C] motion-safe:animate-[reward-confetti_900ms_ease-out_1]">✦</span>
+        <span className="text-[#155B46] motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]">🎉</span>
+        <span className="text-[#91A96D] motion-safe:animate-[reward-confetti_900ms_ease-out_1]" style={{ animationDelay: '140ms' }}>✧</span>
+        <span>{celebration} applied!</span>
+      </span>}
       {compact && <button type="button" aria-label="Promo code" aria-expanded={expanded} aria-controls={`${inputId}-panel`}
         onClick={() => setExpanded(open => !open)} className="cart-promo-toggle">
         <span><Tag size={16} /> Promo code</span>
@@ -49,7 +59,7 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
       {(pricingPolicyVersion >= 2 ? appliedCoupons : appliedCoupon ? [appliedCoupon] : []).filter(coupon => !compact || !coupon.auto_apply).map(coupon => (
         <div key={coupon.code} className="flex items-center justify-between gap-2 rounded-lg bg-[#F0F4E8] pl-3 text-xs text-[#496000]">
           <span><strong>{coupon.code}</strong> applied · −{(pricingPolicyVersion >= 2 ? coupon.discount : totals.couponDiscount).toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-          {(!coupon.auto_apply || pricingPolicyVersion < 2) && <button type="button" onClick={() => { removeCoupon(); setMessage(''); }} aria-label="Remove promo code" className="flex min-h-11 min-w-11 items-center justify-center"><X className="h-4 w-4" /></button>}
+          {(!coupon.auto_apply || pricingPolicyVersion < 2) && <button type="button" onClick={() => { removeCoupon(); setMessage(''); setCelebration(null); }} aria-label="Remove promo code" className="flex min-h-11 min-w-11 items-center justify-center"><X className="h-4 w-4" /></button>}
         </div>
       ))}
       <form onSubmit={apply} className="cart-promo-form flex gap-2">
