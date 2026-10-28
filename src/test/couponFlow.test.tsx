@@ -5,9 +5,9 @@ import { PromoCodeInput } from '@/components/cart/PromoCodeInput';
 import { bestAutomaticCoupon, isAutomaticCoupon, normalizeCoupon, validatedCoupon } from '@/utils/couponPolicy';
 import { calculateCartTotals } from '@/utils/cartCalculations';
 
-const mocks = vi.hoisted(() => ({ active: vi.fn(), validate: vi.fn(), config: vi.fn() }));
+const mocks = vi.hoisted(() => ({ active: vi.fn(), validate: vi.fn(), config: vi.fn(), quote: vi.fn() }));
 vi.mock('@/services/api', () => ({ storeService: {
-  getActiveCoupons: mocks.active, validateCoupon: mocks.validate, getSiteConfig: mocks.config,
+  getActiveCoupons: mocks.active, validateCoupon: mocks.validate, getSiteConfig: mocks.config, getPromotionQuote: mocks.quote,
 } }));
 const definitions = [
   { code: 'DIWALI10', discount_type: 'percentage' as const, value: 10, min_order_value: 199 },
@@ -106,4 +106,61 @@ describe('coupon eligibility and non-stacking', () => {
     await act(async () => { resolveOld!({ success: true, code: '10% OFF' }); });
     expect(cart.appliedCoupon).toBeNull(); expect(cart.totals.couponDiscount).toBe(0);
   });
+});
+
+function modernQuote(subtotal: number, code = '') {
+  const isCreator = code === 'INFLU';
+  const selected = [
+    ...(code ? [{ ...definitions.find(c => c.code === code)!, auto_apply: false }] : []),
+    ...(!isCreator && subtotal >= 999 && code !== '10% OFF' ? [{ ...definitions[2], auto_apply: true }] : []),
+  ];
+  let left = subtotal;
+  const rows = selected.map(c => {
+    const discount = Math.min(left, c.discount_type === 'fixed' ? c.value : Math.round(subtotal * c.value) / 100);
+    left -= discount;
+    return { ...c, discount, free_shipping: isCreator, staff_only: isCreator,
+      min_order_value: isCreator ? 0 : c.min_order_value, shipping_discount: isCreator && subtotal < 499 ? 99 : 0 };
+  });
+  const discount = rows.reduce((sum, c) => sum + c.discount, 0);
+  const shipping = isCreator || subtotal >= 499 ? 0 : 99;
+  return { policy_version: 2, subtotal, applied_discounts: rows, coupon_discount: discount,
+    shipping_discount: isCreator && subtotal < 499 ? 99 : 0, shipping_fee: shipping, tax: 0,
+    total: Math.round((subtotal - discount + shipping) * 100) / 100 };
+}
+function modernConfig() {
+  mocks.config.mockResolvedValue({ free_shipping_threshold: 499, shipping_fee: 99, tax_percentage: 0, promotion_policy_version: 2 });
+  mocks.quote.mockImplementation(async (subtotal, code) => modernQuote(subtotal, code));
+}
+
+it('combines DIWALI10 and automatic 10% only after the backend advertises policy 2', async () => {
+  modernConfig(); start(2274);
+  await waitFor(() => expect(cart.pricingReady && cart.appliedCoupons.length).toBe(1));
+  await act(async () => { await cart.applyCouponCode('DIWALI10'); }); await settled();
+  expect(cart.appliedCoupons.map(c => c.code)).toEqual(['DIWALI10', '10% OFF']);
+  expect(cart.totals.couponDiscount).toBe(454.8);
+  expect(cart.totals.total).toBe(1819.2);
+});
+it('creator INFLU removes shipping below the public free-delivery threshold', async () => {
+  modernConfig(); start(199);
+  await waitFor(() => expect(cart.pricingPolicyVersion).toBe(2)); await settled();
+  await act(async () => { await cart.applyCouponCode('INFLU'); }); await settled();
+  expect(cart.totals.shipping).toBe(0); expect(cart.totals.shippingDiscount).toBe(99);
+  expect(cart.totals.total).toBe(20);
+  expect(cart.appliedCoupons.map(c => c.code)).toEqual(['INFLU']);
+});
+it('removing a modern manual code leaves just the automatic offer', async () => {
+  modernConfig(); start(2274);
+  await waitFor(() => expect(cart.pricingReady && cart.appliedCoupons.length).toBe(1));
+  await act(async () => { await cart.applyCouponCode('DIWALI10'); }); await settled();
+  await act(async () => { cart.removeCoupon(); }); await settled();
+  expect(cart.appliedCoupons.map(c => c.code)).toEqual(['10% OFF']);
+  expect(cart.totals.couponDiscount).toBe(227.4);
+});
+it('blocks checkout pricing on quote failure and allows a retry', async () => {
+  modernConfig(); mocks.quote.mockRejectedValueOnce(new Error('Network failure')); start(2274);
+  await waitFor(() => expect(cart.pricingError).toBeTruthy());
+  expect(cart.pricingReady).toBe(false);
+  expect(cart.totals.couponDiscount).toBe(0);
+  await act(async () => { cart.retryPromotions(); }); await settled();
+  expect(cart.pricingReady).toBe(true); expect(cart.totals.couponDiscount).toBe(227.4);
 });

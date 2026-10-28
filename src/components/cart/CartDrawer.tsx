@@ -17,7 +17,7 @@ export const CartDrawer = () => {
     isOpen, closeCart,
     items, removeFromCart, updateQuantity,
     totals, totalItems,
-    appliedCoupon, availableCoupons, couponPending,
+    appliedCoupon, appliedCoupons, availableCoupons, couponPending, pricingReady, pricingPolicyVersion,
     siteConfig,
   } = useCart();
 
@@ -56,9 +56,10 @@ export const CartDrawer = () => {
   const tenPercentCoupon = availableCoupons.find(coupon =>
     coupon.discount_type === 'percentage' && Number(coupon.value) === 10 && Number(coupon.min_order_value) === tenPercentTarget
   );
-  const tenPercentApplied = Boolean(
-    tenPercentCoupon && appliedCoupon?.code === tenPercentCoupon.code && subtotal >= tenPercentTarget
-  );
+  const tenPercentApplied = Boolean(tenPercentCoupon && subtotal >= tenPercentTarget &&
+    (pricingPolicyVersion >= 2 ? appliedCoupons?.some(c => c.code === tenPercentCoupon.code) : appliedCoupon?.code === tenPercentCoupon.code));
+  const shippingWaiver = appliedCoupons?.find(coupon => coupon.free_shipping);
+  const combinedOffer = pricingPolicyVersion >= 2 && appliedCoupons?.some(c => c.code === 'DIWALI10' && c.value === 10) && tenPercentApplied;
   const rewardStage = subtotal >= tenPercentTarget
     ? 'discount-unlocked'
     : subtotal >= freeDeliveryTarget
@@ -112,12 +113,14 @@ export const CartDrawer = () => {
             {items.length > 0 && (
               <div className="border-b border-[#DCE5DA] bg-[#F2F6F0] px-4 py-3.5">
                 <p className="mb-2.5 text-xs font-medium text-[#243B31]" aria-live="polite">
-                  {subtotal < freeDeliveryTarget ? (
+                  {shippingWaiver ? (
+                    <>Free delivery applied with <strong>{shippingWaiver.code}</strong>. No minimum spend.</>
+                  ) : subtotal < freeDeliveryTarget ? (
                     <>Add <strong>{formatPrice(freeDeliveryTarget - subtotal)}</strong> more to unlock free delivery</>
                   ) : subtotal < tenPercentTarget ? (
                     <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">Congratulations! Free delivery unlocked!</strong> Add <strong>{formatPrice(tenPercentTarget - subtotal)}</strong> more to unlock 10% off</>
                   ) : tenPercentApplied ? (
-                    <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">Congratulations! Your 10% discount is applied.</strong></>
+                    <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">{combinedOffer ? 'DIWALI10 + automatic 10% off applied — 20% total savings.' : 'Congratulations! Your 10% discount is applied.'}</strong></>
                   ) : (
                     <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">10% off is eligible. Your entered promo code replaces this offer.</strong></>
                   )}
@@ -359,7 +362,7 @@ export const CartDrawer = () => {
 
                 {/* Checkout CTA */}
                 <Button
-                  disabled={couponPending}
+                  disabled={couponPending || pricingReady === false}
                   onClick={() => { closeCart(); navigate('/checkout'); }}
                   className="flex w-full items-center justify-center gap-2 bg-[#1A3831] hover:bg-[#112520] text-white min-h-12 rounded-xl px-2 font-bold text-xs sm:text-sm uppercase tracking-wide transition-colors shadow-md"
                 >

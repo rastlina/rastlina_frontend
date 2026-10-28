@@ -14,6 +14,7 @@ import {
   clampQuantity,
 } from '@/utils/cartCalculations';
 import { storeService } from '@/services/api';
+import { parsePromotionQuote, type PromotionQuote } from '@/utils/promotionQuote';
 import { bestAutomaticCoupon, isAutomaticCoupon, normalizeCoupon, normalizeCouponCode, validatedCoupon } from '@/utils/couponPolicy';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -49,12 +50,19 @@ interface SiteConfig {
   free_shipping_threshold: number;
   shipping_fee: number;
   tax_percentage: number;
+  promotion_policy_version?: number;
 }
 
 interface CartContextType {
   items: CartItem[];
   isOpen: boolean;
   appliedCoupon: AppliedCoupon | null;
+  appliedCoupons: AppliedCoupon[];
+  manualCouponCode: string | null;
+  pricingPolicyVersion: number;
+  pricingReady: boolean;
+  pricingError: string | null;
+  retryPromotions: () => void;
   siteConfig: SiteConfig;
   availableCoupons: AvailableCoupon[];
 
@@ -127,6 +135,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [promotionQuote, setPromotionQuote] = useState<PromotionQuote | null>(null);
+  const [pricingError, setPricingError] = useState<string | null>(null);
+  const [promotionRefresh, setPromotionRefresh] = useState(0);
   const [manualCode, setManualCode] = useState<string | null>(null);
   const [couponPending, setCouponPending] = useState(false);
   const validationRequest = useRef(0);
@@ -164,6 +175,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           free_shipping_threshold: Number(cfg.free_shipping_threshold ?? 999),
           shipping_fee: Number(cfg.shipping_fee ?? 0),
           tax_percentage: Number(cfg.tax_percentage ?? 0),
+          promotion_policy_version: Number(cfg.promotion_policy_version ?? 1),
         });
       }
     }).catch(() => {});
@@ -180,18 +192,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ── Totals ────────────────────────────────────────────────────────────────
 
-  const totals = useMemo(() => calculateCartTotals(
-    items.map(i => ({
-      price: i.price,
-      original_price: i.originalPrice,
-      quantity: i.quantity,
-      stock: i.stock,
-    })),
-    appliedCoupon,
-    siteConfig.free_shipping_threshold,
-    siteConfig.shipping_fee,
-    siteConfig.tax_percentage,
-  ), [items, appliedCoupon, siteConfig]);
+  const pricingPolicyVersion = siteConfig.promotion_policy_version ?? 1;
+  const totals = useMemo(() => {
+    const base = calculateCartTotals(items.map(i => ({ price: i.price, original_price: i.originalPrice,
+      quantity: i.quantity, stock: i.stock })), pricingPolicyVersion >= 2 ? null : appliedCoupon,
+      siteConfig.free_shipping_threshold, siteConfig.shipping_fee, siteConfig.tax_percentage);
+    if (pricingPolicyVersion < 2 || !promotionQuote || promotionQuote.subtotal !== base.subtotal) return base;
+    return { ...base, couponDiscount: promotionQuote.couponDiscount, shippingDiscount: promotionQuote.shippingDiscount,
+      shipping: promotionQuote.shipping, tax: promotionQuote.tax, total: promotionQuote.total,
+      totalSavings: base.itemSavings + promotionQuote.couponDiscount + promotionQuote.shippingDiscount };
+  }, [items, appliedCoupon, siteConfig, pricingPolicyVersion, promotionQuote]);
+  const appliedCoupons = pricingPolicyVersion >= 2
+    ? (promotionQuote?.subtotal === totals.subtotal ? promotionQuote.coupons : [])
+    : (appliedCoupon?.validated_subtotal === totals.subtotal ? [appliedCoupon] : []);
+  const pricingReady = pricingPolicyVersion < 2 || totals.subtotal === 0 ||
+    (promotionQuote?.subtotal === totals.subtotal && !pricingError);
+  const retryPromotions = useCallback(() => setPromotionRefresh(value => value + 1), []);
 
   const totalItems = useMemo(() => items.reduce((s, i) => s + i.quantity, 0), [items]);
 
@@ -228,6 +244,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!storageReady) return;
     const subtotal = totals.subtotal;
     const candidate = manualCode || bestAutomaticCoupon(availableCoupons, subtotal)?.code;
+    if (pricingPolicyVersion >= 2) {
+      const request = ++validationRequest.current;
+      setAppliedCoupon(null);
+      setPromotionQuote(null);
+      setPricingError(null);
+      if (subtotal <= 0) { setManualCode(null); setCouponPending(false); return; }
+      setCouponPending(true);
+      storeService.getPromotionQuote(subtotal, manualCode || '').then(raw => {
+        if (validationRequest.current !== request) return;
+        const quote = parsePromotionQuote(raw, subtotal);
+        setPromotionQuote(quote);
+        setAppliedCoupon(quote.coupons.find(coupon => coupon.code === manualCode) || quote.coupons[0] || null);
+      }).catch(error => {
+        if (validationRequest.current !== request) return;
+        setPricingError(error?.error || 'Unable to check your offers. Please retry.');
+        if (manualCode && error?.error) {
+          setManualCode(null);
+          toast.info(error.error);
+        }
+      }).finally(() => {
+        if (validationRequest.current === request) setCouponPending(false);
+      });
+      return () => { ++validationRequest.current; };
+    }
     const request = ++validationRequest.current;
     setAppliedCoupon(null);
     if (!candidate || subtotal <= 0) {
@@ -248,7 +288,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (validationRequest.current === request) setCouponPending(false);
     });
     return () => { ++validationRequest.current; };
-  }, [totals.subtotal, manualCode, availableCoupons, storageReady, isOpen, validateCode]);
+  }, [totals.subtotal, manualCode, availableCoupons, storageReady, isOpen, validateCode, pricingPolicyVersion, promotionRefresh]);
 
   const applyCouponCode = useCallback(async (input: string) => {
     const code = normalizeCouponCode(input);
@@ -257,11 +297,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const request = ++validationRequest.current;
     setCouponPending(true);
     try {
-      const coupon = await validateCode(code, subtotal);
+      const quote = pricingPolicyVersion >= 2
+        ? parsePromotionQuote(await storeService.getPromotionQuote(subtotal, code), subtotal) : null;
+      const coupon = quote ? quote.coupons.find(c => c.code.toUpperCase() === code) : await validateCode(code, subtotal);
+      if (!coupon) throw { error: 'This promo code is no longer available.' };
       if (request !== validationRequest.current || subtotal !== currentSubtotal.current) {
         throw { error: 'Your cart changed. Please apply the code again.' };
       }
       setManualCode(code);
+      if (quote) setPromotionQuote(quote);
+      setPricingError(null);
       setAppliedCoupon(coupon);
     } catch (error) {
       if (request === validationRequest.current) setAvailableCoupons(previous => [...previous]);
@@ -269,7 +314,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       if (request === validationRequest.current) setCouponPending(false);
     }
-  }, [validateCode]);
+  }, [validateCode, pricingPolicyVersion]);
 
   // ── Next coupon nudge ─────────────────────────────────────────────────────
   // The nearest coupon threshold the user hasn't yet reached
@@ -320,7 +365,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return prev;
         }
         const updated = [...prev];
-        updated[existIdx] = { ...existing, quantity: newQty };
+        updated[existIdx] = { ...existing, product, quantity: newQty, price, originalPrice, stock, variantId };
         return updated;
       }
 
@@ -391,8 +436,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const removeCoupon = useCallback(() => {
     ++validationRequest.current;
     setManualCode(null);
+    setPromotionQuote(null);
     setAppliedCoupon(null);
+    setPricingError(null);
     setCouponPending(false);
+    setPromotionRefresh(value => value + 1);
   }, []);
   const updateSiteConfig = useCallback((config: Partial<SiteConfig>) => {
     setSiteConfig(prev => ({ ...prev, ...config }));
@@ -401,6 +449,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <CartContext.Provider value={{
       items, isOpen, appliedCoupon: appliedCoupon?.validated_subtotal === totals.subtotal ? appliedCoupon : null, siteConfig, availableCoupons: availableCoupons.filter(isAutomaticCoupon),
+      appliedCoupons, manualCouponCode: manualCode, pricingPolicyVersion, pricingReady, pricingError, retryPromotions,
       totals, totalItems, freeShippingProgress, remainingForFreeShipping,
       nextCoupon, remainingForNextCoupon,
       addToCart, removeFromCart, updateQuantity, clearCart,
