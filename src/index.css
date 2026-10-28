@@ -310,6 +310,7 @@
   display: inline-flex;
   align-items: center;
   gap: .45rem;
+  width: max-content;
   max-width: calc(100vw - 2rem);
   padding: .75rem 1rem;
   border: 1px solid rgba(205, 168, 92, .55);
@@ -337,6 +338,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reward-milestone-popup { animation-duration: 1ms; }
+  .reward-milestone-popup { animation: none; opacity: 1; transform: translateX(-50%); }
   .reward-total-value { animation: none; }
 }

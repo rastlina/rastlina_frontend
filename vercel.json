@@ -14,6 +14,7 @@
     { "source": "/3d", "destination": "/", "permanent": true }
   ],
   "headers": [
+    { "source": "/api/store/:path*", "headers": [{ "key": "Cache-Control", "value": "private, no-store" }] },
     {
       "source": "/journey/assets/:clip((?:story-0[1-5]-(?:mobile|web)-v3|(?:living-room|bedroom|office)-(?:mobile|web)-v6).mp4)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
@@ -40,6 +41,10 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/store/config/", "destination": "/api/promotions?action=config" },
+    { "source": "/api/store/active-coupons/", "destination": "/api/promotions?action=active" },
+    { "source": "/api/store/promotion-quote/", "destination": "/api/promotions?action=quote" },
+    { "source": "/api/store/validate-coupon/", "destination": "/api/promotions?action=validate" },
     {
       "source": "/",
       "destination": "/index.html"

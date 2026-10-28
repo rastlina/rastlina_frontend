@@ -164,3 +164,14 @@ it('blocks checkout pricing on quote failure and allows a retry', async () => {
   await act(async () => { cart.retryPromotions(); }); await settled();
   expect(cart.pricingReady).toBe(true); expect(cart.totals.couponDiscount).toBe(227.4);
 });
+
+it('blocks fallback shipping and promotions when delivery rules cannot load, then recovers on retry', async () => {
+  modernConfig(); mocks.config.mockRejectedValueOnce(new Error('Network failure')); start(1137);
+  await waitFor(() => expect(cart.pricingError).toContain('Unable to load delivery'));
+  expect(cart.pricingReady).toBe(false);
+  expect(mocks.quote).not.toHaveBeenCalled();
+  await act(async () => { cart.retryPromotions(); });
+  await waitFor(() => expect(cart.pricingReady).toBe(true));
+  expect(cart.pricingPolicyVersion).toBe(2);
+  expect(cart.totals.total).toBe(1023.3);
+});
