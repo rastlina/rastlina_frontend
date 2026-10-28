@@ -5,10 +5,11 @@ import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { PromoCodeInput } from './PromoCodeInput';
+import { AppliedDiscounts } from './AppliedDiscounts';
 
 const formatPrice = (v: number) =>
   new Intl.NumberFormat('en-IN', {
-    style: 'currency', currency: 'INR', maximumFractionDigits: 0,
+    style: 'currency', currency: 'INR', maximumFractionDigits: 2,
   }).format(v);
 
 export const CartDrawer = () => {
@@ -337,13 +338,7 @@ export const CartDrawer = () => {
   )}
 </div>
 
-  {totals.couponDiscount > 0 && appliedCoupon && (
-    <div className="flex justify-between text-sm font-semibold text-[#667D00]">
-      <span>Discount — {appliedCoupon.discount_type === 'percentage' ? `${Number(appliedCoupon.value)}% off` : appliedCoupon.code}</span>
-      <span>−{formatPrice(totals.couponDiscount)}</span>
-    </div>
-  )}
-
+  <AppliedDiscounts />
 
   <div className="flex justify-between items-center pt-3 mt-2 border-t border-gray-100">
     <span className="font-bold text-[#1A3831] text-base">

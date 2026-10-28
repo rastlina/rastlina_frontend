@@ -3,7 +3,7 @@ import { Loader2, Tag, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 
 export function PromoCodeInput() {
-  const { appliedCoupon, applyCouponCode, removeCoupon, couponPending } = useCart();
+  const { appliedCoupon, applyCouponCode, removeCoupon, couponPending, totals } = useCart();
   const inputId = useId();
   const messageId = `${inputId}-message`;
   const [code, setCode] = useState('');
@@ -34,7 +34,7 @@ export function PromoCodeInput() {
       </label>
       {appliedCoupon && (
         <div className="flex items-center justify-between gap-2 rounded-lg bg-[#F0F4E8] pl-3 text-xs text-[#496000]">
-          <span><strong>{appliedCoupon.code}</strong> applied</span>
+          <span><strong>{appliedCoupon.code}</strong> applied · −{totals.couponDiscount.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           <button type="button" onClick={() => { removeCoupon(); setMessage(''); }} aria-label="Remove promo code" className="flex min-h-11 min-w-11 items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
       )}
