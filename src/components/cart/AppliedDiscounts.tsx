@@ -7,7 +7,7 @@ const money = (amount: number) => new Intl.NumberFormat('en-IN', {
 }).format(amount);
 
 /** Show deductions separately from eligible offers so the total never implies stacking. */
-export function AppliedDiscounts() {
+export function AppliedDiscounts({ compact = false }: { compact?: boolean }) {
   const { appliedCoupon, appliedCoupons, pricingPolicyVersion = 1, totals, availableCoupons, couponPending } = useCart();
   const automaticOffer = bestAutomaticCoupon(availableCoupons, totals.subtotal);
   const applied = appliedCoupon && totals.couponDiscount > 0 ? appliedCoupon : null;
@@ -23,11 +23,11 @@ export function AppliedDiscounts() {
     const reduction = totals.couponDiscount + (totals.shippingDiscount || 0);
     if (!coupons.length && !couponPending) return null;
     return (
-      <section aria-label="Applied discounts" className="space-y-2 border-y border-gray-100 py-3 text-xs sm:text-sm">
+      <section aria-label="Applied discounts" className={compact ? 'space-y-1.5 border-y border-gray-100 py-2 text-xs' : 'space-y-2 border-y border-gray-100 py-3 text-xs sm:text-sm'}>
         <h3 className="font-bold text-[#1A3831]">Applied discounts</h3>
         {coupons.map(coupon => <div key={coupon.code} className="space-y-1 text-[#667D00]">
           {coupon.discount > 0 && <div className="flex items-start justify-between gap-3 font-semibold">
-            <span className="min-w-0 break-words">{coupon.auto_apply ? 'Automatic discount' : 'Promo code'} — {coupon.code}</span>
+            <span className="min-w-0 break-words">{coupon.auto_apply ? (compact ? 'Automatic' : 'Automatic discount') : 'Promo code'} — {coupon.code}</span>
             <span className="shrink-0 tabular-nums">−{money(coupon.discount)}</span>
           </div>}
           {coupon.free_shipping && <div className="flex items-start justify-between gap-3 font-semibold">
