@@ -7,8 +7,6 @@
 .cart-drawer-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; scroll-padding: 16px 0; -webkit-overflow-scrolling: touch; }
 .cart-rewards { padding: 12px 18px 10px; background: #f2f6f0; border-bottom: 1px solid #dce5da; }
 .cart-rewards p { margin: 0 0 10px; font-size: 12px; line-height: 1.45; }
-.cart-progress { height: 4px; overflow: hidden; border-radius: 20px; background: #d5ded2; }
-.cart-progress > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #1a6b50, #94b56c); transition: width .25s; }
 .cart-reward-labels { display: flex; justify-content: space-between; gap: 12px; margin-top: 7px; color: #637568; font-size: 10px; line-height: 1.4; }
 .cart-product-line { display: grid; grid-template-columns: 72px minmax(0, 1fr) 32px; column-gap: 10px; row-gap: 6px; padding: 14px 16px; border-bottom: 1px solid #edf0ea; }
 .cart-product-image { grid-row: 1 / 3; display: flex; align-items: center; justify-content: center; width: 72px; height: 82px; overflow: hidden; border-radius: 9px; background: #f8f7f4; }
@@ -49,7 +47,6 @@
 .cart-promo-form { scroll-margin: 18px 0; }
 @media (max-width: 639px) { .shopping-cart-drawer { max-width: none; } }
 @media (max-height: 480px) { .cart-secure-checkout { display: none; } .cart-checkout-footer { padding-top: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom)); } }
-@media (prefers-reduced-motion: reduce) { .cart-progress > span { transition: none; } }
 .cart-promo-section { padding-top: 7px; padding-bottom: 7px; }
 .cart-promo-toggle, .cart-promo-toggle > span { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .cart-promo-toggle { width: 100%; min-height: 44px; font-size: 13px; font-weight: 600; text-align: left; }
@@ -62,15 +59,3 @@
 .cart-payable > s { margin-left: auto; color: #98a29a; font-size: 11px; }
 .cart-payable > strong { margin-left: auto; font-size: 22px; }
 .cart-checkout-footer .cart-checkout-button { gap: 12px; font-size: 13px; font-weight: 750; text-transform: uppercase; }
-/* Restore the truck, reward milestones and celebration in a shorter strip. */
-.cart-progress { position: relative; height: 26px; overflow: visible; background: transparent; }
-.cart-progress .cart-progress-track, .cart-progress .cart-progress-fill { position: absolute; top: 11px; left: 0; height: 4px; border-radius: 20px; }
-.cart-progress .cart-progress-track { width: 100%; background: #d5ded2; }
-.cart-progress .cart-progress-fill { background: linear-gradient(90deg, #1a6b50, #94b56c); transition: width 700ms ease-out; }
-.cart-progress .cart-delivery-milestone, .cart-progress .cart-progress-truck, .cart-progress .cart-discount-milestone { position: absolute; top: 1px; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 2px solid #f2f6f0; border-radius: 50%; background: #155b46; color: white; }
-.cart-progress .cart-delivery-milestone, .cart-progress .cart-progress-truck { transform: translateX(-50%); }
-.cart-progress .cart-progress-truck { transition: left 700ms ease-out; box-shadow: 0 2px 6px #155b4626; }
-.cart-progress .cart-discount-milestone { right: 0; background: #fff; color: #155b46; border: 1px solid #155b46; font-size: 8px; font-weight: 800; }
-.cart-progress .cart-discount-milestone.is-unlocked { background: #155b46; color: #fff; animation: reward-pop 650ms ease-out both; }
-@media (prefers-reduced-motion: reduce) { .cart-progress .cart-progress-fill, .cart-progress .cart-progress-truck { transition: none; } .cart-progress .is-unlocked { animation: none; } }
-.cart-progress .cart-discount-milestone { top: -3px; width: 32px; height: 32px; }

@@ -1,4 +1,4 @@
-import { Check, CheckCircle2, Minus, Plus, ShoppingBag, Trash2, Truck, X } from 'lucide-react';
+import { CheckCircle2, Minus, Plus, ShoppingBag, Trash2, Truck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -94,10 +94,10 @@ export const CartDrawer = () => {
           <Button onClick={closeCart} asChild className="h-12 rounded-lg bg-[#1A3831] px-8 text-white"><Link to="/shop">Browse Products</Link></Button>
         </div> : <>
           <section className="cart-rewards" aria-label="Cart rewards">
-            {pricingReady && (tenPercentApplied || totals.shipping === 0) && <span key={rewardStage} className="reward-milestone-popup" role="status" aria-live="polite">
+            {pricingReady && (tenPercentApplied || (subtotal >= freeDeliveryTarget && totals.shipping === 0)) && <span key={rewardStage} className="reward-milestone-popup" role="status" aria-live="polite">
               <span className="text-[#CDA85C] motion-safe:animate-[reward-confetti_900ms_ease-out_1]">✦</span>
               <span className="text-[#155B46] motion-safe:animate-[reward-pop_650ms_cubic-bezier(.2,.8,.2,1)_1]">🎉</span>
-              <span className="text-[#91A96D] motion-safe:animate-[reward-confetti_900ms_ease-out_1]">✧</span>
+              <span className="text-[#91A96D] motion-safe:animate-[reward-confetti_900ms_ease-out_1]" style={{ animationDelay: '140ms' }}>✧</span>
               <span>{tenPercentApplied ? '10% discount unlocked!' : 'Free delivery unlocked!'}</span>
             </span>}
             <p aria-live="polite">{shippingWaiver ? <><strong>Free shipping with {shippingWaiver.code}.</strong> No minimum spend.</>
@@ -105,15 +105,22 @@ export const CartDrawer = () => {
               : subtotal < tenPercentTarget ? <><strong>Free delivery unlocked.</strong> Add {formatPrice(tenPercentTarget - subtotal)} for 10% off.</>
               : tenPercentApplied ? <strong>{combinedOffer ? 'DIWALI10 + automatic 10% off applied — 20% total savings.' : 'Automatic 10% off applied. Free delivery unlocked.'}</strong>
               : <strong>{pricingReady ? 'Free delivery unlocked. Your selected offer is applied.' : 'Checking delivery and available offers…'}</strong>}</p>
-            <div className="cart-progress" role="img" aria-label={`Cart progress ${Math.round(progressPercent)} percent toward 10 percent savings at ${tenPercentTarget}`}>
-              <span className="cart-progress-track" />
-              <span className="cart-progress-fill" style={{ width: `${progressPercent}%` }} />
-              <span className="cart-delivery-milestone" style={{ left: `${Math.min(80, freeDeliveryTarget / tenPercentTarget * 100)}%` }} aria-hidden="true">
-                {pricingReady && totals.shipping === 0 ? <Check size={12} /> : <Truck size={12} />}
-              </span>
-              {progressPercent < 100 && <span className="cart-progress-truck" style={{ left: `${Math.min(92, Math.max(4, progressPercent))}%` }} aria-hidden="true"><Truck size={13} /></span>}
-              <span className={`cart-discount-milestone ${tenPercentApplied ? 'is-unlocked' : ''}`} aria-hidden="true">10%</span>
-            </div>
+            <div className="relative mx-1 h-8" role="img" aria-label={`Cart progress ${Math.round(progressPercent)} percent toward 10 percent savings at ${tenPercentTarget}`}>
+                  <div className="absolute inset-x-0 top-3.5 h-1.5 rounded-full bg-[#D5DED2]" />
+                  <div
+                    className="absolute left-0 top-3.5 h-1.5 rounded-full bg-gradient-to-r from-[#1A6B50] to-[#94B56C] transition-[width] duration-700 ease-out"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                  <span className="absolute left-1/2 top-[11px] h-3 w-3 -translate-x-1/2 rounded-full border-2 border-[#F2F6F0] bg-[#A7B99A]" aria-hidden="true" />
+                  <span
+                    className="absolute top-0 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-[#F2F6F0] bg-[#155B46] text-white shadow-md transition-[left] duration-700 ease-out"
+                    style={{ left: `${Math.min(96, Math.max(4, progressPercent))}%` }}
+                    aria-hidden="true"
+                  >
+                    <Truck className="h-4 w-4" />
+                  </span>
+                  <span className={`absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-extrabold shadow-sm transition-colors duration-500 ${subtotal >= tenPercentTarget ? 'border-[#155B46] bg-[#155B46] text-white' : 'border-[#155B46] bg-white text-[#155B46]'}`}>10%</span>
+                </div>
             <div className="cart-reward-labels"><span>Free delivery · {formatPrice(freeDeliveryTarget)}</span><span>10% off · {formatPrice(tenPercentTarget)}</span></div>
           </section>
 
@@ -164,7 +171,7 @@ export const CartDrawer = () => {
       {items.length > 0 && <footer className="cart-checkout-footer">
         <div className="cart-payable"><span>To Pay</span>
           {totals.couponDiscount > 0 && <s>{formatPrice(totals.total + totals.couponDiscount + (totals.shippingDiscount || 0))}</s>}
-          <strong aria-live="polite">{formatPrice(totals.total)}</strong>
+          <strong key={totals.total} className="reward-total-value" aria-live="polite">{formatPrice(totals.total)}</strong>
         </div>
           <Button disabled={couponPending || pricingReady === false} aria-label={`Checkout — ${formatPrice(totals.total)}`}
             onClick={() => { closeCart(); navigate('/checkout'); }} className="cart-checkout-button">
