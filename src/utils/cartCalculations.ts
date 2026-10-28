@@ -16,6 +16,7 @@ export interface CartTotals {
   shipping: number;         // 0 if free shipping unlocked
   tax: number;              // tax amount (if applicable)
   total: number;            // final amount to pay
+  shippingDiscount?: number;
   totalSavings: number;     // itemSavings + couponDiscount
 }
 
@@ -26,6 +27,10 @@ export interface AppliedCoupon {
   min_order_value: number;
   discount: number;
   validated_subtotal?: number;
+  auto_apply?: boolean;
+  free_shipping?: boolean;
+  staff_only?: boolean;
+  shipping_discount?: number;
 }
 // ─── Core Calculations ────────────────────────────────────────────────────────
 

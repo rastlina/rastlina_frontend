@@ -126,7 +126,7 @@ function Field({
 
 export default function CheckoutPage() {
   const {
-    items, totals, appliedCoupon, removeCoupon, couponPending,
+    items, totals, appliedCoupon, removeCoupon, couponPending, pricingReady, pricingPolicyVersion, manualCouponCode,
     siteConfig, clearCart,
   } = useCart();
   const { user: authUser } = useAuth();
@@ -174,10 +174,7 @@ export default function CheckoutPage() {
 
     const afterDiscounts = Math.max(0, subtotal - couponDiscount - exchangeDiscount);
 
-    const freeThreshold = siteConfig.free_shipping_threshold;
-    const shippingFlat = siteConfig.shipping_fee;
-    const shipping =
-      freeThreshold > 0 && subtotal >= freeThreshold ? 0 : shippingFlat;
+    const shipping = totals.shipping;
 
     const tax =
       siteConfig.tax_percentage > 0
@@ -226,9 +223,17 @@ export default function CheckoutPage() {
     return null;
   };
 
+  const finishOrder = (orderId: number, message: string) => {
+    clearCart(); removeCoupon(); setAppliedExchange(null); setExchangeInput('');
+    toast.success(message);
+    setIsPlacingOrder(false);
+    if (isLoggedIn) navigate('/profile?tab=orders');
+    else setOrderSuccess({ orderId, guestEmail: guestForm.email, isGuest: true });
+  };
+
   // ── Place order ────────────────────────────────────────────────────────────
   const handlePlaceOrder = async () => {
-    if (couponPending || isPlacingOrder) return;
+    if (couponPending || !pricingReady || isPlacingOrder) return;
     setCheckoutError(null);
 
     // Address validation
@@ -267,7 +272,8 @@ export default function CheckoutPage() {
         quantity: item.quantity,
       })),
       payment_method: 'Online',
-      coupon_code: appliedCoupon?.code ?? '',
+      coupon_code: pricingPolicyVersion >= 2 ? manualCouponCode || '' : appliedCoupon?.code ?? '',
+      promotion_policy_version: pricingPolicyVersion,
       exchange_code: appliedExchange?.code ?? '',
       accepted_return_policy: acceptedPolicy,
       // Address fields
@@ -285,14 +291,17 @@ export default function CheckoutPage() {
     };
 
     try {
+      const res = await orderService.createOrder(orderPayload);
+      if (res.payment_required === false) {
+        finishOrder(res.order_id, 'Order confirmed. No payment is required.');
+        return;
+      }
       const razorpayReady = await loadRazorpayCheckout();
       if (!razorpayReady) {
         toast.error('Payment gateway failed to load. Please check your connection and try again.');
         setIsPlacingOrder(false);
         return;
       }
-
-      const res = await orderService.createOrder(orderPayload);
 
       const rzpOptions = {
         key: res.key,
@@ -324,24 +333,7 @@ export default function CheckoutPage() {
       eventID: `purchase_${res.order_id}_${response.razorpay_payment_id}`,
     });
 
-    // Clear everything after successful payment
-    clearCart();
-    removeCoupon();
-    setAppliedExchange(null);
-    setExchangeInput('');
-
-    toast.success('🎉 Payment successful! Your order is confirmed.');
-
-    if (isLoggedIn) {
-      navigate('/profile?tab=orders');
-    } else {
-      setOrderSuccess({
-        orderId: res.order_id,
-        guestEmail: guestForm.email,
-        isGuest: true,
-      });
-      setIsPlacingOrder(false);
-    }
+    finishOrder(res.order_id, '🎉 Payment successful! Your order is confirmed.');
   } catch {
             toast.error(
               'Payment verification failed. Contact support with payment ID: ' +
@@ -829,7 +821,7 @@ export default function CheckoutPage() {
               {/* CTA */}
               <button
                 onClick={handlePlaceOrder}
-                disabled={couponPending || isPlacingOrder}
+                disabled={couponPending || !pricingReady || isPlacingOrder}
                 className={[
                   'w-full py-4 rounded-xl font-extrabold text-sm uppercase tracking-widest',
                   'transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md',
@@ -841,12 +833,12 @@ export default function CheckoutPage() {
                 {isPlacingOrder ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
                 ) : (
-                  <>Pay {fmt(checkoutCalc.total)} <ChevronRight className="h-4 w-4" /></>
+                  checkoutCalc.total === 0 ? <>Place order — no payment required</> : <>Pay {fmt(checkoutCalc.total)} <ChevronRight className="h-4 w-4" /></>
                 )}
               </button>
 
               <p className="text-center text-[10px] text-gray-400 font-medium">
-                Secured by Razorpay · Your payment data is encrypted
+                {checkoutCalc.total === 0 ? 'Your discount covers this order.' : 'Secured by Razorpay · Your payment data is encrypted'}
               </p>
             </div>
           </div>

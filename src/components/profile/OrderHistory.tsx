@@ -11,12 +11,14 @@ import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Package, Clock, CheckCircle, Truck, XCircle,
+  Package, Clock, CheckCircle, Truck, XCircle, Loader2,
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
   RotateCcw, AlertCircle, Gift, ShoppingBag, X, ArrowLeftRight,
   type LucideIcon,
 } from 'lucide-react';
-import { orderService } from '@/services/api';
+import { orderService, storeService } from '@/services/api';
+import { useCart } from '@/contexts/CartContext';
+import { prepareReorder } from '@/utils/reorder';
 import { toast } from 'sonner';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -29,6 +31,7 @@ interface OrderItem {
   id: number;
   product_name: string;
   product_slug?: string;
+  variant_id?: number | null;
   variant_label?: string;
   image_url?: string;
   price: number | string;
@@ -408,6 +411,26 @@ interface OrderCardProps {
 
 function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }: OrderCardProps) {
   const [cancelling, setCancelling] = useState(false);
+  const [reordering, setReordering] = useState(false);
+  const { items: cartItems, addToCart } = useCart();
+  const handleBuyAgain = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (reordering) return;
+    setReordering(true);
+    try {
+      const result = await prepareReorder(order.items, storeService.getProductBySlug, cartItems);
+      for (const line of result.lines) {
+        addToCart(line.product, line.selectedSize, line.selectedColor, line.selectedColorHex,
+          line.price, line.originalPrice, line.stock, line.variantId, line.quantity);
+      }
+      if (result.lines.length) toast.success('Available items added to your cart at current prices.');
+      if (result.unavailable.length) toast.info(`Unavailable or changed options: ${result.unavailable.join(', ')}. Choose alternatives from the shop.`);
+      if (result.adjusted.length) toast.info('Some quantities were limited to the stock available.');
+      if (!result.lines.length && !result.unavailable.length) toast.info('These items are already in your cart up to the available stock.');
+    } catch {
+      toast.error('Unable to load these products. Please try again.');
+    } finally { setReordering(false); }
+  };
   const [showExchangeModal, setShowExchangeModal] = useState(false);
   const [showReturnModal, setShowReturnModal] = useState(false);
 
@@ -503,6 +526,14 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
             <div className="flex-shrink-0 mt-0.5">
               {expanded ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
             </div>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button type="button" onClick={handleBuyAgain} disabled={reordering || !order.items?.length}
+              aria-label={`Buy again order #${order.id}`}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#1A3831]/20 px-4 text-sm font-bold text-[#1A3831] hover:bg-[#F0F4E8] disabled:opacity-50">
+              {reordering ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+              {reordering ? 'Adding…' : 'Buy again'}
+            </button>
           </div>
         </div>
 

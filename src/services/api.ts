@@ -183,6 +183,9 @@ export const storeService = {
 
   getSiteConfig: async () => (await api.get('/store/config/')).data,
 
+  getPromotionQuote: async (orderTotal: number, couponCode = '') =>
+    (await api.post('/store/promotion-quote/', { order_total: orderTotal, coupon_code: couponCode })).data,
+
   getActiveCoupons: async () => (await api.get('/store/active-coupons/')).data,
 
   validateCoupon: async (code: string, orderTotal: number) =>

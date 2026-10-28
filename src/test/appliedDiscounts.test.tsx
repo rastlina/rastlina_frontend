@@ -65,3 +65,25 @@ it('hides the block when no promotion applies or is eligible', () => {
   render(<AppliedDiscounts />);
   expect(screen.queryByRole('region', { name: 'Applied discounts' })).not.toBeInTheDocument();
 });
+
+
+it('lists both actual public deductions and their combined total with policy 2', () => {
+  const diwali = { ...validatedCoupon({ ...automatic, code: 'DIWALI10' }, 2274), discount: 227.4, auto_apply: false };
+  const auto = { ...validatedCoupon(automatic, 2274), discount: 227.4, auto_apply: true };
+  state.cart = { ...state.cart, pricingPolicyVersion: 2, appliedCoupons: [diwali, auto], totals: { subtotal: 2274, couponDiscount: 454.8 } };
+  render(<AppliedDiscounts />);
+  expect(screen.getByText('Promo code — DIWALI10')).toBeVisible();
+  expect(screen.getByText('Automatic discount — 10% OFF')).toBeVisible();
+  expect(screen.getAllByText('−₹227.40')).toHaveLength(2);
+  expect(screen.getByText('−₹454.80')).toBeVisible();
+  expect(screen.queryByText(/Eligible/)).not.toBeInTheDocument();
+});
+it('lists creator product and shipping savings as separate deductions', () => {
+  const creator = { ...validatedCoupon({ ...automatic, code: 'INFLU' }, 199), discount: 179, auto_apply: false, free_shipping: true, shipping_discount: 99 };
+  state.cart = { ...state.cart, pricingPolicyVersion: 2, appliedCoupons: [creator], totals: { subtotal: 199, couponDiscount: 179, shippingDiscount: 99 } };
+  render(<AppliedDiscounts />);
+  expect(screen.getByText('Promo code — INFLU')).toBeVisible();
+  expect(screen.getByText('Shipping discount — INFLU')).toBeVisible();
+  expect(screen.getByText('−₹99.00')).toBeVisible();
+  expect(screen.getByText('−₹278.00')).toBeVisible();
+});
