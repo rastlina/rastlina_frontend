@@ -55,7 +55,10 @@ useEffect(() => {
   const switchTab = (tab: Tab) => {
     setActiveTab(tab);
     setSearchParams({ tab });
-    if (tab === 'orders') setCurrentPage(1);
+    if (tab === 'orders') {
+      setCurrentPage(1);
+      if (activeTab === 'orders') void loadOrders(1);
+    }
   };
 
   useEffect(() => {
