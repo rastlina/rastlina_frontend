@@ -297,7 +297,8 @@ export const CartDrawer = () => {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="cart-checkout-footer shrink-0 max-h-[55dvh] overflow-y-auto border-t border-gray-100 bg-white px-5 py-4 space-y-3">
+              <div className="cart-checkout-footer flex min-h-0 shrink-0 max-h-[55dvh] flex-col gap-3 overflow-hidden border-t border-gray-100 bg-white px-5 py-4">
+                <div className="cart-price-details min-h-0 overflow-y-auto space-y-3">
                 {/* Savings summary */}
                 {totalSaved > 0 && (
                   <div className="flex items-center justify-between py-2 px-3 bg-[#F0F4E8] rounded-xl">
@@ -360,6 +361,8 @@ export const CartDrawer = () => {
 
 </div>
 
+                </div>
+                <div className="shrink-0 space-y-3">
                 {/* Checkout CTA */}
                 <Button
                   disabled={couponPending || pricingReady === false}
@@ -392,6 +395,7 @@ export const CartDrawer = () => {
                 <p className="text-center text-[10px] text-gray-400 font-medium">
                   Secure checkout · Razorpay encrypted
                 </p>
+                </div>
               </div>
             )}
           </div>
