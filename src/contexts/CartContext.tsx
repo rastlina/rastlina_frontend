@@ -1,7 +1,7 @@
 // src/contexts/CartContext.tsx
 import React, {
   createContext, useContext, useState,
-  useCallback, useEffect, useMemo,
+  useCallback, useEffect, useMemo, useRef,
 } from 'react';
 import { toast } from 'sonner';
 import {
@@ -12,9 +12,9 @@ import {
   calculateRemainingForCoupon,
   calculateFreeShippingProgress,
   clampQuantity,
-  canIncrement,
 } from '@/utils/cartCalculations';
 import { storeService } from '@/services/api';
+import { bestAutomaticCoupon, isAutomaticCoupon, normalizeCoupon, normalizeCouponCode, validatedCoupon } from '@/utils/couponPolicy';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -42,6 +42,7 @@ export interface AvailableCoupon {
   discount_type: 'percentage' | 'fixed';
   value: number;
   min_order_value: number;
+  auto_apply?: boolean;
 }
 
 interface SiteConfig {
@@ -81,7 +82,8 @@ interface CartContextType {
   removeFromCart: (productId: number, sizeName: string, colorName: string) => void;
   updateQuantity: (productId: number, sizeName: string, colorName: string, quantity: number) => void;
   clearCart: () => void;
-  applyCoupon: (coupon: AppliedCoupon) => void;
+  applyCouponCode: (code: string) => Promise<void>;
+  couponPending: boolean;
   removeCoupon: () => void;
   openCart: () => void;
   closeCart: () => void;
@@ -99,7 +101,7 @@ const DEFAULT_CONFIG: SiteConfig = {
 };
 
 const CART_KEY = 'rastlina_cart_v2';
-const COUPON_KEY = 'rastlina_coupon_v2';
+const COUPON_KEY = 'rastlina_manual_coupon_v3';
 
 function loadCart(): CartItem[] {
   try {
@@ -108,10 +110,12 @@ function loadCart(): CartItem[] {
   } catch { return []; }
 }
 
-function loadCoupon(): AppliedCoupon | null {
+function loadCoupon(): string | null {
   try {
-    const raw = localStorage.getItem(COUPON_KEY);
-    return raw ? JSON.parse(raw) : null;
+    // Legacy entries may have been applied without consent. Never restore them.
+    localStorage.removeItem('rastlina_coupon_v2');
+    const saved = JSON.parse(localStorage.getItem(COUPON_KEY) || 'null');
+    return typeof saved === 'string' ? normalizeCouponCode(saved) : null;
   } catch { return null; }
 }
 
@@ -123,13 +127,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [manualCode, setManualCode] = useState<string | null>(null);
+  const [couponPending, setCouponPending] = useState(false);
+  const validationRequest = useRef(0);
+  const currentSubtotal = useRef(0);
   const [storageReady, setStorageReady] = useState(false);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(DEFAULT_CONFIG);
   const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>([]);
 
   useEffect(() => {
     setItems(loadCart());
-    setAppliedCoupon(loadCoupon());
+    setManualCode(loadCoupon());
     setStorageReady(true);
   }, []);
 
@@ -143,12 +151,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!storageReady) return;
     try {
-      if (appliedCoupon) localStorage.setItem(COUPON_KEY, JSON.stringify(appliedCoupon));
+      if (manualCode) localStorage.setItem(COUPON_KEY, JSON.stringify(manualCode));
       else localStorage.removeItem(COUPON_KEY);
     } catch {}
-  }, [appliedCoupon, storageReady]);
+  }, [manualCode, storageReady]);
 
-  // Fetch site config + available coupons on mount
+  // Refresh admin rules on mount and whenever the drawer visibility changes.
   useEffect(() => {
     storeService.getSiteConfig().then((cfg: any) => {
       if (cfg) {
@@ -163,12 +171,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Fetch active coupons — used for auto-apply + nudge banners
     storeService.getActiveCoupons().then((coupons: AvailableCoupon[]) => {
       // Sort ascending by min_order_value so we find the cheapest to unlock first
-      const sorted = [...(coupons || [])].sort(
+      const sorted = [...(coupons || [])].map(normalizeCoupon).sort(
         (a, b) => a.min_order_value - b.min_order_value
       );
       setAvailableCoupons(sorted);
     }).catch(() => {});
-  }, []);
+  }, [isOpen]);
 
   // ── Totals ────────────────────────────────────────────────────────────────
 
@@ -202,70 +210,72 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [totals.subtotal],
   );
 
-  // ── Auto-apply best eligible coupon ──────────────────────────────────────
-  // When subtotal changes: find best applicable coupon (highest discount) and apply if none applied
-  useEffect(() => {
-    if (availableCoupons.length === 0) return;
-    const subtotal = totals.subtotal;
+  currentSubtotal.current = totals.subtotal;
 
-    // Find all coupons the cart qualifies for
-    const eligible = availableCoupons.filter(c => subtotal >= c.min_order_value);
-    if (eligible.length === 0) {
-      // If previously auto-applied coupon no longer qualifies, remove it
-      if (appliedCoupon) {
-        const stillValid = availableCoupons.find(c => c.code === appliedCoupon.code);
-        if (stillValid && subtotal < stillValid.min_order_value) {
-          setAppliedCoupon(null);
-          toast.info('Coupon removed — minimum order requirement no longer met.');
-        }
-      }
+  // Always validate with the server: dates, active status, usage limit and
+  // minimum spend are authoritative there. A manual selection replaces auto.
+  const validateCode = useCallback(async (code: string, subtotal: number) => {
+    const [response, definitions] = await Promise.all([
+      storeService.validateCoupon(code, subtotal), storeService.getActiveCoupons(),
+    ]);
+    const definition = (definitions as AvailableCoupon[]).map(normalizeCoupon)
+      .find(c => c.code === normalizeCouponCode(response.code || code));
+    if (!definition || subtotal < definition.min_order_value || !Number.isFinite(definition.value) || !Number.isFinite(definition.min_order_value) || response.success !== true) throw { error: 'This promo code is no longer available.' };
+    return validatedCoupon(definition, subtotal);
+  }, []);
+
+  useEffect(() => {
+    if (!storageReady) return;
+    const subtotal = totals.subtotal;
+    const candidate = manualCode || bestAutomaticCoupon(availableCoupons, subtotal)?.code;
+    const request = ++validationRequest.current;
+    setAppliedCoupon(null);
+    if (!candidate || subtotal <= 0) {
+      setCouponPending(false);
+      if (subtotal <= 0) setManualCode(null);
       return;
     }
-
-    // Pick best coupon: highest flat discount value
-    const best = eligible.reduce((prev, curr) => {
-      const prevDiscount = prev.discount_type === 'percentage'
-        ? (subtotal * prev.value) / 100
-        : prev.value;
-      const currDiscount = curr.discount_type === 'percentage'
-        ? (subtotal * curr.value) / 100
-        : curr.value;
-      return currDiscount > prevDiscount ? curr : prev;
-    });
-
-    // Only auto-apply if user hasn't manually applied something better
-    const bestDiscount = best.discount_type === 'percentage'
-  ? Math.round((subtotal * Number(best.value)) / 100)
-  : Number(best.value);
-
-const currentDiscount = appliedCoupon
-  ? (
-      appliedCoupon.discount_type === 'percentage'
-        ? Math.round((subtotal * Number(appliedCoupon.value)) / 100)
-        : Number(appliedCoupon.value)
-    )
-  : 0;
-
-if (!appliedCoupon || currentDiscount < bestDiscount) {
-setAppliedCoupon({
-  code: best.code,
-  discount_type: best.discount_type,
-  value: Number(best.value),
-  min_order_value: Number(best.min_order_value),
-  discount: bestDiscount,
-});
-      if (!appliedCoupon) {
-        toast.success(`🎉 Coupon ${best.code} applied automatically!`, { duration: 3000 });
+    setCouponPending(true);
+    validateCode(candidate, subtotal).then(coupon => {
+      if (validationRequest.current === request) setAppliedCoupon(coupon);
+    }).catch((error) => {
+      if (validationRequest.current !== request) return;
+      if (manualCode) {
+        setManualCode(null);
+        toast.info(error?.error || 'Promo code removed. Please check its requirements.');
       }
+    }).finally(() => {
+      if (validationRequest.current === request) setCouponPending(false);
+    });
+    return () => { ++validationRequest.current; };
+  }, [totals.subtotal, manualCode, availableCoupons, storageReady, isOpen, validateCode]);
+
+  const applyCouponCode = useCallback(async (input: string) => {
+    const code = normalizeCouponCode(input);
+    const subtotal = currentSubtotal.current;
+    if (!code || subtotal <= 0) throw { error: 'Add an item and enter a promo code.' };
+    const request = ++validationRequest.current;
+    setCouponPending(true);
+    try {
+      const coupon = await validateCode(code, subtotal);
+      if (request !== validationRequest.current || subtotal !== currentSubtotal.current) {
+        throw { error: 'Your cart changed. Please apply the code again.' };
+      }
+      setManualCode(code);
+      setAppliedCoupon(coupon);
+    } catch (error) {
+      if (request === validationRequest.current) setAvailableCoupons(previous => [...previous]);
+      throw error;
+    } finally {
+      if (request === validationRequest.current) setCouponPending(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totals.subtotal, availableCoupons]);
+  }, [validateCode]);
 
   // ── Next coupon nudge ─────────────────────────────────────────────────────
   // The nearest coupon threshold the user hasn't yet reached
   const nextCoupon = useMemo((): AvailableCoupon | null => {
     const subtotal = totals.subtotal;
-    return availableCoupons.find(c => c.min_order_value > subtotal) ?? null;
+    return availableCoupons.find(c => isAutomaticCoupon(c) && c.min_order_value > subtotal) ?? null;
   }, [totals.subtotal, availableCoupons]);
 
   const remainingForNextCoupon = useMemo(() => {
@@ -378,19 +388,23 @@ setAppliedCoupon({
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
   const toggleCart = useCallback(() => setIsOpen(p => !p), []);
-  const applyCoupon = useCallback((coupon: AppliedCoupon) => setAppliedCoupon(coupon), []);
-  const removeCoupon = useCallback(() => setAppliedCoupon(null), []);
+  const removeCoupon = useCallback(() => {
+    ++validationRequest.current;
+    setManualCode(null);
+    setAppliedCoupon(null);
+    setCouponPending(false);
+  }, []);
   const updateSiteConfig = useCallback((config: Partial<SiteConfig>) => {
     setSiteConfig(prev => ({ ...prev, ...config }));
   }, []);
 
   return (
     <CartContext.Provider value={{
-      items, isOpen, appliedCoupon, siteConfig, availableCoupons,
+      items, isOpen, appliedCoupon: appliedCoupon?.validated_subtotal === totals.subtotal ? appliedCoupon : null, siteConfig, availableCoupons: availableCoupons.filter(isAutomaticCoupon),
       totals, totalItems, freeShippingProgress, remainingForFreeShipping,
       nextCoupon, remainingForNextCoupon,
       addToCart, removeFromCart, updateQuantity, clearCart,
-      applyCoupon, removeCoupon,
+      applyCouponCode, couponPending, removeCoupon,
       openCart, closeCart, toggleCart,
       updateSiteConfig, remainingForCoupon,
     }}>

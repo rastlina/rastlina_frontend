@@ -1,9 +1,10 @@
 // src/components/cart/CartDrawer.tsx
-import { X, Minus, Plus, ShoppingBag, Trash2, Truck, Tag, CheckCircle2 } from 'lucide-react';
+import { X, Minus, Plus, ShoppingBag, Trash2, Truck, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
+import { PromoCodeInput } from './PromoCodeInput';
 
 const formatPrice = (v: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -15,7 +16,7 @@ export const CartDrawer = () => {
     isOpen, closeCart,
     items, removeFromCart, updateQuantity,
     totals, totalItems,
-    appliedCoupon, removeCoupon, availableCoupons,
+    appliedCoupon, availableCoupons, couponPending,
     siteConfig,
   } = useCart();
 
@@ -48,8 +49,8 @@ export const CartDrawer = () => {
   }, [isOpen, closeCart]);
   const subtotal = totals.subtotal;
   const totalSaved = totals.totalSavings;
-  const freeDeliveryTarget = Number(siteConfig.free_shipping_threshold || 499);
-  const tenPercentTarget = 999;
+  const freeDeliveryTarget = Number(siteConfig.free_shipping_threshold ?? 499);
+  const tenPercentTarget = Number(availableCoupons.find(coupon => coupon.discount_type === 'percentage' && Number(coupon.value) === 10)?.min_order_value ?? 999);
   const progressPercent = Math.min(100, Math.max(0, (subtotal / tenPercentTarget) * 100));
   const tenPercentCoupon = availableCoupons.find(coupon =>
     coupon.discount_type === 'percentage' && Number(coupon.value) === 10 && Number(coupon.min_order_value) === tenPercentTarget
@@ -117,11 +118,11 @@ export const CartDrawer = () => {
                   ) : tenPercentApplied ? (
                     <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">Congratulations! Your 10% discount is applied.</strong></>
                   ) : (
-                    <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">Congratulations! Your cart unlocked the 10% off milestone.</strong></>
+                    <>{rewardCelebration}<strong className="text-[#155B46] motion-safe:animate-[reward-congrats_750ms_cubic-bezier(.2,.8,.2,1)_1]">10% off is eligible. Your entered promo code replaces this offer.</strong></>
                   )}
                 </p>
 
-                <div className="relative mx-1 h-8" role="img" aria-label={`Cart progress ${Math.round(progressPercent)} percent toward 10 percent savings at ₹999`}>
+                <div className="relative mx-1 h-8" role="img" aria-label={`Cart progress ${Math.round(progressPercent)} percent toward 10 percent savings at ${tenPercentTarget}`}>
                   <div className="absolute inset-x-0 top-3.5 h-1.5 rounded-full bg-[#D5DED2]" />
                   <div
                     className="absolute left-0 top-3.5 h-1.5 rounded-full bg-gradient-to-r from-[#1A6B50] to-[#94B56C] transition-[width] duration-700 ease-out"
@@ -140,7 +141,7 @@ export const CartDrawer = () => {
 
                 <div className="mt-1 flex justify-between text-[9px] font-semibold uppercase tracking-wide text-[#637568]">
                   <span>Free delivery · {formatPrice(freeDeliveryTarget)}</span>
-                  <span>10% off · ₹999</span>
+                  <span>10% off · {formatPrice(tenPercentTarget)}</span>
                 </div>
               </div>
             )}
@@ -285,13 +286,14 @@ export const CartDrawer = () => {
                       </div>
                     );
                   })}
+                  <PromoCodeInput />
                 </div>
               )}
             </div>
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="cart-checkout-footer border-t border-gray-100 bg-white px-5 py-4 space-y-3">
+              <div className="cart-checkout-footer shrink-0 max-h-[55dvh] overflow-y-auto border-t border-gray-100 bg-white px-5 py-4 space-y-3">
                 {/* Savings summary */}
                 {totalSaved > 0 && (
                   <div className="flex items-center justify-between py-2 px-3 bg-[#F0F4E8] rounded-xl">
@@ -362,6 +364,7 @@ export const CartDrawer = () => {
 
                 {/* Checkout CTA */}
                 <Button
+                  disabled={couponPending}
                   onClick={() => { closeCart(); navigate('/checkout'); }}
                   className="flex w-full items-center justify-center gap-2 bg-[#1A3831] hover:bg-[#112520] text-white min-h-12 rounded-xl px-2 font-bold text-xs sm:text-sm uppercase tracking-wide transition-colors shadow-md"
                 >
