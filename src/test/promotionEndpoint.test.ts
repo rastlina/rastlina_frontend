@@ -11,11 +11,12 @@ afterEach(() => vi.unstubAllGlobals());
 it('fetches live configuration without forwarding browser cookies or untrusted host headers', async () => {
   const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ promotion_policy_version: 2 }), { headers: { 'Content-Type': 'application/json' } }));
   vi.stubGlobal('fetch', fetch);
-  const result = await request('config', 'GET', { headers: { cookie: 'private-cookie', 'x-forwarded-host': 'preview.invalid' } });
+  const result = await request('config', 'GET', { headers: { cookie: 'private-cookie', 'x-forwarded-host': 'preview.invalid', 'x-vercel-forwarded-for': '203.0.113.5' } });
   expect(result.status).toBe(200); expect(result.headers['Cache-Control']).toBe('private, no-store');
   expect(fetch.mock.calls[0][0]).toBe('https://admin.rastlina.com/api/store/config/');
   expect(fetch.mock.calls[0][1].headers).not.toHaveProperty('cookie');
   expect(fetch.mock.calls[0][1].headers).not.toHaveProperty('x-forwarded-host');
+  expect(fetch.mock.calls[0][1].headers['X-Forwarded-For']).toBe('203.0.113.5');
 });
 it('forwards the signed-in token and quote data to the fixed backend', async () => {
   const fetch = vi.fn().mockResolvedValue(new Response('{"total":"909.60"}', { headers: { 'Content-Type': 'application/json' } }));

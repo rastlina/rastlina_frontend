@@ -73,3 +73,4 @@
 .cart-progress .cart-discount-milestone { right: 0; background: #fff; color: #155b46; border: 1px solid #155b46; font-size: 8px; font-weight: 800; }
 .cart-progress .cart-discount-milestone.is-unlocked { background: #155b46; color: #fff; animation: reward-pop 650ms ease-out both; }
 @media (prefers-reduced-motion: reduce) { .cart-progress .cart-progress-fill, .cart-progress .cart-progress-truck { transition: none; } .cart-progress .is-unlocked { animation: none; } }
+.cart-progress .cart-discount-milestone { top: -3px; width: 32px; height: 32px; }

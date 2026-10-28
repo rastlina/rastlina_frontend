@@ -1,5 +1,7 @@
+import { isIP } from 'node:net';
+
 /** Same-origin, uncached access to four read-only pricing endpoints.
- * Forward only the customer's bearer token, never browser cookies or proxy host
+ * Forward the bearer token and validated client IP, never browser cookies or host
  * headers. Django continues to authenticate and calculate all prices itself.
  */
 type RequestLike = { url?: string; method?: string; body?: unknown; headers?: Record<string, string | string[] | undefined> };
@@ -20,6 +22,11 @@ export default async function handler(request: RequestLike, response: ResponseLi
   const route = routes[action as keyof typeof routes];
   if (request.method !== route.method) { send(405, 'Method not allowed.'); return; }
   const headers: Record<string, string> = { Accept: 'application/json', 'Content-Type': 'application/json' };
+  // Vercel overwrites this header with the connecting client address. Retaining
+  // it keeps Django's per-customer throttling from grouping all shoppers under
+  // the outbound function address. Never forward arbitrary proxy-host headers.
+  const clientIp = Object.entries(request.headers || {}).find(([key]) => key.toLowerCase() === 'x-vercel-forwarded-for')?.[1];
+  if (typeof clientIp === 'string' && isIP(clientIp.trim())) headers['X-Forwarded-For'] = clientIp.trim();
   const authorization = Object.entries(request.headers || {}).find(([key]) => key.toLowerCase() === 'authorization')?.[1];
   if (authorization !== undefined) {
     if (typeof authorization !== 'string' || !authorization.startsWith('Bearer ') || authorization.length > 8192 || /[\r\n]/.test(authorization)) {
