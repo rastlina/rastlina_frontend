@@ -41,7 +41,7 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
 
   return (
     <section className={`border-y border-gray-100 p-4 ${compact ? 'cart-promo-section' : 'space-y-2'}`} aria-label="Promo codes">
-      {celebration && <RewardCelebration key={celebration.id} text={`${celebration.code} applied!`} duration={4200} />}
+      {celebration && <RewardCelebration key={celebration.id} text={`${celebration.code} applied!`} duration={4200} priority />}
       {compact && <button type="button" aria-label="Promo code" aria-expanded={expanded} aria-controls={`${inputId}-panel`}
         onClick={() => setExpanded(open => !open)} className="cart-promo-toggle">
         <span><Tag size={16} /> Promo code</span>
