@@ -18,3 +18,9 @@ it('shows the popup directly in the cart above the scrolling promo form', () => 
   expect(screen.getByRole('status').parentElement).toBe(view.container.firstElementChild);
   expect(screen.getByTestId('scroll')).not.toContainElement(screen.getByRole('status'));
 });
+
+it('keeps the entered promo confirmation above a simultaneous threshold celebration', () => {
+  render(<><RewardCelebration text="DIWALI10 applied!" priority /><RewardCelebration text="10% discount unlocked!" /></>);
+  expect(screen.getByText('DIWALI10 applied!').closest('[role="status"]')).toHaveStyle('z-index: 10000');
+  expect(screen.getByText('10% discount unlocked!').closest('[role="status"]')).not.toHaveStyle('z-index: 10000');
+});
