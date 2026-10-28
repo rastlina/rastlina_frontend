@@ -42,4 +42,5 @@ it('returns a safe retry error if the backend returns HTML or is unavailable', a
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('<h1>Private server traceback</h1>', { status: 400, headers: { 'Content-Type': 'text/html' } })));
   const result = await request();
   expect(result.status).toBe(503); expect(JSON.stringify(result)).not.toContain('traceback');
+  expect(result.body.retryable).toBe(true);
 });

@@ -16,7 +16,7 @@ const routes = {
 export default async function handler(request: RequestLike, response: ResponseLike) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
   response.setHeader('Cache-Control', 'private, no-store');
-  const send = (status: number, error: string) => response.status(status).send(JSON.stringify({ error }));
+  const send = (status: number, error: string, retryable = false) => response.status(status).send(JSON.stringify({ error, ...(retryable ? { retryable: true } : {}) }));
   const action = new URL(request.url || '/', 'https://www.rastlina.com').searchParams.get('action') || '';
   if (!Object.prototype.hasOwnProperty.call(routes, action)) { send(400, 'Unknown pricing request.'); return; }
   const route = routes[action as keyof typeof routes];
@@ -54,7 +54,8 @@ export default async function handler(request: RequestLike, response: ResponseLi
     });
     if (!upstream.headers.get('content-type')?.includes('application/json')) throw new Error('Invalid pricing response');
     const data = await upstream.json();
+    if ((upstream.status >= 500 || upstream.status === 429) && data && typeof data === 'object') data.retryable = true;
     response.status(upstream.status).send(JSON.stringify(data));
-  } catch { send(503, 'Unable to check delivery and offers. Please retry.'); }
+  } catch { send(503, 'Unable to check delivery and offers. Please retry.', true); }
   finally { clearTimeout(timeout); }
 }
