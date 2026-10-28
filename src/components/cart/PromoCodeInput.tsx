@@ -12,7 +12,8 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState(false);
   const [expanded, setExpanded] = useState(!compact);
-  const [celebration, setCelebration] = useState<string | null>(null);
+  const [celebration, setCelebration] = useState<{ code: string; id: number } | null>(null);
+  const celebrationId = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (compact && expanded) inputRef.current?.focus({ preventScroll: true });
@@ -26,7 +27,7 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
     setCelebration(null);
     try {
       await applyCouponCode(code);
-      setCelebration(code.trim().toUpperCase());
+      setCelebration({ code: code.trim().toUpperCase(), id: ++celebrationId.current });
       setCode('');
       setError(false);
       setMessage(pricingPolicyVersion >= 2 ? 'Promo code applied. Eligible automatic savings are included.' : 'Promo code applied. One offer per order.');
@@ -40,7 +41,7 @@ export function PromoCodeInput({ compact = false }: { compact?: boolean }) {
 
   return (
     <section className={`border-y border-gray-100 p-4 ${compact ? 'cart-promo-section' : 'space-y-2'}`} aria-label="Promo codes">
-      {celebration && <RewardCelebration key={celebration} text={`${celebration} applied!`} duration={4200} />}
+      {celebration && <RewardCelebration key={celebration.id} text={`${celebration.code} applied!`} duration={4200} />}
       {compact && <button type="button" aria-label="Promo code" aria-expanded={expanded} aria-controls={`${inputId}-panel`}
         onClick={() => setExpanded(open => !open)} className="cart-promo-toggle">
         <span><Tag size={16} /> Promo code</span>
