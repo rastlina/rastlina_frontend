@@ -97,3 +97,16 @@ it('keeps invalid text editable and preserves the previous quote after a rejecte
   expect(screen.queryByText('INVALID applied!')).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Checkout — ₹1,023.30' })).toBeEnabled();
 });
+
+it('replays the celebration when the same valid code is applied again', async () => {
+  start(); const input = await ready();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'DIWALI10' } });
+      fireEvent.submit(input.closest('form')!);
+    });
+    await waitFor(() => expect(screen.getByText('DIWALI10 applied!')).toBeVisible());
+    fireEvent.animationEnd(screen.getByText('DIWALI10 applied!').closest('.reward-milestone-popup')!);
+    expect(screen.queryByText('DIWALI10 applied!')).not.toBeInTheDocument();
+  }
+});
