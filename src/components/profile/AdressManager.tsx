@@ -265,7 +265,7 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
 
 
   return (
-    <div className="space-y-4">
+    <div className={isCheckoutMode ? "space-y-4" : "account-addresses space-y-4"}>
       <div className="flex items-center justify-between">
         <h3 className="font-display font-bold text-foreground">
           {isCheckoutMode ? 'Shipping Address' : 'Saved Addresses'}
@@ -302,7 +302,7 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
             <div
               key={addr.id}
               onClick={() => isCheckoutMode && onSelect(addr)}
-              className={`relative border rounded-xl p-4 transition-all ${
+              className={`${isCheckoutMode ? "" : "account-address-card"} relative border rounded-xl p-4 transition-all ${
                 isCheckoutMode ? 'cursor-pointer' : ''
               } ${isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border/30 hover:border-border'}`}
             >
@@ -334,7 +334,7 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
               </div>
 
 
-              <div className="flex gap-3 mt-3 pl-7">
+              <div className="account-address-actions flex gap-3 mt-3 pl-7">
                 <button onClick={(e) => { e.stopPropagation(); openEdit(addr); }} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
                   <Edit2 className="w-3 h-3" /> Edit
                 </button>
@@ -366,15 +366,20 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
 
 
       {showForm && (
-        <div className="border border-border/30 rounded-xl p-5 space-y-4 bg-muted/20">
+        <div className="account-address-form border border-border/30 rounded-xl p-5 space-y-4 bg-muted/20">
           <h4 className="font-semibold text-sm text-foreground">{editing ? 'Edit Address' : 'New Address'}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {formFields.map(({ key, label, full, placeholder, hint, type = 'text' }) => (
               <div key={key} className={full ? 'sm:col-span-2' : ''}>
-                <label className="block text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">
+                <label htmlFor={`address-${key}`} className="block text-[10px] font-bold text-muted-foreground mb-1 uppercase tracking-wider">
                   {label}
                 </label>
                 <input
+                  id={`address-${key}`}
+                  name={key}
+                  inputMode={key === 'phone' || key === 'zip_code' ? 'numeric' : undefined}
+                  aria-invalid={!!errors[key]}
+                  aria-describedby={errors[key] ? `address-error-${key}` : undefined}
                   type={type}
                   value={form[key]}
                   onChange={(e) => {
@@ -397,7 +402,7 @@ export default function AddressManager({ onSelect, selectedId }: Props) {
                   </span>
                 )}
                 {errors[key] && (
-                  <span className="text-[10px] text-red-500 mt-1 block font-medium">
+                  <span id={`address-error-${key}`} className="text-[10px] text-red-500 mt-1 block font-medium">
                     {errors[key]}
                   </span>
                 )}

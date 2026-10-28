@@ -1,11 +1,11 @@
 // src/pages/UserProfile.tsx
 // Complete user profile page for Rastlina.
-// Tabs: My Orders | Addresses | Account Details
+// Tabs: My Orders | Addresses | The person behind the plants
 // Order history uses the full-featured OrderHistory component.
 // Preserves existing sidebar design from the uploaded UserProfile.tsx.
 
 import { useState, useEffect, useCallback } from 'react';
-import { Package, MapPin, LogOut, ChevronRight, User as UserIcon } from 'lucide-react';
+import { Package, MapPin, LogOut, ArrowUpRight, Leaf, User as UserIcon } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService, orderService } from '@/services/api';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import AddressManager from '@/components/profile/AdressManager';
 import OrderHistory from '@/components/profile/OrderHistory';
 import ProfileDetails from '@/components/profile/ProfileDetails';
+import './account-premium.css';
 
 type Tab = 'orders' | 'addresses' | 'details';
 
@@ -54,8 +55,16 @@ useEffect(() => {
   const switchTab = (tab: Tab) => {
     setActiveTab(tab);
     setSearchParams({ tab });
-    if (tab === 'orders') loadOrders(1);
+    if (tab === 'orders') {
+      setCurrentPage(1);
+      if (activeTab === 'orders') void loadOrders(1);
+    }
   };
+
+  useEffect(() => {
+    const next = searchParams.get('tab');
+    setActiveTab(next === 'addresses' || next === 'details' ? next : 'orders');
+  }, [searchParams]);
 
   // ── Load orders ────────────────────────────────────────────────────────────
   const loadOrders = useCallback(async (page: number) => {
@@ -105,6 +114,7 @@ useEffect(() => {
       toast.success('Profile updated successfully');
     } catch {
       toast.error('Failed to update profile');
+      throw new Error('Profile update failed');
     } finally {
       setUpdating(false);
     }
@@ -127,13 +137,13 @@ useEffect(() => {
     switch (activeTab) {
       case 'orders':
         return (
-          <div className="space-y-6">
-            <div className="border-b border-gray-100 pb-6">
-              <h2 className="text-2xl font-serif font-extrabold text-gray-900 uppercase tracking-tight">
-                Order History
+          <div className="account-panel">
+            <div className="account-panel-heading">
+              <h2 className="account-section-title">
+                Your orders
               </h2>
-              <p className="text-sm text-gray-400 mt-1">
-                All your Rastlina orders in one place
+              <p className="account-section-note">
+                Track your deliveries, revisit your favourites, and bring home more green.
               </p>
             </div>
             <OrderHistory
@@ -150,13 +160,13 @@ useEffect(() => {
 
       case 'addresses':
         return (
-          <div className="space-y-6">
-            <div className="border-b border-gray-100 pb-6">
-              <h2 className="text-2xl font-serif font-extrabold text-gray-900 uppercase tracking-tight">
-                Saved Addresses
+          <div className="account-panel">
+            <div className="account-panel-heading">
+              <h2 className="account-section-title">
+                A place to grow
               </h2>
-              <p className="text-sm text-gray-400 mt-1">
-                Manage your delivery addresses
+              <p className="account-section-note">
+                Keep your delivery details ready for your next green arrival.
               </p>
             </div>
             <AddressManager />
@@ -165,13 +175,13 @@ useEffect(() => {
 
       case 'details':
         return (
-          <div className="space-y-6">
-            <div className="border-b border-gray-100 pb-6">
-              <h2 className="text-2xl font-serif font-extrabold text-gray-900 uppercase tracking-tight">
-                Account Details
+          <div className="account-panel">
+            <div className="account-panel-heading">
+              <h2 className="account-section-title">
+                The person behind the plants
               </h2>
-              <p className="text-sm text-gray-400 mt-1">
-                Update your personal information
+              <p className="account-section-note">
+                A few details to make every Rastlina visit feel like home.
               </p>
             </div>
             <ProfileDetails
@@ -187,83 +197,40 @@ useEffect(() => {
     }
   };
 
-  // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col min-h-screen bg-[#FDFDFD] pt-[140px] pb-24">
-      <div className="container-custom max-w-6xl">
-        <div className="flex flex-col lg:flex-row gap-10 items-start">
+    <div className="account-page">
+      <div className="account-container">
+        <header className="account-welcome">
+          <div className="account-welcome-copy">
+            <span className="account-eyebrow"><Leaf size={14} aria-hidden="true" /> YOUR RASTLINA</span>
+            <h1>A little green.<br /><em>A space of your own.</em></h1>
+            <p>Welcome back, {authUser.first_name || 'plant lover'}. Make yourself at home.</p>
+          </div>
+          <a className="account-shop-link" href="/shop">Find your next favourite <ArrowUpRight size={18} /></a>
+          <Leaf className="account-hero-leaf" strokeWidth={0.7} aria-hidden="true" />
+        </header>
 
-          {/* ── Sidebar ── */}
-          <aside className="w-full lg:w-[280px] flex-shrink-0 lg:sticky lg:top-40 self-start">
-            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-
-              {/* Avatar + user info */}
-              <div className="flex flex-col items-center text-center mb-8">
-                <div className="w-20 h-20 rounded-full bg-[#1A3831] text-white flex items-center justify-center font-extrabold text-2xl uppercase mb-4 shadow-lg shadow-[#1A3831]/20">
-                  {(authUser.first_name?.charAt(0) || authUser.email?.charAt(0) || '?').toUpperCase()}
-                </div>
-                <p className="font-extrabold text-sm text-gray-900 uppercase tracking-widest truncate max-w-full">
-                  {authUser.first_name || 'Member'}
-                </p>
-                <p className="text-[10px] text-gray-400 font-bold mt-1 truncate max-w-full">
-                  {authUser.email}
-                </p>
-              </div>
-
-              {/* Nav */}
-              <nav className="space-y-1.5">
-                {([
-                  { id: 'orders',    label: 'My Orders',  icon: Package,  badge: totalOrders > 0 ? totalOrders : null },
-                  { id: 'addresses', label: 'Addresses',  icon: MapPin,   badge: null },
-                  { id: 'details',   label: 'Account',    icon: UserIcon, badge: null },
-                ] as const).map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => switchTab(item.id)}
-                    className={[
-                      'w-full flex items-center justify-between px-5 py-4 rounded-2xl',
-                      'text-[10px] font-black uppercase tracking-[0.15em] transition-all',
-                      activeTab === item.id
-                        ? 'bg-black text-white shadow-xl shadow-black/10'
-                        : 'bg-transparent text-black hover:bg-gray-100',
-                    ].join(' ')}
-                  >
-                    <span className="flex items-center gap-3">
-                      <item.icon
-                        size={15}
-                        className={activeTab === item.id ? 'text-white' : 'text-black'}
-                      />
-                      {item.label}
-                      {item.badge !== null && (
-                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
-                          activeTab === item.id ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
-                        }`}>
-                          {item.badge}
-                        </span>
-                      )}
-                    </span>
-                    <ChevronRight
-                      size={14}
-                      className={activeTab === item.id ? 'opacity-100' : 'opacity-0'}
-                    />
-                  </button>
-                ))}
-
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-5 py-4 text-[10px] font-black uppercase tracking-[0.15em] text-red-500 hover:bg-red-50 rounded-2xl mt-6 transition-colors"
-                >
-                  <LogOut size={15} /> Logout
-                </button>
-              </nav>
+        <div className="account-layout">
+          <aside className="account-sidebar" aria-label="Your account">
+            <div className="account-member">
+              <span className="account-avatar" aria-hidden="true">{(authUser.first_name?.charAt(0) || authUser.email?.charAt(0) || '?').toUpperCase()}</span>
+              <div><p>{authUser.first_name || 'Rastlina member'}</p><span>Your little corner of green</span></div>
             </div>
+            <nav className="account-nav" aria-label="Account navigation">
+              {([
+                { id: 'orders', label: 'My orders', icon: Package },
+                { id: 'addresses', label: 'Addresses', icon: MapPin },
+                { id: 'details', label: 'My profile', icon: UserIcon },
+              ] as const).map(item => (
+                <button key={item.id} type="button" aria-current={activeTab === item.id ? 'page' : undefined}
+                  onClick={() => switchTab(item.id)}>
+                  <item.icon size={18} aria-hidden="true" /><span>{item.label}</span>
+                </button>
+              ))}
+            </nav>
+            <button type="button" onClick={handleLogout} className="account-logout"><LogOut size={16} /> Sign out</button>
           </aside>
-
-          {/* ── Main Content ── */}
-          <main className="flex-1 bg-white rounded-[3rem] p-8 md:p-12 border border-gray-100 shadow-sm min-h-[650px] w-full">
-            {renderContent()}
-          </main>
-
+          <main className="account-main" id="account-content">{renderContent()}</main>
         </div>
       </div>
     </div>

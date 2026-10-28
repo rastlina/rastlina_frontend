@@ -458,84 +458,37 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-
-        {/* Collapsed row */}
-        <div onClick={onToggle} className="p-5 cursor-pointer hover:bg-[#FAFAF8] transition-colors">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-[#F8F7F4] border border-gray-100">
-              {firstItem?.image_url ? (
-                <img src={firstItem.image_url} alt={firstItem.product_name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Package className="h-6 w-6 text-gray-200" />
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2 flex-wrap">
-                <div className="min-w-0">
-                  <p className="font-semibold text-gray-900 text-sm line-clamp-1">
-                    {firstItem?.product_name || `Order #${order.id}`}
-                    {order.items?.length > 1 && (
-                      <span className="text-gray-400 font-normal"> +{order.items.length - 1} more</span>
-                    )}
-                  </p>
-                  {firstItem?.variant_label && (
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">
-                      {firstItem.variant_label}
-                    </p>
-                  )}
-                </div>
-                <p className="font-extrabold text-gray-900 text-base flex-shrink-0">
-                  {fmt(order.total_amount)}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <span className="text-xs text-gray-400">
-                  #{order.id} · {fmtDate(order.created_at)}
-                </span>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${statusCfg.color}`}>
-                  <StatusIcon className="h-3 w-3" /> {statusCfg.label}
-                </span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${PAYMENT_STATUS_COLOR[order.payment_status] || 'text-gray-500 bg-gray-100'}`}>
-                  {order.payment_status}
-                </span>
-              </div>
-
-              {/* Progress bar */}
-              {!isCancelled && (
-                <div className="flex items-center gap-0.5 mt-3">
-                  {STATUS_STEPS.map((step, idx) => {
-                    const currentStep = STATUS_STEPS.indexOf(order.order_status);
-                    return (
-                      <div key={step} className="flex-1">
-                        <div className={`h-1 rounded-full transition-all duration-500 ${idx <= currentStep ? 'bg-[#667D00]' : 'bg-gray-200'}`} />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Request status badges — visible on collapsed card */}
-              <RequestBadges order={order} />
-            </div>
-
-            <div className="flex-shrink-0 mt-0.5">
-              {expanded ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
-            </div>
-          </div>
-          <div className="mt-3 flex justify-end">
-            <button type="button" onClick={handleBuyAgain} disabled={reordering || !order.items?.length}
-              aria-label={`Buy again order #${order.id}`}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#1A3831]/20 px-4 text-sm font-bold text-[#1A3831] hover:bg-[#F0F4E8] disabled:opacity-50">
-              {reordering ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-              {reordering ? 'Adding…' : 'Buy again'}
-            </button>
-          </div>
+      <article className="account-order-card">
+        <div className="account-order-meta">
+          <span>ORDER #{order.id} <span aria-hidden="true">·</span> {fmtDate(order.created_at)}</span>
+          <span className={`account-payment ${PAYMENT_STATUS_COLOR[order.payment_status] || 'text-gray-500 bg-gray-100'}`}>{order.payment_status}</span>
         </div>
+        <button type="button" onClick={onToggle} className="account-order-summary"
+          aria-expanded={expanded} aria-controls={`order-details-${order.id}`}
+          aria-label={`${expanded ? 'Hide' : 'View'} details for order #${order.id}`}>
+          <div className="account-order-photo">
+            {firstItem?.image_url ? <img src={firstItem.image_url} alt={firstItem.product_name} loading="lazy" /> : <Package aria-hidden="true" />}
+          </div>
+          <div className="account-order-description">
+            <h3>{firstItem?.product_name || `Order #${order.id}`}</h3>
+            <p>{firstItem?.variant_label || 'Your green favourites'}{order.items?.length > 1 && ` · +${order.items.length - 1} more`}</p>
+            <span className={`account-status ${statusCfg.color}`}><StatusIcon size={14} aria-hidden="true" />{statusCfg.label}</span>
+          </div>
+          <div className="account-order-price"><strong>{fmt(order.total_amount)}</strong><span>{expanded ? 'Hide details' : 'View details'} {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</span></div>
+        </button>
+        <div className="account-order-footer">
+          <div className="account-order-progress">
+            {!isCancelled && <div className="account-progress-track" aria-label={`Order status: ${statusCfg.label}`}>
+              {STATUS_STEPS.map((step, idx) => <span key={step} className={idx <= STATUS_STEPS.indexOf(order.order_status) ? 'is-complete' : ''} />)}
+            </div>}
+            <span>{isCancelled ? 'Order cancelled' : order.order_status === 'Delivered' ? 'A little green, delivered.' : 'We’re caring for your order.'}</span>
+          </div>
+          <button type="button" onClick={handleBuyAgain} disabled={reordering || !order.items?.length}
+            aria-label={`Buy again order #${order.id}`} className="account-buy-again">
+            {reordering ? <Loader2 size={16} className="animate-spin" /> : <RotateCcw size={16} />}{reordering ? 'Adding…' : 'Buy again'}
+          </button>
+        </div>
+        <RequestBadges order={order} />
 
         {/* Expanded detail */}
         <AnimatePresence>
@@ -547,7 +500,7 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
               transition={{ duration: 0.25 }}
               className="overflow-hidden"
             >
-              <div className="border-t border-gray-100 p-5 space-y-6">
+              <div id={`order-details-${order.id}`} className="account-order-details border-t border-gray-100 p-5 space-y-6">
 
                 {/* Items */}
                 <div>
@@ -737,7 +690,7 @@ function OrderCard({ order, expanded, onToggle, onCancelled, onRequestSuccess }:
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </article>
 
       <AnimatePresence>
         {showExchangeModal && (
@@ -818,7 +771,7 @@ export default function OrderHistory({
   return (
     <div className="space-y-5">
       {totalOrders > 0 && (
-        <p className="text-xs text-gray-400 font-medium">
+        <p className="account-order-count">
           {totalOrders} {totalOrders === 1 ? 'order' : 'orders'} total
         </p>
       )}
