@@ -4,6 +4,7 @@
 import axios from 'axios';
 import { catalogueKey } from '@/lib/catalogueBootstrap.mjs';
 import { serverProduct } from '@/lib/serverProduct';
+import { pricingBase } from './pricingBase';
 
 export interface BulkOrderPayload {
   name: string;
@@ -29,9 +30,12 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 const publicCatalogue = axios.create({ baseURL: '/' });
-// Four read-only promotion endpoints use our fixed same-origin Vercel rewrites.
-// Preview and production therefore load the same authoritative pricing rules.
-const pricingApi = axios.create({ baseURL: '/api/store', headers: { 'Content-Type': 'application/json' } });
+// Production keeps its direct backend connection. Previews use the fixed
+// forwarding endpoint because the backend only permits production browser origins.
+const pricingApi = axios.create({ baseURL: pricingBase(
+  typeof window === 'undefined' ? '' : window.location.hostname,
+  import.meta.env.VITE_API_URL || 'https://admin.rastlina.com/api',
+), headers: { 'Content-Type': 'application/json' } });
 
 for (const client of [api, pricingApi]) {
 client.interceptors.request.use((config) => {
