@@ -203,8 +203,8 @@ useEffect(() => {
         <header className="account-welcome">
           <div className="account-welcome-copy">
             <span className="account-eyebrow"><Leaf size={14} aria-hidden="true" /> YOUR RASTLINA</span>
-            <h1>A little green.<br /><em>A space of your own.</em></h1>
-            <p>Welcome back, {authUser.first_name || 'plant lover'}. Make yourself at home.</p>
+            <h1><span className="account-desktop-title">A little green.<br /><em>A space of your own.</em></span><span className="account-mobile-title">Your green corner.</span></h1>
+            <p>Welcome back, {authUser.first_name || 'plant lover'}. <span className="account-welcome-extra">Make yourself at home.</span></p>
           </div>
           <a className="account-shop-link" href="/shop">Find your next favourite <ArrowUpRight size={18} /></a>
           <Leaf className="account-hero-leaf" strokeWidth={0.7} aria-hidden="true" />
