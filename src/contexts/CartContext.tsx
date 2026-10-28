@@ -274,7 +274,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }).catch(error => {
         if (validationRequest.current !== request) return;
         setPricingError(error?.error || 'Unable to check your offers. Please retry.');
-        if (manualCode && error?.error) {
+        if (manualCode && error?.error && !error?.retryable) {
           setManualCode(null);
           toast.info(error.error);
         }

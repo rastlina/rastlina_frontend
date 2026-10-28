@@ -187,3 +187,20 @@ it('ignores a stale configuration failure after a newer drawer refresh succeeds'
   expect(cart.pricingReady).toBe(true);
   expect(cart.pricingError).toBeNull();
 });
+
+it('preserves the entered code through a temporary pricing outage and reapplies it on retry', async () => {
+  modernConfig(); start(1137);
+  await waitFor(() => expect(cart.pricingReady).toBe(true));
+  await act(async () => { await cart.applyCouponCode('DIWALI10'); });
+  await waitFor(() => expect(cart.totals.couponDiscount).toBe(227.4));
+  mocks.quote.mockRejectedValue({ error: 'Temporarily unavailable', retryable: true });
+  act(() => cart.retryPromotions());
+  await waitFor(() => expect(cart.pricingError).toBe('Temporarily unavailable'));
+  expect(cart.pricingReady).toBe(false);
+  expect(localStorage.getItem('rastlina_manual_coupon_v3')).toBe(JSON.stringify('DIWALI10'));
+  modernConfig();
+  act(() => cart.retryPromotions());
+  await waitFor(() => expect(cart.pricingReady).toBe(true));
+  expect(cart.appliedCoupons.map(c => c.code)).toEqual(['DIWALI10', '10% OFF']);
+  expect(cart.totals.total).toBe(909.6);
+});
