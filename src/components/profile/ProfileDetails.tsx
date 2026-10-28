@@ -36,8 +36,10 @@ export default function ProfileDetails({ user, onSave, loading = false }: Profil
   };
 
   const handleSubmit = async () => {
-    await onSave(form);
-    setIsDirty(false);
+    try {
+      await onSave(form);
+      setIsDirty(false);
+    } catch { /* Keep edits available after a failed save. */ }
   };
 
   const fields = [
@@ -56,25 +58,17 @@ export default function ProfileDetails({ user, onSave, loading = false }: Profil
   ];
 
   return (
-    <div className="space-y-6 max-w-md">
-      {/* Read-only email */}
-      <div>
-        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
-          Email Address
-        </label>
-        <div className="flex items-center gap-3 border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
-          <Mail className="h-4 w-4 text-gray-300 flex-shrink-0" />
-          <span className="text-sm text-gray-400 font-medium">{user?.email || '—'}</span>
-          <span className="ml-auto text-[10px] text-gray-300 font-bold uppercase tracking-wider">
-            Cannot change
-          </span>
-        </div>
+    <form className="account-profile-form space-y-6" onSubmit={event => { event.preventDefault(); void handleSubmit(); }}>
+      <div className="account-email">
+        <p className="text-xs mb-2">Your email</p>
+        <div className="account-email-value"><Mail size={16} className="shrink-0 mt-0.5" /><span>{user?.email || '—'}</span></div>
+        <small>This email is linked to your account.</small>
       </div>
 
       {/* Editable fields */}
-      {fields.map(({ key, label, icon: Icon, placeholder, type, required }) => (
+      <div className="account-profile-fields">{fields.map(({ key, label, icon: Icon, placeholder, type, required }) => (
         <div key={key}>
-          <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
+          <label htmlFor={`profile-${key}`} className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
             {label}{required && ' *'}
           </label>
           <div className="relative">
@@ -82,6 +76,10 @@ export default function ProfileDetails({ user, onSave, loading = false }: Profil
               <Icon className="h-4 w-4 text-gray-300" />
             </div>
             <input
+              id={`profile-${key}`}
+              name={key}
+              autoComplete={key === 'first_name' ? 'given-name' : key === 'last_name' ? 'family-name' : 'tel-national'}
+              required={required}
               type={type}
               value={(form as any)[key]}
               onChange={e => handleChange(key, e.target.value)}
@@ -90,11 +88,11 @@ export default function ProfileDetails({ user, onSave, loading = false }: Profil
             />
           </div>
         </div>
-      ))}
+      ))}</div>
 
       {/* Save button */}
       <button
-        onClick={handleSubmit}
+        type="submit"
         disabled={loading || !isDirty}
         className={[
           'flex items-center gap-2 px-8 py-3 rounded-xl font-extrabold text-sm transition-all',
@@ -113,6 +111,6 @@ export default function ProfileDetails({ user, onSave, loading = false }: Profil
       {!isDirty && !loading && (
         <p className="text-xs text-gray-400 font-medium">All changes saved.</p>
       )}
-    </div>
+    </form>
   );
 }
