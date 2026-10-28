@@ -175,3 +175,15 @@ it('blocks fallback shipping and promotions when delivery rules cannot load, the
   expect(cart.pricingPolicyVersion).toBe(2);
   expect(cart.totals.total).toBe(1023.3);
 });
+
+it('ignores a stale configuration failure after a newer drawer refresh succeeds', async () => {
+  modernConfig();
+  let rejectOld: (reason: Error) => void;
+  mocks.config.mockImplementationOnce(() => new Promise((_, reject) => { rejectOld = reject; }));
+  start(1137);
+  act(() => cart.openCart());
+  await waitFor(() => expect(cart.pricingReady).toBe(true));
+  await act(async () => rejectOld(new Error('Older request timed out')));
+  expect(cart.pricingReady).toBe(true);
+  expect(cart.pricingError).toBeNull();
+});
