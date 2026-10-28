@@ -1,3 +1,4 @@
+import { PromoCodeInput } from '@/components/cart/PromoCodeInput';
 // src/pages/CheckoutPage.tsx
 // Rastlina — Production checkout page.
 // Supports: guest checkout, authenticated checkout, Razorpay,
@@ -12,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { authService, orderService, storeService } from '@/services/api';
+import { authService, orderService } from '@/services/api';
 import { toast } from 'sonner';
 import AddressManager from '@/components/profile/AdressManager';
 
@@ -124,7 +125,7 @@ function Field({
 
 export default function CheckoutPage() {
   const {
-    items, totals, appliedCoupon, removeCoupon, applyCoupon,
+    items, totals, appliedCoupon, removeCoupon, couponPending,
     siteConfig, clearCart,
   } = useCart();
   const { user: authUser } = useAuth();
@@ -142,10 +143,6 @@ export default function CheckoutPage() {
       setGuestForm(prev => ({ ...prev, [field]: val })),
     [],
   );
-
-  // ── Coupon state ───────────────────────────────────────────────────────────
-  const [couponInput, setCouponInput] = useState(appliedCoupon?.code ?? '');
-  const [couponLoading, setCouponLoading] = useState(false);
 
   // ── Exchange code state ────────────────────────────────────────────────────
   const [exchangeInput, setExchangeInput] = useState('');
@@ -166,15 +163,10 @@ export default function CheckoutPage() {
     isGuest: boolean;
   } | null>(null);
 
-  // Keep coupon input in sync if CartContext auto-applies one
-  useEffect(() => {
-    if (appliedCoupon?.code) setCouponInput(appliedCoupon.code);
-  }, [appliedCoupon?.code]);
-
   // ── Price calculations ─────────────────────────────────────────────────────
   const checkoutCalc = useMemo(() => {
     const subtotal = totals.subtotal;
-    const couponDiscount = appliedCoupon?.discount ?? 0;
+    const couponDiscount = totals.couponDiscount;
     const exchangeDiscount = appliedExchange
       ? Math.min(appliedExchange.originalOrderValue, subtotal)
       : 0;
@@ -188,42 +180,13 @@ export default function CheckoutPage() {
 
     const tax =
       siteConfig.tax_percentage > 0
-        ? Math.round((afterDiscounts * siteConfig.tax_percentage) / 100)
+        ? Math.round(afterDiscounts * siteConfig.tax_percentage) / 100
         : 0;
 
-    const total = afterDiscounts + shipping + tax;
+    const total = Math.round((afterDiscounts + shipping + tax) * 100) / 100;
 
     return { subtotal, couponDiscount, exchangeDiscount, shipping, tax, total };
-  }, [totals.subtotal, appliedCoupon, appliedExchange, siteConfig]);
-
-  // ── Coupon handlers ────────────────────────────────────────────────────────
-  const handleApplyCoupon = async () => {
-    if (appliedCoupon) {
-      removeCoupon();
-      setCouponInput('');
-      return;
-    }
-    if (!couponInput.trim()) return;
-    setCouponLoading(true);
-    try {
-      const res = await storeService.validateCoupon(
-        couponInput.trim().toUpperCase(),
-        totals.subtotal,
-      );
-applyCoupon({
-  code: couponInput.trim().toUpperCase(),
-  discount_type: res.discount_type,
-  value: Number(res.value ?? 0),
-  min_order_value: Number(res.min_order_value ?? 0),
-  discount: Number(res.discount ?? 0),
-});
-      toast.success(res.message || 'Coupon applied!');
-    } catch (err: any) {
-      toast.error(err?.error || 'Invalid coupon code');
-    } finally {
-      setCouponLoading(false);
-    }
-  };
+  }, [totals, appliedExchange, siteConfig]);
 
   // ── Exchange code handlers ─────────────────────────────────────────────────
   const handleApplyExchange = async () => {
@@ -264,6 +227,7 @@ applyCoupon({
 
   // ── Place order ────────────────────────────────────────────────────────────
   const handlePlaceOrder = async () => {
+    if (couponPending || isPlacingOrder) return;
     setCheckoutError(null);
 
     // Address validation
@@ -735,45 +699,7 @@ applyCoupon({
 
               <hr className="border-gray-100" />
 
-              {/* ── Coupon Code ── */}
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
-                  Coupon Code
-                </label>
-                {appliedCoupon ? (
-                  <div className="flex items-center justify-between p-3 bg-[#F0F4E8] border border-[#667D00]/30 rounded-xl">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-[#667D00]" />
-                      <span className="text-sm font-bold text-[#667D00]">
-                        {appliedCoupon.code} — Save {fmt(appliedCoupon.discount)}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => { removeCoupon(); setCouponInput(''); }}
-                      className="text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <input
-                      value={couponInput}
-                      onChange={e => setCouponInput(e.target.value.toUpperCase())}
-                      onKeyDown={e => e.key === 'Enter' && handleApplyCoupon()}
-                      placeholder="Enter coupon code"
-                      className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-mono uppercase focus:ring-2 focus:ring-[#1A3831] focus:border-transparent outline-none transition-all"
-                    />
-                    <button
-                      onClick={handleApplyCoupon}
-                      disabled={couponLoading || !couponInput.trim()}
-                      className="px-4 py-2.5 bg-[#1A3831] text-white text-sm font-bold rounded-xl hover:bg-[#112520] disabled:opacity-50 transition-colors flex items-center gap-1.5"
-                    >
-                      {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply'}
-                    </button>
-                  </div>
-                )}
-              </div>
+              <PromoCodeInput />
 
               {/* ── Exchange Code ── */}
               <div>
@@ -910,7 +836,7 @@ applyCoupon({
               {/* CTA */}
               <button
                 onClick={handlePlaceOrder}
-                disabled={isPlacingOrder}
+                disabled={couponPending || isPlacingOrder}
                 className={[
                   'w-full py-4 rounded-xl font-extrabold text-sm uppercase tracking-widest',
                   'transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md',

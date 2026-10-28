@@ -25,6 +25,7 @@ export interface AppliedCoupon {
   value: number;
   min_order_value: number;
   discount: number;
+  validated_subtotal?: number;
 }
 // ─── Core Calculations ────────────────────────────────────────────────────────
 
@@ -49,12 +50,13 @@ export function calculateCouponDiscount(
   subtotal: number,
   coupon: AppliedCoupon | null,
 ): number {
-  if (!coupon) return 0;
+  if (!coupon || !Number.isFinite(subtotal) || subtotal <= 0) return 0;
+  if (coupon.validated_subtotal !== undefined && coupon.validated_subtotal !== subtotal) return 0;
   if (subtotal < coupon.min_order_value) return 0;
   if (coupon.discount_type === 'percentage') {
-    return Math.round((subtotal * coupon.value) / 100);
+    return Math.round(Math.min(subtotal, Math.max(0, (subtotal * coupon.value) / 100)) * 100) / 100;
   }
-  return Math.min(coupon.value, subtotal); // fixed discount can't exceed subtotal
+  return Math.max(0, Math.min(coupon.value, subtotal)); // fixed discount can't exceed subtotal
 }
 
 export function calculateShipping(
@@ -126,13 +128,10 @@ export function calculateCartTotals(
   const itemSavings = calculateItemSavings(items);
   const couponDiscount = calculateCouponDiscount(subtotal, coupon);
   const afterCoupon = Math.max(0, subtotal - couponDiscount);
-const shipping = calculateShipping(
-  afterCoupon,
-  freeShippingThreshold,
-  baseShippingFee
-);
-  const tax = taxPercentage > 0 ? Math.round((afterCoupon * taxPercentage) / 100) : 0;
-  const total = afterCoupon + shipping + tax;
+  // Match order creation: free delivery is based on the merchandise subtotal.
+  const shipping = calculateShipping(subtotal, freeShippingThreshold, baseShippingFee);
+  const tax = taxPercentage > 0 ? Math.round(afterCoupon * taxPercentage) / 100 : 0;
+  const total = Math.round((afterCoupon + shipping + tax) * 100) / 100;
   const totalSavings = itemSavings + couponDiscount;
 
   return {
