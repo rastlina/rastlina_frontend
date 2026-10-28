@@ -171,7 +171,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Refresh admin rules on mount and whenever the drawer visibility changes.
   useEffect(() => {
+    let current = true;
     storeService.getSiteConfig().then((cfg: any) => {
+      if (!current) return;
       if (cfg) {
         setSiteConfig({
           free_shipping_threshold: Number(cfg.free_shipping_threshold ?? 999),
@@ -186,18 +188,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSiteConfigError('Unable to load delivery and offers. Please retry before checkout.');
       }
     }).catch(() => {
+      if (!current) return;
       setSiteConfigReady(false);
       setSiteConfigError('Unable to load delivery and offers. Please retry before checkout.');
     });
 
     // Fetch active coupons — used for auto-apply + nudge banners
     storeService.getActiveCoupons().then((coupons: AvailableCoupon[]) => {
+      if (!current) return;
       // Sort ascending by min_order_value so we find the cheapest to unlock first
       const sorted = [...(coupons || [])].map(normalizeCoupon).sort(
         (a, b) => a.min_order_value - b.min_order_value
       );
       setAvailableCoupons(sorted);
     }).catch(() => {});
+    return () => { current = false; };
   }, [isOpen, promotionRefresh]);
 
   // ── Totals ────────────────────────────────────────────────────────────────
