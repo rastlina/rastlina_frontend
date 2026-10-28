@@ -1,4 +1,5 @@
 import { PromoCodeInput } from '@/components/cart/PromoCodeInput';
+import { AppliedDiscounts } from '@/components/cart/AppliedDiscounts';
 // src/pages/CheckoutPage.tsx
 // Rastlina — Production checkout page.
 // Supports: guest checkout, authenticated checkout, Razorpay,
@@ -8,7 +9,7 @@ import { PromoCodeInput } from '@/components/cart/PromoCodeInput';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Loader2, Tag, X, ChevronRight, ShieldCheck, Truck,
+  Loader2, X, ChevronRight, ShieldCheck, Truck,
   CheckCircle, Gift, LogIn, UserPlus, AlertCircle, Info,
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
@@ -57,7 +58,7 @@ const loadRazorpayCheckout = (): Promise<boolean> =>
 
 const fmt = (v: number) =>
   new Intl.NumberFormat('en-IN', {
-    style: 'currency', currency: 'INR', maximumFractionDigits: 0,
+    style: 'currency', currency: 'INR', maximumFractionDigits: 2,
   }).format(v);
 
 // ─── Indian states ────────────────────────────────────────────────────────────
@@ -327,7 +328,6 @@ export default function CheckoutPage() {
     clearCart();
     removeCoupon();
     setAppliedExchange(null);
-    setCouponInput('');
     setExchangeInput('');
 
     toast.success('🎉 Payment successful! Your order is confirmed.');
@@ -751,15 +751,6 @@ export default function CheckoutPage() {
                   <span className="font-medium">{fmt(checkoutCalc.subtotal)}</span>
                 </div>
 
-                {checkoutCalc.couponDiscount > 0 && appliedCoupon && (
-                  <div className="flex justify-between text-sm text-[#667D00]">
-                    <span className="flex items-center gap-1">
-                      <Tag className="h-3 w-3" /> {appliedCoupon.code}
-                    </span>
-                    <span className="font-medium">−{fmt(checkoutCalc.couponDiscount)}</span>
-                  </div>
-                )}
-
                 {checkoutCalc.exchangeDiscount > 0 && appliedExchange && (
                   <div className="flex justify-between text-sm text-amber-600">
                     <span className="flex items-center gap-1">
@@ -777,6 +768,8 @@ export default function CheckoutPage() {
                     {checkoutCalc.shipping === 0 ? 'FREE' : fmt(checkoutCalc.shipping)}
                   </span>
                 </div>
+
+                <AppliedDiscounts />
 
                 {checkoutCalc.tax > 0 && (
                   <div className="flex justify-between text-sm text-gray-600">

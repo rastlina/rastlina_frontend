@@ -61,7 +61,7 @@ describe('coupon eligibility and non-stacking', () => {
   it('applies manual INFLU from the cart entry and recalculates after quantity changes', async () => {
     start(); await waitFor(() => expect(cart.items).toHaveLength(1));
     fireEvent.change(screen.getByLabelText('Promo code'), { target: { value: ' influ ' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Apply', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
     await waitFor(() => expect(cart.appliedCoupon?.code).toBe('INFLU')); await settled();
     expect(cart.totals.total).toBe(299); expect(cart.totals.couponDiscount).toBe(179);
     expect(localStorage.getItem('rastlina_manual_coupon_v3')).toBe('"INFLU"');
