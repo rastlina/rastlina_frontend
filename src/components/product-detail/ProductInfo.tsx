@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { Star, Truck, ShieldCheck } from 'lucide-react';
-import { ProductVariant, DeliveryEstimate } from '@/pages/ProductDetail'; // Import shared types
+import { Star } from 'lucide-react';
+import { ProductVariant } from '@/pages/ProductDetail'; // Import shared types
 
 interface ProductInfoProps {
   name: string;
@@ -10,7 +10,6 @@ interface ProductInfoProps {
   originalPrice: number | null;
   discountPercentage: number;
   activeVariant: ProductVariant | null;
-  deliveryEstimates: DeliveryEstimate[];
   onShare: () => void;
   badges: {
     isNewArrival: boolean;
@@ -34,7 +33,6 @@ export const ProductInfo = ({
   originalPrice,
   discountPercentage,
   activeVariant,
-  deliveryEstimates,
   onShare,
   badges
 }: ProductInfoProps) => {
@@ -117,23 +115,6 @@ const calculatedDiscount =
             </>
           )}
         </div>
-
-        {deliveryEstimates.length > 0 && (
-          <div className="bg-[#F8F7F4] border border-gray-200 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-gray-900 font-bold mb-3">
-              <Truck className="h-5 w-5 text-primary" />
-              <h4 className="uppercase tracking-tight text-xs">Estimated Delivery</h4>
-            </div>
-            <div className="space-y-2">
-              {deliveryEstimates.map((est, i) => (
-                <div key={i} className="flex justify-between text-sm">
-                  <span className="text-gray-600">{est.region}:</span>
-                  <span className="text-gray-900 font-extrabold">{est.estimate}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </motion.div>
   );

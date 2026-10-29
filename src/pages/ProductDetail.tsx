@@ -397,7 +397,6 @@ const ProductDetail = () => {
               originalPrice={product.original_price ? Number(product.original_price) : null}
               discountPercentage={product.discount_percentage}
               activeVariant={activeVariant}
-              deliveryEstimates={product.delivery_estimates}
               onShare={handleShare}
               badges={{
                 isNewArrival: product.is_new_arrival,
