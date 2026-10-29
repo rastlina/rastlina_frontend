@@ -340,3 +340,22 @@
 @media (prefers-reduced-motion: reduce) {
   .reward-total-value { animation: none; }
 }
+
+/* Keep form entry readable on phones without disabling browser pinch zoom. */
+@media (max-width: 1023px) {
+  .product-cart-cta:not(:disabled) {
+    border: 1px solid #ffffff26;
+    background: linear-gradient(180deg, #2b574a 0%, #1a3831 100%);
+    box-shadow: 0 4px 0 #0d281f, 0 9px 18px #163d2d33, inset 0 1px 0 #ffffff33;
+  }
+  .product-cart-cta:not(:disabled):active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #0d281f, 0 3px 8px #163d2d26, inset 0 1px 0 #ffffff1f;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  :root select,
+  :root textarea {
+    font-size: 16px;
+    min-height: 44px;
+  }
+}

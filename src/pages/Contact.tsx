@@ -137,10 +137,10 @@ export default function Contact() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="group">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Full Name <span className="text-red-500">*</span></label>
+                    <label htmlFor="bulk-name" className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Full Name <span className="text-red-500">*</span></label>
                     <input 
                       type="text" 
-                      name="name" 
+                      name="name" id="bulk-name" autoComplete="name"
                       required
                       value={formData.name}
                       onChange={handleChange}
@@ -150,10 +150,10 @@ export default function Contact() {
                   </div>
 
                   <div className="group">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Phone Number <span className="text-red-500">*</span></label>
+                    <label htmlFor="bulk-phone" className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Phone Number <span className="text-red-500">*</span></label>
                     <input 
                       type="tel" 
-                      name="phone" 
+                      name="phone" id="bulk-phone" autoComplete="tel"
                       required
                       value={formData.phone}
                       onChange={handleChange}
@@ -165,10 +165,10 @@ export default function Contact() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="group">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Email Address <span className="text-red-500">*</span></label>
+                    <label htmlFor="bulk-email" className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Email Address <span className="text-red-500">*</span></label>
                     <input 
                       type="email" 
-                      name="email" 
+                      name="email" id="bulk-email" autoComplete="email"
                       required
                       value={formData.email}
                       onChange={handleChange}
@@ -178,10 +178,10 @@ export default function Contact() {
                   </div>
 
                   <div className="group">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Est. Quantity</label>
+                    <label htmlFor="bulk-quantity" className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Est. Quantity</label>
                     <input 
                       type="text" 
-                      name="quantity" 
+                      name="quantity" id="bulk-quantity" inputMode="numeric"
                       value={formData.quantity}
                       onChange={handleChange}
                       className="w-full border-b-2 border-gray-200 py-2 px-1 focus:outline-none focus:border-primary transition-colors bg-transparent placeholder-gray-300"
@@ -191,9 +191,9 @@ export default function Contact() {
               </div>
 
               <div className="group relative">
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">What are you looking for? <span className="text-red-500">*</span></label>
+                <label htmlFor="bulk-inquiry-type" className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">What are you looking for? <span className="text-red-500">*</span></label>
                 <Select onValueChange={handleTypeChange} required>
-                  <SelectTrigger className="w-full border-b-2 border-gray-200 rounded-none border-x-0 border-t-0 px-1 py-2 h-auto focus:ring-0 focus:border-primary text-base text-left font-normal bg-transparent">
+                  <SelectTrigger id="bulk-inquiry-type" className="w-full border-b-2 border-gray-200 rounded-none border-x-0 border-t-0 px-1 py-2 min-h-11 focus:ring-0 focus:border-primary text-base text-left font-normal bg-transparent">
                     <SelectValue placeholder="Select Inquiry Type" />
                   </SelectTrigger>
                   
@@ -215,9 +215,9 @@ export default function Contact() {
               </div>
 
               <div className="group">
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Message / Customization Needs</label>
+                <label htmlFor="bulk-message" className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Message / Customization Needs</label>
                 <textarea 
-                  name="message"
+                  name="message" id="bulk-message"
                   value={formData.message}
                   onChange={handleChange}
                   rows={4}

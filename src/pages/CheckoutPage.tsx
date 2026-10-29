@@ -6,7 +6,7 @@ import { AppliedDiscounts } from '@/components/cart/AppliedDiscounts';
 //           AddressManager integration, coupon codes, exchange codes,
 //           guest login encouragement banner, post-order account prompt.
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, useId } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Loader2, X, ChevronRight, ShieldCheck, Truck,
@@ -104,12 +104,18 @@ function Field({
   label: string; value: string; onChange: (v: string) => void;
   placeholder?: string; type?: string; required?: boolean; half?: boolean;
 }) {
+  const inputId = useId();
+  const autofill: Record<string, string> = { 'First Name': 'given-name', 'Last Name': 'family-name', 'Email Address': 'email', 'Phone Number': 'tel', 'Apartment / Floor': 'address-line2', City: 'address-level2', 'PIN Code': 'postal-code' };
   return (
     <div className={half ? 'col-span-1' : 'col-span-2 sm:col-span-1'}>
-      <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+      <label htmlFor={inputId} className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1.5">
         {label}{required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
       <input
+        id={inputId}
+        autoComplete={autofill[label]}
+        inputMode={label === 'PIN Code' ? 'numeric' : type === 'tel' ? 'tel' : undefined}
+        aria-required={required}
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -426,13 +432,14 @@ export default function CheckoutPage() {
             </p>
             <div className="flex gap-3">
               <Link
-                to={`/signup?email=${encodeURIComponent(orderSuccess.guestEmail)}`}
+                to="/login?mode=signup"
+                state={{ email: orderSuccess.guestEmail }}
                 className="flex-1 text-center py-2.5 bg-[#1A3831] text-white text-xs font-bold rounded-xl hover:bg-[#112520] transition-colors"
               >
                 Create Account
               </Link>
               <Link
-                to="/login?redirect=/checkout"
+                to="/shop?main_category=plants"
                 className="flex-1 text-center py-2.5 border border-gray-200 text-gray-600 text-xs font-bold rounded-xl hover:bg-gray-50 transition-colors"
               >
                 Continue Shopping
@@ -552,10 +559,13 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+                    <label htmlFor="guest-street-address" className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1.5">
                       Street Address <span className="text-red-400">*</span>
                     </label>
                     <input
+                      id="guest-street-address"
+                      autoComplete="address-line1"
+                      aria-required="true"
                       value={guestForm.address}
                       onChange={e => setGF('address')(e.target.value)}
                       placeholder="House / Flat no., Street name"
@@ -583,10 +593,13 @@ export default function CheckoutPage() {
                       placeholder="Mumbai"
                     />
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+                      <label htmlFor="guest-state" className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1.5">
                         State <span className="text-red-400">*</span>
                       </label>
                       <select
+                        id="guest-state"
+                        autoComplete="address-level1"
+                        aria-required="true"
                         value={guestForm.state}
                         onChange={e => setGF('state')(e.target.value)}
                         className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-[#1A3831] focus:border-transparent outline-none transition-all bg-white"
@@ -606,10 +619,11 @@ export default function CheckoutPage() {
                       placeholder="400001"
                     />
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+                      <label htmlFor="guest-country" className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-1.5">
                         Country
                       </label>
                       <input
+                        id="guest-country"
                         value="India"
                         disabled
                         className="w-full border border-gray-100 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50 text-gray-400 cursor-not-allowed"
@@ -695,7 +709,7 @@ export default function CheckoutPage() {
 
               {/* ── Exchange Code ── */}
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                <label htmlFor="checkout-exchange-code" className="block text-[11px] font-bold uppercase tracking-wider text-gray-600 mb-2">
                   Exchange Code
                 </label>
                 {appliedExchange ? (
@@ -710,8 +724,10 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <button
+                      type="button"
+                      aria-label="Remove exchange code"
                       onClick={() => { setAppliedExchange(null); setExchangeInput(''); }}
-                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      className="flex min-h-11 min-w-11 items-center justify-center text-gray-500 hover:text-red-500 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -719,13 +735,19 @@ export default function CheckoutPage() {
                 ) : (
                   <div className="flex gap-2">
                     <input
+                      id="checkout-exchange-code"
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      spellCheck={false}
                       value={exchangeInput}
                       onChange={e => setExchangeInput(e.target.value.toUpperCase())}
                       onKeyDown={e => e.key === 'Enter' && handleApplyExchange()}
                       placeholder="YC-XXXXXXXX"
-                      className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-mono uppercase focus:ring-2 focus:ring-[#1A3831] focus:border-transparent outline-none transition-all"
+                      className="min-w-0 flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-mono uppercase focus:ring-2 focus:ring-[#1A3831] focus:border-transparent outline-none transition-all"
                     />
                     <button
+                      type="button"
+                      aria-label="Apply exchange code"
                       onClick={handleApplyExchange}
                       disabled={exchangeLoading || !exchangeInput.trim()}
                       className="px-4 py-2.5 bg-amber-600 text-white text-sm font-bold rounded-xl hover:bg-amber-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"

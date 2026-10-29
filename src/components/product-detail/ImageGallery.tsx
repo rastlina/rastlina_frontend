@@ -167,6 +167,8 @@ export const ImageGallery = ({
               {/* Share */}
               {onShare && (
                 <button
+                  type="button"
+                  aria-label="Share this plant"
                   onClick={(e) => {
                     e.stopPropagation();
                     onShare();
@@ -189,6 +191,7 @@ className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 s
                       e.stopPropagation();
                       prev();
                     }}
+                    aria-label="Previous product image"
                     className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
                   >
                     <ChevronLeft className="h-5 w-5 text-gray-800" />
@@ -199,6 +202,7 @@ className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 s
                       e.stopPropagation();
                       next();
                     }}
+                    aria-label="Next product image"
                     className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
                   >
                     <ChevronRight className="h-5 w-5 text-gray-800" />
@@ -245,7 +249,8 @@ className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 s
                   e.stopPropagation();
                   prev();
                 }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md z-10"
+                aria-label="Previous product image"
+                className="absolute left-3 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md z-10"
               >
                 <ChevronLeft className="h-4 w-4 text-gray-800" />
               </button>
@@ -258,7 +263,8 @@ className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 s
                   e.stopPropagation();
                   next();
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md z-10"
+                aria-label="Next product image"
+                className="absolute right-3 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-md z-10"
               >
                 <ChevronRight className="h-4 w-4 text-gray-800" />
               </button>
@@ -281,6 +287,7 @@ className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 s
           >
             {/* Close */}
             <button
+              aria-label="Close image viewer"
               className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2.5 z-10 transition-colors"
               onClick={() => setLightboxOpen(false)}
             >
@@ -290,6 +297,7 @@ className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 s
             {/* Prev */}
             {images.length > 1 && (
               <button
+                aria-label="Previous enlarged image"
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-white/10 hover:bg-white/20 rounded-full p-3 z-10 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -318,6 +326,7 @@ className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 s
             {/* Next */}
             {images.length > 1 && (
               <button
+                aria-label="Next enlarged image"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-white/10 hover:bg-white/20 rounded-full p-3 z-10 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();

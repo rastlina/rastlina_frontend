@@ -3,7 +3,7 @@ import { useId, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Droplets, Sun, Thermometer, Ruler, PawPrint,
-  Check, Leaf, ShieldCheck,
+  Check, Leaf, Sprout,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ApiProductDetail } from '@/pages/ProductDetail';
@@ -11,6 +11,7 @@ import type { ApiProductDetail } from '@/pages/ProductDetail';
 interface ProductTabsProps {
   product: ApiProductDetail;
   compact?: boolean;
+  showDescription?: boolean;
 }
 
 type TabId = 'description' | 'care' | 'included';
@@ -21,25 +22,21 @@ const tabVariants = {
   exit: { opacity: 0, y: -8, transition: { duration: 0.15 } },
 };
 
-export const ProductTabs = ({ product, compact = false }: ProductTabsProps) => {
-  const [activeTab, setActiveTab] = useState<TabId>('description');
+export const ProductTabs = ({ product, compact = false, showDescription = true }: ProductTabsProps) => {
+  const [activeTab, setActiveTab] = useState<TabId>(showDescription ? 'description' : 'care');
   const tabId = useId();
 
-  // Only show tabs with content
-// Only show tabs with content
+  // The universal pot tip keeps Care Guide useful even without structured fields.
   const tabs = ([
     {
       id: 'description',
       label: 'Description',
-      hasContent: !!product.description,
+      hasContent: showDescription && !!product.description,
     },
     {
       id: 'care',
       label: 'Care Guide',
-      hasContent: !!(
-        product.sunlight || product.watering || product.temperature ||
-        product.growth_rate || product.care_instructions_list?.length
-      ),
+      hasContent: true,
     },
     {
       id: 'included',
@@ -61,6 +58,12 @@ export const ProductTabs = ({ product, compact = false }: ProductTabsProps) => {
     },
     product.temperature && {
       icon: Thermometer, label: 'Temperature', value: product.temperature,
+    },
+    {
+      // Reservoir and drainage guidance: Illinois Extension, Container Drainage Options.
+      // https://extension.illinois.edu/container-gardens/container-drainage-options
+      icon: Sprout, label: 'Self-watering pot',
+      value: 'Soil draws moisture from the reservoir for roots to absorb.',
     },
     product.growth_rate && {
       icon: Ruler, label: 'Growth Rate', value: product.growth_rate,
@@ -145,10 +148,10 @@ export const ProductTabs = ({ product, compact = false }: ProductTabsProps) => {
                     {careCards.map(card => (
                       <div
                         key={card.label}
-                        className={`bg-white rounded-xl text-center border border-gray-100 ${compact ? 'p-3' : 'p-5 shadow-sm'}`}
+                        className={`min-w-0 break-words bg-white rounded-xl text-center border border-gray-100 ${compact ? 'p-3' : 'p-5 shadow-sm'}`}
                       >
                         <card.icon className="h-6 w-6 text-[#667D00] mx-auto mb-2" />
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">
+                        <p className="text-[11px] text-gray-600 font-bold uppercase tracking-wider mb-1">
                           {card.label}
                         </p>
                         <p className="font-extrabold text-gray-900 text-sm leading-tight">

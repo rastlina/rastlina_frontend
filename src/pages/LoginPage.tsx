@@ -7,12 +7,14 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  return <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-    <LoginForm />
-  </GoogleOAuthProvider>;
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  // Email sign-in must remain usable in previews or deployments without Google setup.
+  return googleClientId ? <GoogleOAuthProvider clientId={googleClientId}>
+    <LoginForm googleEnabled />
+  </GoogleOAuthProvider> : <LoginForm googleEnabled={false} />;
 }
 
-function LoginForm() {
+function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, googleLogin, signup, isLoggedIn } = useAuth();
@@ -23,14 +25,14 @@ const from =
   params.get('redirect') ||
   (location.state as any)?.from ||
   '/profile';
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(params.get('mode') !== 'signup');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    email: (location.state as { email?: string } | null)?.email || '',
     phone: '',
     password: '',
     confirmPassword: '',
@@ -175,8 +177,10 @@ const from =
             {!isLogin && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">First Name</label>
+                  <label htmlFor="account-first-name" className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">First Name</label>
                   <input
+                    id="account-first-name"
+                    autoComplete="given-name"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
@@ -186,8 +190,10 @@ const from =
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Last Name</label>
+                  <label htmlFor="account-last-name" className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Last Name</label>
                   <input
+                    id="account-last-name"
+                    autoComplete="family-name"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
@@ -199,8 +205,10 @@ const from =
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Email Address</label>
+              <label htmlFor="account-email" className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Email Address</label>
               <input
+                id="account-email"
+                autoComplete={isLogin ? 'username' : 'email'}
                 name="email"
                 type="email"
                 value={formData.email}
@@ -213,8 +221,11 @@ const from =
 
             {!isLogin && (
               <div>
-                <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Phone (optional)</label>
+                <label htmlFor="account-phone" className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Phone (optional)</label>
                 <input
+                  id="account-phone"
+                  type="tel"
+                  autoComplete="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
@@ -225,9 +236,11 @@ const from =
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Password</label>
+              <label htmlFor="account-password" className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Password</label>
               <div className="relative">
                 <input
+                  id="account-password"
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
@@ -238,8 +251,9 @@ const from =
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                  className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-stone-500 hover:text-stone-700"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -248,9 +262,11 @@ const from =
 
             {!isLogin && (
               <div>
-                <label className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Confirm Password</label>
+                <label htmlFor="account-confirm-password" className="block text-xs font-semibold text-stone-500 mb-1.5 uppercase tracking-wider">Confirm Password</label>
                 <div className="relative">
                   <input
+                    id="account-confirm-password"
+                    autoComplete="new-password"
                     name="confirmPassword"
                     type={showConfirm ? 'text' : 'password'}
                     value={formData.confirmPassword}
@@ -261,8 +277,9 @@ const from =
                   />
                   <button
                     type="button"
+                    aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                    className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center text-stone-500 hover:text-stone-700"
                   >
                     {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -290,6 +307,7 @@ const from =
             </button>
           </form>
 
+          {googleEnabled && <>
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
@@ -317,6 +335,7 @@ const from =
               }
             }}
           />
+          </>}
 
           <p className="text-center text-xs text-stone-500 mt-6">
             {isLogin ? "Don't have an account? " : 'Already have an account? '}

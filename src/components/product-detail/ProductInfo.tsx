@@ -104,12 +104,12 @@ const calculatedDiscount =
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-baseline gap-3">
-          <span className="text-4xl font-extrabold text-gray-900">{formatPrice(displayPrice)}</span>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+          <span className="whitespace-nowrap text-4xl font-extrabold text-gray-900">{formatPrice(displayPrice)}</span>
           {displayOriginalPrice && displayOriginalPrice > displayPrice && (
             <>
-              <span className="text-xl text-gray-400 line-through font-bold">{formatPrice(displayOriginalPrice)}</span>
-              <span className="bg-[#1A3831] text-white font-extrabold px-3 py-1 rounded-lg text-sm">
+              <span className="whitespace-nowrap text-xl text-gray-400 line-through font-bold">{formatPrice(displayOriginalPrice)}</span>
+              <span className="shrink-0 whitespace-nowrap bg-[#1A3831] text-white font-extrabold px-3 py-1 rounded-lg text-sm">
   Save {calculatedDiscount}%
 </span>
             </>

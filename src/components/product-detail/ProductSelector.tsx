@@ -8,6 +8,16 @@ import {
   isColorAvailableForSize,
 } from '@/utils/variantHelpers';
 
+// Keep size and pot colour choices visually consistent, including stock states.
+const optionButtonClass = (selected: boolean, available: boolean) => [
+  'relative inline-flex min-h-12 min-w-[112px] items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-extrabold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A3831] focus-visible:ring-offset-2',
+  !available
+    ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+    : selected
+    ? 'border-[#1A3831] bg-[#1A3831] text-white shadow-md'
+    : 'border-gray-200 bg-white text-gray-900 hover:border-[#1A3831] hover:text-[#1A3831]',
+].join(' ');
+
 // ─── Size Selector ────────────────────────────────────────────────────────────
 
 interface SizeSelectorProps {
@@ -48,14 +58,7 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
               onClick={() => onSelect(size.id)}
               disabled={!available}
               aria-pressed={isSelected}
-              className={[
-                'relative px-5 py-3 rounded-xl border-2 transition-all text-sm font-extrabold min-w-[80px]',
-                isSelected
-                  ? 'border-[#1A3831] bg-[#1A3831] text-white shadow-md'
-                  : available
-                  ? 'border-gray-200 bg-white text-gray-900 hover:border-[#1A3831] hover:text-[#1A3831]'
-                  : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed',
-              ].join(' ')}
+              className={optionButtonClass(isSelected, available)}
             >
               {/* Struck-through line for unavailable sizes */}
               {!available && !isSelected && (
@@ -134,15 +137,11 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
               disabled={isOutOfStock}
               aria-pressed={isSelected}
               title={isOutOfStock ? `${color.name} — Out of Stock` : color.name}
-              className={[
-                'relative inline-flex min-h-12 items-center gap-2 rounded-xl border-2 px-3 py-3 text-sm font-semibold transition-colors',
-                isSelected ? 'border-[#1A3831] bg-[#F7F7F0] text-[#1A3831]' : 'border-gray-200 bg-white text-gray-700 hover:border-[#1A3831]',
-                isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-              ].join(' ')}
+              className={optionButtonClass(isSelected, !isOutOfStock)}
             >
                 <div
                   aria-hidden="true"
-                  className="h-5 w-5 shrink-0 rounded-full border border-gray-300 shadow-inner"
+                  className="h-5 w-5 shrink-0 rounded-full border border-black/10 shadow-inner ring-2 ring-white/30"
                   style={{ backgroundColor: color.hex_code }}
                 />
 

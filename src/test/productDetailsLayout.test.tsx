@@ -40,17 +40,24 @@ it('keeps explicit backend colours and stock controls instead of creating a seco
   expect(screen.getByRole('button', { name: 'Black' })).toBeDisabled();
   fireEvent.click(screen.getByRole('button', { name: 'Ivory' })); expect(select).toHaveBeenCalledWith(2);
 });
-it('keeps description, care and included details accessible beside the selectors without changing the purchasable variant', async () => {
+it('separates the desktop description and keeps care and included details beside matching selectors without changing the purchasable variant', async () => {
   render(<HelmetProvider><MemoryRouter initialEntries={['/product/lucky-bamboo']}><Routes>
     <Route path="/product/:slug" element={<ProductDetail />} />
   </Routes></MemoryRouter></HelmetProvider>);
   expect(await screen.findByRole('button', { name: 'Ivory' })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByRole('button', { name: 'Ivory' }).className).toBe(screen.getByRole('button', { name: 'Small' }).className);
+  const description = screen.getByRole('region', { name: 'Product description' });
+  expect(description).toHaveClass('hidden', 'lg:block');
+  expect(within(description).getByText(product.description)).toBeInTheDocument();
   const tabs = screen.getByRole('tablist', { name: 'Product information' });
-  const description = within(tabs).getByRole('tab', { name: 'Description' });
-  fireEvent.keyDown(description, { key: 'ArrowRight' });
-  expect(within(tabs).getByRole('tab', { name: 'Care Guide' })).toHaveAttribute('aria-selected', 'true');
+  expect(within(tabs).queryByRole('tab', { name: 'Description' })).not.toBeInTheDocument();
+  const care = within(tabs).getByRole('tab', { name: 'Care Guide' });
+  expect(care).toHaveAttribute('aria-selected', 'true');
   expect(await screen.findByText('18–30°C')).toBeInTheDocument();
-  fireEvent.click(within(tabs).getByRole('tab', { name: "What's Included" }));
+  expect(screen.getByText('Self-watering pot')).toBeInTheDocument();
+  expect(screen.getByText('Soil draws moisture from the reservoir for roots to absorb.')).toBeInTheDocument();
+  fireEvent.keyDown(care, { key: 'ArrowRight' });
+  expect(within(tabs).getByRole('tab', { name: "What's Included" })).toHaveAttribute('aria-selected', 'true');
   expect(await screen.findByText('Self-watering pot with soil mix')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /Add to Basket/ }));
   await waitFor(() => expect(mocks.add).toHaveBeenCalledOnce());

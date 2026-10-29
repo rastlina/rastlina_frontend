@@ -380,13 +380,19 @@ const ProductDetail = () => {
       <section className="container mx-auto px-4 max-w-7xl pb-8 lg:pb-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14">
 
-          {/* Left: Image Gallery */}
-          <div className="min-w-0 lg:sticky lg:top-32 lg:self-start">
+          {/* Left: Gallery with a desktop-only description below the photos. */}
+          <div className="min-w-0 space-y-5">
             <ImageGallery
               images={displayImages}
               productName={product.name}
               onShare={handleShare}
             />
+            {product.description && (
+              <section aria-label="Product description" className="hidden lg:block rounded-2xl border border-[#DEE5DA] bg-[#FAFAF8] p-5">
+                <h2 className="mb-3 text-lg font-bold text-[#1A3831]">Description</h2>
+                <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">{product.description}</p>
+              </section>
+            )}
           </div>
 
           {/* Right: Info, selectors and product details */}
@@ -434,7 +440,7 @@ const ProductDetail = () => {
                   : 'Select a size and color to check availability.'}
               </div>
             )}
-            <ProductTabs product={product} compact />
+            <ProductTabs product={product} compact showDescription={false} />
           </div>
         </div>
       </section>

@@ -457,9 +457,9 @@ function FilterSections({
             <span>{formatINR(localPrice[0])}</span>
             <span>{formatINR(localPrice[1])}</span>
           </div>
-          <input type="range" min={filterOptions.price_range.min} max={filterOptions.price_range.max}
+          <input type="range" aria-label="Maximum price" min={filterOptions.price_range.min} max={filterOptions.price_range.max}
             value={localPrice[1]} onChange={e => setLocalPrice([localPrice[0], Number(e.target.value)])}
-            className="w-full accent-[#1A3831]" />
+            className="min-h-11 w-full accent-[#1A3831]" />
         </div>
       </FilterSection>
 
