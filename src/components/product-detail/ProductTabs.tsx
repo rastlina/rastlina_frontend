@@ -1,5 +1,5 @@
 // src/components/product-detail/ProductTabs.tsx
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Droplets, Sun, Thermometer, Ruler, PawPrint,
@@ -10,6 +10,7 @@ import type { ApiProductDetail } from '@/pages/ProductDetail';
 
 interface ProductTabsProps {
   product: ApiProductDetail;
+  compact?: boolean;
 }
 
 type TabId = 'description' | 'care' | 'included';
@@ -20,8 +21,9 @@ const tabVariants = {
   exit: { opacity: 0, y: -8, transition: { duration: 0.15 } },
 };
 
-export const ProductTabs = ({ product }: ProductTabsProps) => {
+export const ProductTabs = ({ product, compact = false }: ProductTabsProps) => {
   const [activeTab, setActiveTab] = useState<TabId>('description');
+  const tabId = useId();
 
   // Only show tabs with content
 // Only show tabs with content
@@ -47,6 +49,7 @@ export const ProductTabs = ({ product }: ProductTabsProps) => {
   ] as const).filter(t => t.hasContent);
 
   if (tabs.length === 0) return null;
+  const selectedTab = tabs.some(tab => tab.id === activeTab) ? activeTab : tabs[0].id;
 
   // Care quick-stat cards (from structured fields)
   const careCards = [
@@ -71,17 +74,33 @@ export const ProductTabs = ({ product }: ProductTabsProps) => {
   ].filter(Boolean) as Array<{ icon: LucideIcon; label: string; value: string }>;
 
   return (
-    <section className="bg-[#FAFAF8] border-y border-gray-200">
-      <div className="container-custom py-12">
+    <section aria-label="Product details" className={compact ? 'rounded-2xl border border-[#DEE5DA] bg-[#FAFAF8]' : 'bg-[#FAFAF8] border-y border-gray-200'}>
+      <div className={compact ? 'p-4 sm:p-5' : 'container-custom py-12'}>
         {/* Tab buttons */}
-        <div className="flex gap-0 mb-8 border-b border-gray-200 overflow-x-auto no-scrollbar">
+        <div role="tablist" aria-label="Product information" className={`flex gap-0 border-b border-gray-200 ${compact ? 'mb-4' : 'mb-8 overflow-x-auto no-scrollbar'}`}>
           {tabs.map(tab => (
             <button
+              type="button"
+              role="tab"
+              id={`${tabId}-${tab.id}`}
+              aria-selected={selectedTab === tab.id}
+              aria-controls={`${tabId}-panel`}
+              tabIndex={selectedTab === tab.id ? 0 : -1}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              onKeyDown={event => {
+                if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+                event.preventDefault();
+                const current = tabs.findIndex(item => item.id === tab.id);
+                const index = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+                  : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+                setActiveTab(tabs[index].id);
+                event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[index]?.focus();
+              }}
               className={[
-                'pb-4 px-6 font-extrabold whitespace-nowrap transition-all border-b-[3px] -mb-px text-sm',
-                activeTab === tab.id
+                'min-h-11 font-semibold transition-all border-b-[3px] -mb-px',
+                compact ? 'min-w-0 flex-1 whitespace-normal px-1 pb-3 text-xs leading-snug sm:text-sm' : 'whitespace-nowrap pb-4 px-6 text-sm',
+                selectedTab === tab.id
                   ? 'border-[#1A3831] text-[#1A3831]'
                   : 'border-transparent text-gray-400 hover:text-gray-700',
               ].join(' ')}
@@ -92,10 +111,10 @@ export const ProductTabs = ({ product }: ProductTabsProps) => {
         </div>
 
         {/* Tab content */}
-        <div className="min-h-[180px]">
+        <div role="tabpanel" id={`${tabId}-panel`} aria-labelledby={`${tabId}-${selectedTab}`} tabIndex={0} className={compact ? '' : 'min-h-[180px]'}>
           <AnimatePresence mode="wait">
             {/* ── Description ── */}
-            {activeTab === 'description' && (
+            {selectedTab === 'description' && (
               <motion.div
                 key="description"
                 variants={tabVariants}
@@ -104,14 +123,14 @@ export const ProductTabs = ({ product }: ProductTabsProps) => {
                 exit="exit"
                 className="max-w-3xl space-y-4"
               >
-                <p className="text-gray-700 font-medium leading-relaxed text-base md:text-lg whitespace-pre-line">
+                <p className={`text-gray-700 leading-relaxed whitespace-pre-line ${compact ? 'text-sm' : 'font-medium text-base md:text-lg'}`}>
                   {product.description}
                 </p>
               </motion.div>
             )}
 
             {/* ── Care Guide ── */}
-            {activeTab === 'care' && (
+            {selectedTab === 'care' && (
               <motion.div
                 key="care"
                 variants={tabVariants}
@@ -122,11 +141,11 @@ export const ProductTabs = ({ product }: ProductTabsProps) => {
               >
                 {/* Quick stat cards from structured fields */}
                 {careCards.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className={compact ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'}>
                     {careCards.map(card => (
                       <div
                         key={card.label}
-                        className="bg-white rounded-xl p-5 text-center shadow-sm border border-gray-100"
+                        className={`bg-white rounded-xl text-center border border-gray-100 ${compact ? 'p-3' : 'p-5 shadow-sm'}`}
                       >
                         <card.icon className="h-6 w-6 text-[#667D00] mx-auto mb-2" />
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">
@@ -164,7 +183,7 @@ export const ProductTabs = ({ product }: ProductTabsProps) => {
             )}
 
             {/* ── What's Included ── */}
-            {activeTab === 'included' && (
+            {selectedTab === 'included' && (
               <motion.div
                 key="included"
                 variants={tabVariants}
@@ -172,7 +191,7 @@ export const ProductTabs = ({ product }: ProductTabsProps) => {
                 animate="animate"
                 exit="exit"
               >
-                <div className="max-w-md bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className={compact ? 'space-y-3' : 'max-w-md bg-white p-6 rounded-2xl shadow-sm border border-gray-100'}>
                   <h3 className="font-extrabold text-gray-900 mb-5 text-base">
                     In the Box
                   </h3>

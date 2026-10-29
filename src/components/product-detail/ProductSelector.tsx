@@ -43,9 +43,11 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
 
           return (
             <button
+              type="button"
               key={size.id}
               onClick={() => onSelect(size.id)}
               disabled={!available}
+              aria-pressed={isSelected}
               className={[
                 'relative px-5 py-3 rounded-xl border-2 transition-all text-sm font-extrabold min-w-[80px]',
                 isSelected
@@ -77,7 +79,7 @@ interface ColorSelectorProps {
   variants: ProductVariant[];
   selectedColorId: number | null;
   selectedSizeId: number | null;
-  onSelect: (colorId: number) => void;
+  onSelect: (colorId: number | null) => void;
 }
 
 export const ColorSelector: React.FC<ColorSelectorProps> = ({
@@ -89,16 +91,24 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
 }) => {
   // Only show colors that exist for the currently selected size
   // If no size selected, show all colors
-  const visibleColors = getColorsForSize(variants, colors, selectedSizeId);
+  const namedColors = getColorsForSize(variants, colors, selectedSizeId);
+  // These Rastlina sets include the original ivory self-watering pot. Legacy
+  // products store that option as an unnamed (null-colour) variant. Show its
+  // included colour without inventing a colour ID or changing stock/selection.
+  const includedIvory = namedColors.length === 0 && variants.some(variant =>
+    variant.color_id === null && (selectedSizeId === null || variant.size_id === selectedSizeId));
+  const visibleColors: Array<{ id: number | null; name: string; hex_code: string }> = includedIvory
+    ? [{ id: null, name: 'Ivory', hex_code: '#F4F0E5' }]
+    : namedColors;
 
   if (visibleColors.length === 0) return null;
 
   const selectedName = visibleColors.find(c => c.id === selectedColorId)?.name;
 
   return (
-    <div className="space-y-3 pt-1">
+    <div className="space-y-3">
       <h3 className="font-extrabold text-gray-900 text-base tracking-tight">
-        Color:{' '}
+        Pot colour:{' '}
         <span className="font-semibold text-gray-600">
           {selectedName ?? 'Select a color'}
         </span>
@@ -106,7 +116,10 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
 
       <div className="flex flex-wrap gap-3">
         {visibleColors.map(color => {
-          const availability = isColorAvailableForSize(variants, color.id, selectedSizeId);
+          const availability = color.id === null
+            ? variants.some(variant => variant.color_id === null &&
+              (selectedSizeId === null || variant.size_id === selectedSizeId) && variant.stock > 0)
+            : isColorAvailableForSize(variants, color.id, selectedSizeId);
           // availability === null → combination doesn't exist → skip (hidden)
           if (availability === null) return null;
 
@@ -115,29 +128,23 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
 
           return (
             <button
-              key={color.id}
+              type="button"
+              key={color.id ?? 'included-ivory'}
               onClick={() => !isOutOfStock && onSelect(color.id)}
+              disabled={isOutOfStock}
+              aria-pressed={isSelected}
               title={isOutOfStock ? `${color.name} — Out of Stock` : color.name}
               className={[
-                'relative flex flex-col items-center gap-1.5 group',
+                'relative inline-flex min-h-12 items-center gap-2 rounded-xl border-2 px-3 py-3 text-sm font-semibold transition-colors',
+                isSelected ? 'border-[#1A3831] bg-[#F7F7F0] text-[#1A3831]' : 'border-gray-200 bg-white text-gray-700 hover:border-[#1A3831]',
                 isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
               ].join(' ')}
             >
-              {/* Outer ring — selected state */}
-              <div
-                className={[
-                  'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
-                  isSelected
-                    ? 'ring-2 ring-offset-2 ring-[#1A3831] scale-110'
-                    : 'ring-1 ring-transparent hover:ring-gray-300',
-                ].join(' ')}
-              >
-                {/* Color swatch — exact hex from backend */}
                 <div
-                  className="w-8 h-8 rounded-full border border-gray-200 shadow-sm"
-                  style={{ backgroundColor: color.hex_code }} // NO hardcoded fallback
+                  aria-hidden="true"
+                  className="h-5 w-5 shrink-0 rounded-full border border-gray-300 shadow-inner"
+                  style={{ backgroundColor: color.hex_code }}
                 />
-              </div>
 
               {/* Sold out X overlay */}
               {isOutOfStock && (
@@ -150,7 +157,7 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
               )}
 
               {/* Color name label */}
-              <span className="text-[10px] font-bold text-gray-500 max-w-[48px] text-center leading-tight">
+              <span className="text-sm leading-tight">
                 {color.name}
               </span>
             </button>

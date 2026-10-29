@@ -377,18 +377,20 @@ const ProductDetail = () => {
       </div>
 
       {/* ── Primary Product Section ── */}
-      <section className="container mx-auto px-4 max-w-7xl pb-16">
+      <section className="container mx-auto px-4 max-w-7xl pb-8 lg:pb-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14">
 
           {/* Left: Image Gallery */}
-          <ImageGallery
-            images={displayImages}
-            productName={product.name}
-            onShare={handleShare}
-          />
+          <div className="min-w-0 lg:sticky lg:top-32 lg:self-start">
+            <ImageGallery
+              images={displayImages}
+              productName={product.name}
+              onShare={handleShare}
+            />
+          </div>
 
-          {/* Right: Info + Selectors (sticky on desktop) */}
-          <div className="space-y-7 lg:sticky lg:top-36 lg:self-start">
+          {/* Right: Info, selectors and product details */}
+          <div className="min-w-0 space-y-5">
             <ProductInfo
               name={product.name}
               reviewCount={product.review_count}
@@ -405,7 +407,7 @@ const ProductDetail = () => {
               }}
             />
 
-            <div className="space-y-5 pt-1">
+            <div className="grid grid-cols-2 items-start gap-4 pt-1">
               {product.variants.length > 0 && (
                 <SizeSelector
                   variants={product.variants}
@@ -415,15 +417,13 @@ const ProductDetail = () => {
                 />
               )}
 
-              {product.available_colors.length > 0 && (
-                <ColorSelector
-                  colors={product.available_colors}
-                  variants={product.variants}
-                  selectedColorId={selectedColorId}
-                  selectedSizeId={selectedSizeId}
-                  onSelect={handleColorSelect}
-                />
-              )}
+              <ColorSelector
+                colors={product.available_colors}
+                variants={product.variants}
+                selectedColorId={selectedColorId}
+                selectedSizeId={selectedSizeId}
+                onSelect={handleColorSelect}
+              />
             </div>
 
             {/* Out of stock notice */}
@@ -434,12 +434,10 @@ const ProductDetail = () => {
                   : 'Select a size and color to check availability.'}
               </div>
             )}
+            <ProductTabs product={product} compact />
           </div>
         </div>
       </section>
-
-      {/* ── Tabs: Description / Care Guide / What's Included ── */}
-      <ProductTabs product={product} />
 
       {/* ── Reviews ── */}
       <ProductReviews
