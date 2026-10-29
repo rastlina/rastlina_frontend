@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import {
   Instagram,
   Facebook,
-  MapPin,
   Phone,
   Mail,
   Clock,
@@ -101,17 +100,6 @@ export const Footer = () => {
             </h4>
 
             <ul className="space-y-4 text-sm text-white/75">
-              <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-accent-gold shrink-0 mt-0.5" />
-                <span>
-                  4th Floor, Lake View Towers,
-                  <br />
-                  Safari Nagar, Kondapur,
-                  <br />
-                  Hyderabad, Telangana 500084, India
-                </span>
-              </li>
-
               <li className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-accent-gold shrink-0" />
                 <a
