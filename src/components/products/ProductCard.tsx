@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { formatPrice } from '@/utils/variantHelpers';
 import { normalizeProductName } from '@/utils/productName';
+import HomeAddToCart from './HomeAddToCart';
 
 export interface ApiProduct {
   id: number;
@@ -36,9 +37,10 @@ interface ProductCardProps {
   product: ApiProduct;
   index?: number;
   priority?: boolean;
+  quickAdd?: boolean;
 }
 
-export const ProductCard = ({ product: sourceProduct, priority = false }: ProductCardProps) => {
+export const ProductCard = ({ product: sourceProduct, priority = false, quickAdd = false }: ProductCardProps) => {
   const product = { ...sourceProduct, name: normalizeProductName(sourceProduct.name) };
   const availableColors = product.available_colors ?? [];
 
@@ -199,9 +201,10 @@ export const ProductCard = ({ product: sourceProduct, priority = false }: Produc
               </>
             )}
           </div>
-          <span className="product-card-action">{product.in_stock ? 'Choose options' : 'View details'} <span aria-hidden="true">→</span></span>
+          {!quickAdd && <span className="product-card-action">{product.in_stock ? 'Choose options' : 'View details'} <span aria-hidden="true">→</span></span>}
         </div>
       </Link>
+      {quickAdd && <HomeAddToCart product={product} />}
     </div>
   );
 };

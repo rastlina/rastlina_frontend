@@ -188,6 +188,10 @@ body:not(.rastlina-light-shop) .luxury-header img[alt="Rastlina"]{filter:graysca
 .product-card-action { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:12px; min-height:44px; padding:10px 12px; border-radius:8px; background:#edf2eb; color:#1a3831; font-size:12px; font-weight:700; }
 .product-card a:focus-visible { outline:3px solid #667d00; outline-offset:-3px; border-radius:15px; }
 .product-card:hover .product-card-action { background:#dfe9db; }
+.product-card .home-card-add { width:calc(100% - 28px); margin:0 14px 14px; background:#18392a; color:#fffdf7; border:1px solid #18392a; }
+.product-card:hover .home-card-add { background:#254e39; }
+.product-card .home-card-add:disabled { cursor:not-allowed; opacity:.6; }
+.product-card .home-card-add:focus-visible { outline:2px solid #b89b5b; outline-offset:3px; }
 body.rastlina-light-shop .journey-mode-switch { visibility:hidden; pointer-events:none; }
 body.rastlina-light-shop.has-journey-mode-control a[aria-label="Chat on WhatsApp"] { bottom:22px; }
 .home-refined .home-collections h2,.watch-shop-card h3 { font-family:'Playfair Display',Georgia,serif; }

@@ -262,6 +262,7 @@ export const ProductSlider = ({
                     <ProductCard
                       product={product}
                       index={i}
+                      quickAdd
                     />
                   </div>
                 ))}

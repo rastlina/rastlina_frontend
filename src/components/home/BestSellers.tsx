@@ -10,7 +10,7 @@ const BestSellers = () => {
       title="Best-Selling Plants"
       sectionClassName="home-bestsellers"
       eyebrow="01 / The favourites"
-      subtitle="Find your favourite. Choose your options on the next page."
+      subtitle="Find your favourite and add a little green to your cart."
       products={data.best_sellers}
       viewAllHref="/shop?is_best_seller=true"
       bgColor="bg-white"
