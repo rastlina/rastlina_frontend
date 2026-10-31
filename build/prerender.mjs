@@ -43,9 +43,11 @@ try {
       .replace(/<meta name="robots"[^>]*>/, '')
       .replace('</head>', `${metadata.meta.toString()}${metadata.link.toString()}</head>`);
     const content = renderPublicContent(path);
-    if (['/shipping-policy', '/returns-refund-policy', '/replacement-policy'].includes(path) && !content.includes('<h1')) throw new Error(`Missing public policy content: ${path}`);
+    // Shop is rendered dynamically with its live catalogue. Every other public
+    // metadata route must include its actual page body before JavaScript runs.
+    if (path !== '/shop' && !content.includes('<h1')) throw new Error(`Missing public page content: ${path}`);
     if (content) shell = shell.replace('<div id="root"></div>', `<div id="root">${content}</div>`);
-    // Normal createRoot startup is retained; only metadata is rendered here.
+    // Normal createRoot startup retains the existing interactive page behavior.
     await writeFile(`dist/seo-${path.slice(1)}.html`, shell);
   }
   const styles = template.match(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/);

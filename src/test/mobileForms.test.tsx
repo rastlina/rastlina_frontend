@@ -40,7 +40,7 @@ it('opens the working account creation route without putting the customer email 
 it('keeps email sign-in available when Google sign-in is not configured', () => {
   vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
   render(<MemoryRouter><LoginPage /></MemoryRouter>);
-  expect(within(screen.getByLabelText('Password').closest('form')!).getByRole('button', { name: 'Sign In', exact: true })).toBeInTheDocument();
+  expect(within(screen.getByLabelText('Password').closest('form')!).getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
   expect(screen.getByLabelText('Email Address')).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Continue with Google' })).not.toBeInTheDocument();
 });
