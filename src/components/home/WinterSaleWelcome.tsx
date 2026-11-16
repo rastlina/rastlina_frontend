@@ -11,11 +11,10 @@ const flakes = Array.from({ length: 90 }, (_, index) => ({
 
 export default function WinterSaleWelcome() {
   const [visible, setVisible] = useState(false);
-  const [showTitle, setShowTitle] = useState(true);
 
   useEffect(() => {
     setVisible(true);
-    const timer = window.setTimeout(() => setShowTitle(false), 4000);
+    const timer = window.setTimeout(() => setVisible(false), 3000);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -24,9 +23,9 @@ export default function WinterSaleWelcome() {
   return createPortal(
     <div className="winter-sale-welcome">
       <div className="winter-sale-snow" aria-hidden="true">
-        {flakes.map((style, index) => <span key={index} style={style}>❄</span>)}
+        {flakes.map((style, index) => <span key={index} className={index % 3 === 0 ? 'snow-dot' : 'snow-flake'} style={style}>{index % 3 === 0 ? '●' : '❄'}</span>)}
       </div>
-      {showTitle && <div className="winter-sale-title" role="status" aria-label="Winter Sale"><img src="/winter-sale-welcome.webp" alt="" /></div>}
+      <div className="winter-sale-title" role="status" aria-label="Winter Sale"><img src="/winter-sale-welcome.webp" alt="" /></div>
     </div>,
     document.body,
   );

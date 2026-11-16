@@ -10,21 +10,36 @@
 .winter-sale-title {
   position: relative;
   width: min(86vw, 800px);
-  animation: winter-sale-fade 4s both;
+  overflow: hidden;
+  animation: winter-sale-fade 3s both;
 }
 .winter-sale-title img { display: block; width: 100%; height: auto; }
+.winter-sale-title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 249, 211, .6) 50%, transparent 62%);
+  mix-blend-mode: screen;
+  animation: winter-sale-shine 1.6s ease-in-out .35s both;
+}
 
-.winter-sale-snow { position: absolute; inset: 0; overflow: hidden; }
+.winter-sale-snow { position: absolute; inset: 0; overflow: hidden; z-index: 2; }
 .winter-sale-snow span {
   position: absolute;
   top: -2rem;
   color: #fff;
-  text-shadow: 0 1px 4px #244238b0;
+  text-shadow: 0 1px 3px #16392e, 0 0 6px #16392e;
   animation: winter-sale-fall linear infinite;
 }
+.winter-sale-snow .snow-dot { opacity: .85; font-size: 8px !important; }
 
 @keyframes winter-sale-fall {
   to { transform: translate3d(2rem, calc(100dvh + 4rem), 0) rotate(100deg); }
+}
+@keyframes winter-sale-shine {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(120%); }
 }
 @keyframes winter-sale-fade {
   0%, 100% { opacity: 0; }
@@ -35,5 +50,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .winter-sale-welcome { animation: none; }
+  .winter-sale-title::after { animation: none; display: none; }
   .winter-sale-snow { display: none; }
 }
