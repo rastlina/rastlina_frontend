@@ -3,9 +3,10 @@ import { createPortal } from 'react-dom';
 import './WinterSaleWelcome.css';
 
 const flakes = Array.from({ length: 220 }, (_, index) => ({
-  left: `${(index * 37) % 100}%`,
-  width: `${2 + (index * 7) % 5}px`,
-  height: `${2 + (index * 7) % 5}px`,
+  left: `${((index * 37) % 130) - 30}%`,
+  width: `${4 + (index * 7) % 6}px`,
+  height: `${4 + (index * 7) % 6}px`,
+  fontSize: `${10 + (index % 4) * 2}px`,
   opacity: .45 + (index % 5) * .12,
   animationDuration: `${3 + (index % 5) * .6}s`,
   animationDelay: `-${(index * .71) % 5}s`,
@@ -25,7 +26,7 @@ export default function WinterSaleWelcome() {
   return createPortal(
     <div className="winter-sale-welcome">
       <div className="winter-sale-snow" aria-hidden="true">
-        {flakes.map((style, index) => <span key={index} className="snow-dot" style={style} />)}
+        {flakes.map((style, index) => <span key={index} className={index % 10 === 0 ? 'snow-flake' : 'snow-dot'} style={style}>{index % 10 === 0 ? '❄' : null}</span>)}
       </div>
       <div className="winter-sale-title" role="status" aria-label="Winter Sale">
         <img src="/winter-sale-welcome.webp" alt="" />

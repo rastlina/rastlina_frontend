@@ -31,14 +31,13 @@
 .winter-sale-snow span {
   position: absolute;
   top: -2rem;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 4px #fff9, 0 1px 2px #173b3a80;
   animation: winter-sale-fall linear infinite;
 }
+.winter-sale-snow .snow-dot { background: #fff; border-radius: 50%; box-shadow: 0 0 4px #fff9, 0 1px 2px #173b3a80; }
+.winter-sale-snow .snow-flake { color: #fff; line-height: 1; text-shadow: 0 1px 3px #173b3a, 0 0 4px #fff; }
 
 @keyframes winter-sale-fall {
-  to { transform: translate3d(2rem, calc(100dvh + 4rem), 0) rotate(100deg); }
+  to { transform: translate3d(30vw, calc(100dvh + 4rem), 0) rotate(100deg); }
 }
 @keyframes winter-sale-shine {
   from { transform: translateX(-120%); }
