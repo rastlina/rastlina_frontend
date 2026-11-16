@@ -1,0 +1,39 @@
+.winter-sale-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.winter-sale-title {
+  position: relative;
+  width: min(86vw, 800px);
+  animation: winter-sale-fade 4s both;
+}
+.winter-sale-title img { display: block; width: 100%; height: auto; }
+
+.winter-sale-snow { position: absolute; inset: 0; overflow: hidden; }
+.winter-sale-snow span {
+  position: absolute;
+  top: -2rem;
+  color: #fff;
+  text-shadow: 0 1px 4px #244238b0;
+  animation: winter-sale-fall linear infinite;
+}
+
+@keyframes winter-sale-fall {
+  to { transform: translate3d(2rem, calc(100dvh + 4rem), 0) rotate(100deg); }
+}
+@keyframes winter-sale-fade {
+  0%, 100% { opacity: 0; }
+  12%, 83% { opacity: 1; }
+}
+@media (max-width: 600px) {
+  .winter-sale-snow span:nth-child(n + 56) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .winter-sale-welcome { animation: none; }
+  .winter-sale-snow { display: none; }
+}
