@@ -14,6 +14,9 @@
   animation: winter-sale-fade 3s both;
 }
 .winter-sale-title img { display: block; width: 100%; height: auto; }
+.winter-sale-trails { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.winter-sale-trail { fill: none; stroke: #fff1be; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 8 92; opacity: 0; animation: winter-sale-trace 1.8s linear both; }
+.winter-sale-title .winter-sale-spark { opacity: 0; animation: winter-sale-spark 1.8s linear both; }
 .winter-sale-title::after {
   content: '';
   position: absolute;
@@ -32,7 +35,7 @@
   text-shadow: 0 1px 3px #16392e, 0 0 6px #16392e;
   animation: winter-sale-fall linear infinite;
 }
-.winter-sale-snow .snow-dot { opacity: .85; font-size: 8px !important; }
+.winter-sale-snow .snow-dot { opacity: .9; font-size: 5px !important; }
 
 @keyframes winter-sale-fall {
   to { transform: translate3d(2rem, calc(100dvh + 4rem), 0) rotate(100deg); }
@@ -41,15 +44,18 @@
   from { transform: translateX(-120%); }
   to { transform: translateX(120%); }
 }
+@keyframes winter-sale-trace { 8%, 85% { opacity: .9; } from { stroke-dashoffset: 8; } to { stroke-dashoffset: -92; opacity: 0; } }
+@keyframes winter-sale-spark { 8%, 85% { opacity: 1; } 0%, 100% { opacity: 0; } }
 @keyframes winter-sale-fade {
   0%, 100% { opacity: 0; }
   12%, 83% { opacity: 1; }
 }
 @media (max-width: 600px) {
-  .winter-sale-snow span:nth-child(n + 56) { display: none; }
+  .winter-sale-snow span:nth-child(n + 101) { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .winter-sale-welcome { animation: none; }
   .winter-sale-title::after { animation: none; display: none; }
+  .winter-sale-trails { display: none; }
   .winter-sale-snow { display: none; }
 }
